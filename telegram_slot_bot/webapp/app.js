@@ -11,6 +11,7 @@
   const userLine = $('user-line');
   const screenIntro = $('screen-intro');
   const screenGame = $('screen-game');
+  const btnHome = $('btn-home');
   const boardRow = $('board-row');
   const playerRow = $('player-row');
   const handLabel = $('hand-label');
@@ -164,6 +165,16 @@
   $('btn-withdraw').addEventListener('click', onWithdraw);
   $('btn-invite').addEventListener('click', onInvite);
   $('btn-top').addEventListener('click', onTop);
+  if (btnHome) {
+    btnHome.addEventListener('click', () => {
+      if (screenIntro && screenGame) {
+        screenGame.classList.remove('screen--active');
+        screenGame.classList.add('screen--hidden');
+        screenIntro.classList.remove('screen--hidden');
+        screenIntro.classList.add('screen--active');
+      }
+    });
+  }
 
   loadProfile();
 })();
