@@ -27,9 +27,19 @@
     }
   }
 
-  function onPlay() {
+  async function onPlay() {
     if (tg) tg.HapticFeedback.impactOccurred('heavy');
-    alert('Игра будет добавлена позже.');
+    try {
+      const resp = await fetch('/api/holdem/start', { method: 'POST' });
+      if (!resp.ok) throw new Error('bad status');
+      const data = await resp.json();
+      const [c1, c2] = data.player_cards || [];
+      const board = (data.board || []).join(' ');
+      const hand = data.hand_name || 'Комбинация';
+      alert(`Ваши карты: ${c1} ${c2}\nБорд: ${board}\nРука: ${hand}`);
+    } catch (e) {
+      alert('Ошибка раздачи руки');
+    }
   }
   function onDeposit() {
     alert('Пополнение: будет реализовано позже.');

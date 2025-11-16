@@ -9,6 +9,7 @@ from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
 from db import get_user, top_balances, set_display_name
+from holdem import deal_training_hand
 
 APP_DIR = os.path.join(os.path.dirname(__file__), "webapp")
 START_BALANCE = 1000
@@ -96,3 +97,14 @@ async def me(payload: Dict[str, str]):
 async def api_top():
     top = await top_balances(10)
     return {"top": top}
+
+
+@app.post("/api/holdem/start")
+async def holdem_start():
+    """Раздать одиночную тренировочную раздачу Техасского холдема."""
+    res = deal_training_hand()
+    return {
+        "player_cards": res.player_cards,
+        "board": res.board,
+        "hand_name": res.hand_name,
+    }
