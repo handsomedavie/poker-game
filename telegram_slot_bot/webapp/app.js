@@ -87,6 +87,12 @@
     cards.forEach((c) => {
       playerRow.appendChild(makeCardEl(c));
     });
+    // Подсветка выигрышных рук (пара и выше)
+    const isStrong = hand !== 'Старшая карта';
+    if (isStrong) {
+      boardRow.querySelectorAll('.card-chip').forEach((el) => el.classList.add('card-win'));
+      playerRow.querySelectorAll('.card-chip').forEach((el) => el.classList.add('card-win'));
+    }
     handLabel.textContent = hand;
 
     // обновляем статистику
