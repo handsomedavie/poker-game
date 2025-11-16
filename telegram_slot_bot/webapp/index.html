@@ -95,6 +95,17 @@
       font-size: 14px;
       opacity: .9;
     }
+    .stats-card {
+      width: 100%;
+      max-width: 480px;
+      background: rgba(15,23,42,.9);
+      border-radius: 12px;
+      padding: 10px 14px;
+      box-sizing: border-box;
+      font-size: 13px;
+      line-height: 1.4;
+    }
+    .stats-title { font-weight: 600; margin-bottom: 4px; }
   </style>
 </head>
 <body>
@@ -123,6 +134,11 @@
           <!-- карты игрока -->
         </div>
         <div class="hand-label" id="hand-label">Нажмите «Играть», чтобы получить раздачу.</div>
+      </div>
+      <div class="stats-card">
+        <div class="stats-title">Статистика тренажёра</div>
+        <div id="stats-line" class="muted">Раздач сыграно: 0</div>
+        <div id="stats-details" class="muted"></div>
       </div>
     </div>
   </div>

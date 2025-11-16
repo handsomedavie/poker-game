@@ -12,8 +12,26 @@
   const boardRow = $('board-row');
   const playerRow = $('player-row');
   const handLabel = $('hand-label');
+  const statsLine = $('stats-line');
+  const statsDetails = $('stats-details');
   const initData = tg ? tg.initData : '';
   const initDataUnsafe = tg ? tg.initDataUnsafe : {};
+
+  const stats = {
+    total: 0,
+    byHand: {},
+  };
+  const handOrder = [
+    'Стрит‑флеш',
+    'Каре',
+    'Фул‑хаус',
+    'Флеш',
+    'Стрит',
+    'Сет',
+    'Две пары',
+    'Пара',
+    'Старшая карта',
+  ];
 
   async function loadProfile() {
     try {
@@ -50,6 +68,25 @@
       playerRow.appendChild(el);
     });
     handLabel.textContent = hand;
+
+    // обновляем статистику
+    stats.total += 1;
+    stats.byHand[hand] = (stats.byHand[hand] || 0) + 1;
+
+    if (statsLine) {
+      statsLine.textContent = `Раздач сыграно: ${stats.total}`;
+    }
+    if (statsDetails) {
+      const lines = [];
+      handOrder.forEach((name) => {
+        const n = stats.byHand[name] || 0;
+        if (n > 0) {
+          const pct = ((n / stats.total) * 100).toFixed(1);
+          lines.push(`${name}: ${n} (${pct}%)`);
+        }
+      });
+      statsDetails.textContent = lines.join(' • ');
+    }
   }
 
   async function onPlay() {
