@@ -9,6 +9,8 @@
   const $ = (id) => document.getElementById(id);
 
   const userLine = $('user-line');
+  const screenIntro = $('screen-intro');
+  const screenGame = $('screen-game');
   const boardRow = $('board-row');
   const playerRow = $('player-row');
   const handLabel = $('hand-label');
@@ -117,6 +119,13 @@
 
   async function onPlay() {
     if (tg) tg.HapticFeedback.impactOccurred('heavy');
+    // первый переход: плавно показываем экран игры
+    if (screenIntro && screenGame && !screenGame.classList.contains('screen--active')) {
+      screenIntro.classList.remove('screen--active');
+      screenIntro.classList.add('screen--hidden');
+      screenGame.classList.remove('screen--hidden');
+      screenGame.classList.add('screen--active');
+    }
     try {
       const resp = await fetch('/api/holdem/start', { method: 'POST' });
       if (!resp.ok) throw new Error('bad status');
