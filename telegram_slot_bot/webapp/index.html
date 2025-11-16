@@ -15,18 +15,18 @@
       padding: 0;
       height: 100%;
       font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
-      background: var(--tg-theme-bg-color, #0b0f17);
+      background: radial-gradient(circle at top, rgba(15,23,42,.92), rgba(3,7,18,.96));
       color: var(--tg-theme-text-color, #fff);
     }
     body::before {
       content: "";
       position: fixed;
       inset: 0;
-      background-image: url("https://images.unsplash.com/photo-1518131678677-bc1a4dca4ccb?auto=format&fit=crop&w=1400&q=80");
+      background-image: linear-gradient(to bottom, rgba(15,23,42,.25), rgba(15,23,42,.7)),
+                        url("https://images.unsplash.com/photo-1518131678677-bc1a4dca4ccb?auto=format&fit=crop&w=1400&q=80");
       background-size: cover;
       background-position: center;
-      opacity: .25;
-      filter: blur(4px);
+      opacity: .6;
       z-index: -1;
     }
     .wrap {
