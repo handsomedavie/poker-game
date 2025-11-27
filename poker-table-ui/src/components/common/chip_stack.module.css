@@ -1,0 +1,79 @@
+.chip-stack {
+  display: flex;
+  flex-direction: column-reverse;
+  align-items: center;
+  gap: -8px;
+  transform-origin: bottom center;
+  animation: chip-stack-in 0.25s ease-out;
+}
+
+.chip-stack-bet {
+  transform: scale(1.05);
+}
+
+.chip {
+  width: 45px;
+  height: 45px;
+  border-radius: 50%;
+  border: 3px solid;
+  position: relative;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.5);
+}
+
+.chip::before,
+.chip::after {
+  content: '';
+  position: absolute;
+  border: 2px solid rgba(255, 255, 255, 0.4);
+  border-radius: 50%;
+}
+
+.chip::before {
+  width: 70%;
+  height: 70%;
+  top: 15%;
+  left: 15%;
+}
+
+.chip::after {
+  width: 85%;
+  height: 85%;
+  top: 7.5%;
+  left: 7.5%;
+}
+
+.chip-white {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+}
+
+.chip-red {
+  background: #ef4444;
+  border-color: #7f1d1d;
+}
+
+.chip-green {
+  background: #10b981;
+  border-color: #065f46;
+}
+
+.chip-black {
+  background: #1f2937;
+  border-color: #e5e7eb;
+}
+
+.chip-purple {
+  background: #a855f7;
+  border-color: #6b21a8;
+}
+
+@keyframes chip-stack-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}

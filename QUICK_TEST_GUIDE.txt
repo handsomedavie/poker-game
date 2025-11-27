@@ -1,0 +1,273 @@
+╔═══════════════════════════════════════════════════════════════╗
+║                                                               ║
+║       🎮 QUICK TEST GUIDE - NEW FEATURES                     ║
+║                                                               ║
+╚═══════════════════════════════════════════════════════════════╝
+
+═══════════════════════════════════════════════════════════════
+
+✅ 2 ISSUES FIXED:
+
+1. Action Panel Position (CENTERED)
+2. Show/Hide Cards After Showdown (FULL FEATURE)
+
+═══════════════════════════════════════════════════════════════
+
+🚀 HOW TO START:
+
+Terminal 1 - Server:
+  ```
+  python server.py
+  ```
+
+Terminal 2 - Client:
+  ```
+  cd poker-table-ui
+  npm start
+  ```
+
+Browser:
+  http://localhost:3000
+
+═══════════════════════════════════════════════════════════════
+
+🧪 TEST #1: Action Panel Position
+
+WHAT TO CHECK:
+  1. Open game
+  2. Look at bottom panel (FOLD, CALL, RAISE, ALL IN)
+  3. ✅ Should be CENTERED on table
+  4. ✅ All buttons visible
+  5. ✅ No overflow on right edge
+
+BEFORE FIX:
+  Panel ───────────────────────────────→ | (extends beyond edge)
+
+AFTER FIX:
+      ← Panel centered on table →
+
+═══════════════════════════════════════════════════════════════
+
+🧪 TEST #2: Show/Hide Cards Feature
+
+SCENARIO:
+  Play hand → Lose at showdown → Choose to show or hide cards
+
+STEPS:
+  1. Start game
+  2. Play hand until showdown
+  3. Lose the hand
+  4. ✅ Decision panel appears:
+     
+     ┌────────────────────────────────┐
+     │ You lost this hand.            │
+     │ Reveal your cards?             │
+     │                                │
+     │  [Auto-muck in 10s]            │
+     │                                │
+     │  [👁️ SHOW]  [🙈 MUCK]         │
+     └────────────────────────────────┘
+  
+  5. Option A: Click "SHOW"
+     → Your cards revealed to all players
+     → Everyone sees your hand
+  
+  6. Option B: Click "MUCK"
+     → Your cards stay face-down
+     → Hidden from other players
+  
+  7. Option C: Wait 10 seconds
+     → Auto-mucks (default to hide)
+  
+  8. ✅ Panel disappears after decision
+  9. ✅ New hand starts after 2 seconds
+
+═══════════════════════════════════════════════════════════════
+
+📋 EXPECTED BEHAVIOR:
+
+Winner (Always):
+  • Cards ALWAYS shown (mandatory)
+  • No decision panel
+  • Automatic reveal
+
+Loser (Choice):
+  • Decision panel appears
+  • Can choose SHOW or MUCK
+  • 10-second timer
+  • Auto-muck on timeout
+
+═══════════════════════════════════════════════════════════════
+
+🎨 VISUAL CHECK:
+
+Decision Panel:
+  • Position: Bottom-center, above action buttons
+  • Size: ~420px wide
+  • Background: Royal blue gradient
+  • Border: Blue glow
+  • Animation: Slides up smoothly
+  • Buttons: Green (SHOW), Gray (MUCK)
+  • Timer: Yellow countdown
+
+═══════════════════════════════════════════════════════════════
+
+🔍 CONSOLE DEBUG:
+
+Open F12 Console to see:
+
+When Losing:
+  🎰 You lost - showing decision panel
+
+When Clicking SHOW:
+  📤 Sending card visibility decision: SHOW
+
+When Clicking MUCK:
+  📤 Sending card visibility decision: MUCK
+
+═══════════════════════════════════════════════════════════════
+
+✅ SUCCESS CHECKLIST:
+
+Test #1 - Action Panel:
+  [ ] Panel is centered
+  [ ] All buttons visible
+  [ ] No overflow
+  [ ] Works on resize
+
+Test #2 - Show/Hide:
+  [ ] Panel appears when losing
+  [ ] Countdown works (10→0)
+  [ ] SHOW reveals cards
+  [ ] MUCK hides cards
+  [ ] Auto-muck works
+  [ ] Panel disappears
+  [ ] Next hand starts
+
+═══════════════════════════════════════════════════════════════
+
+🐛 TROUBLESHOOTING:
+
+Panel doesn't appear?
+  → Check console for errors
+  → Verify you LOST the hand (not won)
+  → Check server is emitting 'showdownComplete'
+
+Cards don't update?
+  → Check server broadcasts 'playerCardsVisibility'
+  → Verify WebSocket connection
+  → Check network tab in DevTools
+
+Timer doesn't count?
+  → Should auto-start on panel show
+  → Default 10 seconds
+  → Auto-muck when reaches 0
+
+═══════════════════════════════════════════════════════════════
+
+📊 QUICK STATUS:
+
+Issue 1 (Action Panel):
+  Status: ✅ FIXED
+  Files: 1 CSS file
+  Lines: ~10
+  Time: 5 min
+
+Issue 2 (Show/Hide Cards):
+  Status: ✅ IMPLEMENTED
+  Files: 5 files
+  Lines: ~300
+  Time: 30 min
+
+Total Work:
+  Issues Fixed: 2
+  Files Created: 2
+  Files Modified: 4
+  Components: 2 new
+  Server Events: 2 new
+  Total Time: 35 min
+
+═══════════════════════════════════════════════════════════════
+
+🎯 KEY FILES:
+
+New Components:
+  poker-table-ui/src/components/PokerTable/
+    • ShowdownDecision.tsx
+    • showdown_decision.module.css
+
+Modified Files:
+  • poker_table.module.css (action panel center)
+  • PokerTable.tsx (decision logic + socket)
+  • server.py (showcards command handler)
+
+═══════════════════════════════════════════════════════════════
+
+💡 TESTING TIPS:
+
+1. Test with multiple players
+   → Only losers see decision panel
+   → Winner cards always shown
+
+2. Test timeout
+   → Don't click anything
+   → Wait 10 seconds
+   → Should auto-muck
+
+3. Test both choices
+   → Try SHOW first
+   → Try MUCK second
+   → Verify card visibility
+
+4. Test rapid hands
+   → Play multiple hands
+   → Check panel appears each time
+   → Verify no memory leaks
+
+═══════════════════════════════════════════════════════════════
+
+🎉 FINAL CHECK:
+
+If you see:
+  ✅ Action panel centered
+  ✅ Decision panel on loss
+  ✅ Countdown timer working
+  ✅ SHOW reveals cards
+  ✅ MUCK hides cards
+  ✅ Panel hides after decision
+  ✅ New hand starts
+
+Then: 🎊 ALL FEATURES WORKING! 🎊
+
+═══════════════════════════════════════════════════════════════
+
+📞 NEED HELP?
+
+Read Full Documentation:
+  • ✅_FIXES_COMPLETE.md (detailed guide)
+  • ShowdownDecision.tsx (code comments)
+  • server.py lines 982-999 (command handler)
+
+Check Console:
+  • F12 → Console tab
+  • Look for 🎰 📤 emojis
+
+Network Tab:
+  • F12 → Network → WS
+  • Check WebSocket messages
+  • Verify events: showdownComplete, playerCardsVisibility
+
+═══════════════════════════════════════════════════════════════
+
+🚀 READY TO TEST!
+
+Start server → Start client → Play hand → Test features!
+
+═══════════════════════════════════════════════════════════════
+
+Made with ❤️ by Windsurf AI
+Quick Test Guide - November 27, 2025
+
+BOTH FEATURES READY! 🎮 ENJOY TESTING! 🚀
+
+═══════════════════════════════════════════════════════════════

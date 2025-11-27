@@ -1,0 +1,276 @@
+/* Winner Animation Overlay */
+.winnerAnimationOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Winner Banner */
+.winnerBanner {
+  background: linear-gradient(135deg, rgba(212, 175, 55, 0.95) 0%, rgba(255, 215, 0, 0.95) 50%, rgba(212, 175, 55, 0.95) 100%);
+  border: 4px solid #FFD700;
+  border-radius: 20px;
+  padding: 30px 50px;
+  max-width: 500px;
+  box-shadow: 
+    0 0 40px rgba(255, 215, 0, 0.8),
+    0 0 80px rgba(255, 215, 0, 0.5),
+    0 10px 30px rgba(0, 0, 0, 0.5);
+  transform: scale(0) rotateZ(-180deg);
+  opacity: 0;
+  transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+  text-align: center;
+}
+
+.winnerBanner.show {
+  transform: scale(1) rotateZ(0deg);
+  opacity: 1;
+  animation: winnerPulse 2s ease-in-out infinite;
+}
+
+@keyframes winnerPulse {
+  0%, 100% {
+    box-shadow: 
+      0 0 40px rgba(255, 215, 0, 0.8),
+      0 0 80px rgba(255, 215, 0, 0.5),
+      0 10px 30px rgba(0, 0, 0, 0.5);
+  }
+  50% {
+    box-shadow: 
+      0 0 60px rgba(255, 215, 0, 1),
+      0 0 120px rgba(255, 215, 0, 0.7),
+      0 0 160px rgba(255, 215, 0, 0.4),
+      0 10px 30px rgba(0, 0, 0, 0.5);
+  }
+}
+
+.winnerText {
+  font-size: 2em;
+  font-weight: bold;
+  color: #1a1a1a;
+  text-shadow: 
+    2px 2px 4px rgba(255, 255, 255, 0.5),
+    -1px -1px 2px rgba(0, 0, 0, 0.3);
+  margin-bottom: 15px;
+  animation: textShine 2s linear infinite;
+  background: linear-gradient(90deg, 
+    #1a1a1a 0%, 
+    #4a4a4a 25%, 
+    #fff 50%, 
+    #4a4a4a 75%, 
+    #1a1a1a 100%);
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+@keyframes textShine {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.potAmount {
+  font-size: 1.8em;
+  font-weight: bold;
+  color: #2d5016;
+  text-shadow: 
+    0 0 10px rgba(45, 80, 22, 0.5),
+    2px 2px 4px rgba(255, 255, 255, 0.8);
+}
+
+.splitPot {
+  font-size: 1.3em;
+  color: #4a4a4a;
+  margin-top: 10px;
+  font-style: italic;
+}
+
+/* Celebration Container */
+.celebrationContainer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  z-index: 1001;
+  overflow: hidden;
+}
+
+.celebrationText {
+  position: absolute;
+  top: 20%;
+  left: 50%;
+  transform: translateX(-50%) scale(0);
+  font-size: 3.5em;
+  font-weight: bold;
+  color: #FFD700;
+  text-shadow: 
+    0 0 20px rgba(255, 215, 0, 1),
+    0 0 40px rgba(255, 215, 0, 0.8),
+    0 0 60px rgba(255, 215, 0, 0.6),
+    4px 4px 8px rgba(0, 0, 0, 0.5);
+  animation: celebrationBounce 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  z-index: 1002;
+}
+
+@keyframes celebrationBounce {
+  0% {
+    transform: translateX(-50%) scale(0) rotateZ(-180deg);
+    opacity: 0;
+  }
+  60% {
+    transform: translateX(-50%) scale(1.2) rotateZ(10deg);
+  }
+  100% {
+    transform: translateX(-50%) scale(1) rotateZ(0deg);
+    opacity: 1;
+  }
+}
+
+/* Confetti Animation */
+.confettiContainer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+}
+
+.confetti {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  top: -10%;
+  border-radius: 50%;
+  opacity: 0;
+  animation: confettiFall 3s linear forwards;
+}
+
+@keyframes confettiFall {
+  0% {
+    opacity: 1;
+    transform: translateY(0) rotateZ(0deg);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(600px) rotateZ(720deg);
+  }
+}
+
+/* Chip Animation Container */
+.chipAnimationContainer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  z-index: 999;
+}
+
+/* Chip Animation Particles */
+.chipParticle {
+  position: absolute;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 30%, #ff6b6b 0%, #c92a2a 100%);
+  border: 4px solid #fff;
+  box-shadow: 
+    0 0 15px rgba(255, 107, 107, 0.9),
+    0 4px 12px rgba(0, 0, 0, 0.4),
+    inset 0 2px 8px rgba(255, 255, 255, 0.3);
+  pointer-events: none;
+  z-index: 999;
+  opacity: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.chipInner {
+  font-size: 20px;
+  font-weight: bold;
+  color: #fff;
+  text-shadow: 
+    0 1px 2px rgba(0, 0, 0, 0.5),
+    0 0 5px rgba(255, 255, 255, 0.3);
+  user-select: none;
+}
+
+.chipParticle.animating {
+  animation: chipFly 1.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+@keyframes chipFly {
+  0% {
+    opacity: 1;
+    transform: translate(0, 0) scale(1);
+  }
+  50% {
+    transform: translate(var(--chip-mid-x), var(--chip-mid-y)) scale(1.2);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(var(--chip-end-x), var(--chip-end-y)) scale(0.5);
+  }
+}
+
+/* Winner Glow Effect (applied to PlayerSeat) */
+.winnerGlow {
+  animation: winnerGlowPulse 1.5s ease-in-out infinite;
+}
+
+@keyframes winnerGlowPulse {
+  0%, 100% {
+    box-shadow: 
+      0 0 30px rgba(255, 215, 0, 0.8),
+      0 0 60px rgba(255, 215, 0, 0.5),
+      0 0 90px rgba(255, 215, 0, 0.3);
+    border: 3px solid #FFD700;
+  }
+  50% {
+    box-shadow: 
+      0 0 50px rgba(255, 215, 0, 1),
+      0 0 100px rgba(255, 215, 0, 0.7),
+      0 0 150px rgba(255, 215, 0, 0.5);
+    border: 3px solid #FFF;
+  }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .winnerBanner {
+    padding: 20px 30px;
+  }
+  
+  .winnerText {
+    font-size: 2em;
+  }
+  
+  .potAmount {
+    font-size: 1.8em;
+  }
+  
+  .splitPot {
+    font-size: 1em;
+  }
+  
+  .celebrationText {
+    font-size: 4em;
+  }
+}
