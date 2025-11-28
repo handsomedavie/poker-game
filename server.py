@@ -71,10 +71,17 @@ app.mount("/webapp", StaticFiles(directory=APP_DIR), name="webapp")
 
 @app.get("/")
 async def index():
-    index_path = os.path.join(APP_DIR, "index.html")
-    if not os.path.exists(index_path):
-        raise HTTPException(status_code=404, detail="index not found")
-    return FileResponse(index_path)
+    """API Root - returns server status"""
+    return JSONResponse({
+        "status": "ok",
+        "app": "Poker Mini App API",
+        "version": "1.0.0",
+        "endpoints": {
+            "lobby": "/api/lobby",
+            "user": "/api/me",
+            "websocket": "/ws/lobby/{code}"
+        }
+    })
 
 
 def _parse_init_data(init_data: str) -> Dict[str, str]:
