@@ -3,7 +3,7 @@
 
 export const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 export const WS_URL = import.meta.env.VITE_WS_URL || 'ws://localhost:8000';
-export const BOT_USERNAME = import.meta.env.VITE_BOT_USERNAME || 'Pokergamebot';
+export const BOT_USERNAME = import.meta.env.VITE_BOT_USERNAME || 'pokerhouse77bot';
 
 // Helper to build API endpoints
 export const api = {
