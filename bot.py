@@ -1,8 +1,11 @@
+"""
+Telegram Bot for Poker Mini App
+Opens the poker lobby as a Telegram Mini App
+"""
+
 import os
-import asyncio
 import logging
-from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update, WebAppInfo
-from telegram.constants import ParseMode
+from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, WebAppInfo
 from telegram.ext import ApplicationBuilder, CommandHandler, CallbackQueryHandler, ContextTypes
 
 # Load environment variables
@@ -12,13 +15,6 @@ try:
 except ImportError:
     pass
 
-from game import SlotMachine
-from db import (
-    init_db, get_user, get_balance, update_balance,
-    record_spin, can_claim_bonus, claim_bonus,
-    top_balances, set_display_name
-)
-
 # Logging setup
 logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -27,254 +23,131 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 # Configuration
-APP_TITLE = "🎰 Poker Mini App"
-BOT_USERNAME = os.environ.get("BOT_USERNAME", "Pokergamebot")
-WEBAPP_URL = os.environ.get("WEBAPP_URL", "https://your-app.netlify.app")
-START_BALANCE = 1000
-MIN_BET = 10
-MAX_BET = 200
-BONUS_AMOUNT = 200
-BONUS_COOLDOWN = 24 * 60 * 60
-ANIM_FRAMES = 3
-ANIM_DELAY = 0.4
-
-slot = SlotMachine()
+BOT_TOKEN = os.environ.get("TELEGRAM_TOKEN", "")
+BOT_USERNAME = os.environ.get("BOT_USERNAME", "pokerhouse77bot")
+WEBAPP_URL = os.environ.get("WEBAPP_URL", "https://dapper-heliotrope-03aa40.netlify.app")
 
 
-def fmt_grid(grid):
-    rows = [" ".join(row) for row in grid]
-    return "\n".join(rows)
-
-
-def build_keyboard(bet: int) -> InlineKeyboardMarkup:
+def get_main_keyboard() -> InlineKeyboardMarkup:
+    """Build main menu keyboard with Mini App button"""
     keyboard = [
         [
-            InlineKeyboardButton("🎮 Открыть мини‑приложение", web_app=WebAppInfo(url=WEBAPP_URL)),
+            InlineKeyboardButton(
+                "🎰 Play Poker", 
+                web_app=WebAppInfo(url=WEBAPP_URL)
+            )
         ],
         [
-            InlineKeyboardButton("➖ Ставка", callback_data="bet_minus"),
-            InlineKeyboardButton(f"💰 {bet}", callback_data="noop"),
-            InlineKeyboardButton("Ставка ➕", callback_data="bet_plus"),
-        ],
-        [
-            InlineKeyboardButton("🎰 SPIN", callback_data="spin"),
-            InlineKeyboardButton("🎁 Бонус", callback_data="bonus"),
-        ],
-        [
-            InlineKeyboardButton("🏆 Топ", callback_data="top"),
-            InlineKeyboardButton("ℹ️ Инфо", callback_data="info"),
+            InlineKeyboardButton("📊 Leaderboard", callback_data="leaderboard"),
+            InlineKeyboardButton("❓ Help", callback_data="help"),
         ],
     ]
     return InlineKeyboardMarkup(keyboard)
 
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    ud = context.user_data
-    if "bet" not in ud:
-        ud["bet"] = MIN_BET
+    """Handle /start command"""
     user = update.effective_user
-    display = (user.first_name or "Player") if user else "Player"
-
-    # Создадим запись пользователя (если её нет) и отобразим баланс
-    db_user = await get_user(user.id if user else 0, START_BALANCE, display)
-    # Сохраним отображаемое имя (на будущее для топа)
-    if user:
-        await set_display_name(user.id, display)
-
-    text = (
-        f"<b>{APP_TITLE}</b>\n\n"
-        f"Баланс: <b>{db_user['balance']}</b>\n"
-        f"Ставка: <b>{ud['bet']}</b>\n\n"
-        "Нажми 🎰 SPIN, чтобы крутить барабаны!"
+    name = user.first_name if user else "Player"
+    
+    # Check for deep link (lobby invite)
+    args = context.args
+    if args and args[0].startswith("lobby_"):
+        lobby_code = args[0].replace("lobby_", "")
+        lobby_url = f"{WEBAPP_URL}?lobby={lobby_code}"
+        
+        keyboard = [[
+            InlineKeyboardButton(
+                f"🎮 Join Lobby {lobby_code}", 
+                web_app=WebAppInfo(url=lobby_url)
+            )
+        ]]
+        
+        await update.message.reply_text(
+            f"🎰 *Welcome, {name}!*\n\n"
+            f"You've been invited to join a poker lobby!\n"
+            f"Click the button below to join:",
+            parse_mode="Markdown",
+            reply_markup=InlineKeyboardMarkup(keyboard)
+        )
+        return
+    
+    # Regular start
+    await update.message.reply_text(
+        f"🎰 *Welcome to Poker House, {name}!*\n\n"
+        "🃏 Play Texas Hold'em with friends\n"
+        "🏆 Join tournaments and compete\n"
+        "💰 Win big prizes!\n\n"
+        "Tap the button below to start playing:",
+        parse_mode="Markdown",
+        reply_markup=get_main_keyboard()
     )
-    await update.effective_message.reply_text(
-        text,
-        parse_mode=ParseMode.HTML,
-        reply_markup=build_keyboard(ud["bet"]),
+
+
+async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Handle /help command"""
+    await update.message.reply_text(
+        "🎰 *Poker House Help*\n\n"
+        "*Commands:*\n"
+        "/start - Open the game\n"
+        "/help - Show this message\n\n"
+        "*How to Play:*\n"
+        "1. Tap 'Play Poker' to open the app\n"
+        "2. Create a private lobby or join a public table\n"
+        "3. Invite friends via Telegram\n"
+        "4. Play Texas Hold'em and win!\n\n"
+        "*Game Modes:*\n"
+        "🏆 Tournament - Multi-table tournaments\n"
+        "🎯 Bounty Hunter - Knockout format\n"
+        "⚡ Sit & Go - Quick games",
+        parse_mode="Markdown",
+        reply_markup=get_main_keyboard()
     )
 
 
-def clamp_bet(b: int) -> int:
-    return max(MIN_BET, min(MAX_BET, b))
-
-
-async def on_buttons(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Handle button callbacks"""
     query = update.callback_query
     await query.answer()
-    ud = context.user_data
-    user = update.effective_user
-    balance = await get_balance(user.id if user else 0, START_BALANCE)
-    bet = ud.get("bet", MIN_BET)
-
-    if query.data == "bet_minus":
-        bet = clamp_bet(bet - 10)
-        ud["bet"] = bet
-        await query.edit_message_reply_markup(build_keyboard(bet))
-        return
-
-    if query.data == "bet_plus":
-        bet = clamp_bet(bet + 10)
-        ud["bet"] = bet
-        await query.edit_message_reply_markup(build_keyboard(bet))
-        return
-
-    if query.data == "info":
-        info = (
-            "Правила:\n"
-            "- Совпадение 3 символов по линии платит по таблице выплат.\n"
-            "- 🌟 — дикий символ, заменяет любой.\n"
-            "- Линии: 3 горизонтали + 2 диагонали.\n"
-            f"- Ставка от {MIN_BET} до {MAX_BET}."
+    
+    if query.data == "leaderboard":
+        await query.message.reply_text(
+            "🏆 *Top Players*\n\n"
+            "Coming soon!\n"
+            "Play more games to climb the leaderboard.",
+            parse_mode="Markdown"
         )
-        await query.reply_text(info)
-        return
-
-    if query.data == "bonus":
-        can, remain = await can_claim_bonus(user.id if user else 0, None, BONUS_COOLDOWN, START_BALANCE)
-        if not can:
-            hours = remain // 3600
-            mins = (remain % 3600) // 60
-            await query.reply_text(f"Бонус будет доступен через {hours}ч {mins}м")
-            return
-        await claim_bonus(user.id if user else 0, BONUS_AMOUNT, START_BALANCE)
-        balance = await get_balance(user.id if user else 0, START_BALANCE)
-        await query.edit_message_text(
-            text=(
-                f"<b>{APP_TITLE}</b>\n\n"
-                f"Бонус 🎁 +{BONUS_AMOUNT}!\n\n"
-                f"Баланс: <b>{balance}</b>\n"
-                f"Ставка: <b>{bet}</b>"
-            ),
-            parse_mode=ParseMode.HTML,
-            reply_markup=build_keyboard(bet),
-        )
-        return
-
-    if query.data == "top":
-        top = await top_balances(10)
-        if not top:
-            await query.reply_text("Пока нет данных для топа")
-            return
-        lines = [f"{i+1}. {name}: {bal}" for i, (name, bal) in enumerate(top)]
-        await query.reply_text("🏆 Топ игроков по балансу:\n" + "\n".join(lines))
-        return
-
-    if query.data == "noop":
-        return
-
-    if query.data == "spin":
-        if balance < bet:
-            await query.edit_message_text(
-                text=(
-                    f"<b>{APP_TITLE}</b>\n\n"
-                    f"Недостаточно средств. Баланс: <b>{balance}</b>\n"
-                    f"Ставка: <b>{bet}</b>"
-                ),
-                parse_mode=ParseMode.HTML,
-                reply_markup=build_keyboard(bet),
-            )
-            return
-
-        # Списываем ставку
-        new_balance = balance - bet
-        await update_balance(user.id if user else 0, new_balance)
-
-        # Короткая анимация спина
-        anim_text = (
-            f"<b>{APP_TITLE}</b>\n\n"
-            f"Крутим барабаны...\n\n"
-            f"Баланс: <b>{new_balance}</b>\n"
-            f"Ставка: <b>{bet}</b>"
-        )
-        await query.edit_message_text(
-            text=anim_text,
-            parse_mode=ParseMode.HTML,
-            reply_markup=build_keyboard(bet),
-        )
-        for _ in range(ANIM_FRAMES):
-            grid_text = fmt_grid(slot.spin())
-            await asyncio.sleep(ANIM_DELAY)
-            await query.edit_message_text(
-                text=(
-                    f"<b>{APP_TITLE}</b>\n\n"
-                    f"{grid_text}\n\n"
-                    f"Баланс: <b>{new_balance}</b>\n"
-                    f"Ставка: <b>{bet}</b>"
-                ),
-                parse_mode=ParseMode.HTML,
-                reply_markup=build_keyboard(bet),
-            )
-
-        # Финальный результат
-        result = slot.play(bet)
-        win = result.total_win
-        final_balance = new_balance + win
-        await update_balance(user.id if user else 0, final_balance)
-        await record_spin(user.id if user else 0, bet, win)
-
-        grid_text = fmt_grid(result.grid)
-        lines_desc = []
-        for payout, matched in result.lines:
-            if payout > 0:
-                lines_desc.append(f"✅ Выигрыш линия: {' '.join(matched)} = +{payout}")
-        if not lines_desc:
-            lines_desc.append("❌ Нет выигрыша")
-        lines_text = "\n".join(lines_desc)
-
-        text = (
-            f"<b>{APP_TITLE}</b>\n\n"
-            f"{grid_text}\n\n"
-            f"{lines_text}\n\n"
-            f"Ставка: <b>{bet}</b> | Выигрыш: <b>{win}</b>\n"
-            f"Баланс: <b>{final_balance}</b>"
+    
+    elif query.data == "help":
+        await query.message.reply_text(
+            "🎰 *Poker House Help*\n\n"
+            "Tap 'Play Poker' to open the Mini App and start playing!\n\n"
+            "Create private lobbies, invite friends, or join public tournaments.",
+            parse_mode="Markdown",
+            reply_markup=get_main_keyboard()
         )
 
-        await query.edit_message_text(
-            text=text,
-            parse_mode=ParseMode.HTML,
-            reply_markup=build_keyboard(bet),
-        )
+
+def main():
+    """Run the bot"""
+    if not BOT_TOKEN:
+        logger.error("TELEGRAM_TOKEN not set!")
         return
-
-
-async def help_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    await start(update, context)
-
-
-async def top_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    top = await top_balances(10)
-    if not top:
-        await update.effective_message.reply_text("Пока нет данных для топа")
-        return
-    lines = [f"{i+1}. {name}: {bal}" for i, (name, bal) in enumerate(top)]
-    await update.effective_message.reply_text("🏆 Топ игроков по балансу:\n" + "\n".join(lines))
-
-
-def main() -> None:
-    token = os.environ.get("TELEGRAM_TOKEN")
-    if not token:
-        raise RuntimeError("Please set TELEGRAM_TOKEN environment variable")
-
-    # Явно создаём и устанавливаем event loop (актуально для Python 3.12)
-    loop = asyncio.new_event_loop()
-    asyncio.set_event_loop(loop)
-
-    # Инициализируем БД до запуска приложения
-    loop.run_until_complete(init_db())
-
-    app = ApplicationBuilder().token(token).build()
-
-    # Ensure webhook is removed to avoid conflicts with polling
-    loop.run_until_complete(app.bot.delete_webhook(drop_pending_updates=True))
-
+    
+    logger.info(f"Starting bot @{BOT_USERNAME}")
+    logger.info(f"WebApp URL: {WEBAPP_URL}")
+    
+    app = ApplicationBuilder().token(BOT_TOKEN).build()
+    
+    # Register handlers
     app.add_handler(CommandHandler("start", start))
-    app.add_handler(CommandHandler("top", top_cmd))
-    app.add_handler(CommandHandler("help", help_cmd))
-    app.add_handler(CallbackQueryHandler(on_buttons))
-
-    app.run_polling()
+    app.add_handler(CommandHandler("help", help_command))
+    app.add_handler(CallbackQueryHandler(button_callback))
+    
+    # Run bot
+    logger.info("Bot is running...")
+    app.run_polling(allowed_updates=Update.ALL_TYPES)
 
 
 if __name__ == "__main__":
     main()
-    

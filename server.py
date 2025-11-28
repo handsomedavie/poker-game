@@ -20,8 +20,7 @@ except ImportError:
 
 from fastapi import FastAPI, HTTPException, WebSocket, WebSocketDisconnect, Body, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse, JSONResponse
-from fastapi.staticfiles import StaticFiles
+from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 
 from db import get_user, top_balances, set_display_name
@@ -32,7 +31,6 @@ from lobby_db import (
 )
 import json
 
-APP_DIR = os.path.join(os.path.dirname(__file__), "webapp")
 START_BALANCE = 1000
 
 app = FastAPI(title="Poker Mini App Server")
@@ -65,8 +63,6 @@ else:
         allow_headers=["*"],
     )
 
-# Serve static assets
-app.mount("/webapp", StaticFiles(directory=APP_DIR), name="webapp")
 
 
 @app.get("/")
