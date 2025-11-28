@@ -1,78 +1,81 @@
-import { StrictMode, useEffect } from 'react'
+import React, { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
+import './index.css'
+import App from './App.tsx'
 
-// Debug helper - runs immediately
+// Debug helper
 const debug = (msg: string) => {
   console.log('[main] ' + msg);
   (window as any).addDebug?.(msg);
 };
 
+const updateProgress = (text: string) => {
+  debug(text);
+  (window as any).updateLoadingProgress?.(text);
+};
+
+const showError = (message: string) => {
+  debug('ERROR: ' + message);
+  (window as any).showLoadingError?.(message);
+};
+
+// Mark app as loaded for mobile detection
+(window as any).__APP_LOADED__ = true;
 debug('main.tsx LOADED');
 
-// Ultra-minimal app - no heavy imports
-function MinimalApp() {
-  debug('MinimalApp rendering');
-  
-  const tg = (window as any).Telegram?.WebApp;
-  const userName = tg?.initDataUnsafe?.user?.first_name || 'Guest';
-  
-  useEffect(() => {
-    debug('App MOUNTED');
-    // Hide loading screen
-    (window as any).hideLoading?.();
-  }, []);
-  
-  return (
-    <div style={{
-      background: '#0f172a',
-      color: 'white',
-      padding: '40px 20px',
-      textAlign: 'center',
-      minHeight: '100vh',
-      fontFamily: 'system-ui, -apple-system, sans-serif'
-    }}>
-      <h1 style={{ color: '#22c55e', marginBottom: '20px' }}>
-        🎉 It Works!
-      </h1>
-      <p style={{ fontSize: '18px', marginBottom: '10px' }}>
-        Hello, {userName}!
-      </p>
-      <p style={{ color: '#94a3b8', marginBottom: '30px' }}>
-        React is running on mobile
-      </p>
-      <button
-        onClick={() => alert('Button clicked!')}
-        style={{
-          padding: '15px 40px',
-          fontSize: '18px',
-          background: '#22c55e',
-          color: 'white',
-          border: 'none',
-          borderRadius: '12px',
-          cursor: 'pointer',
-          fontWeight: 'bold'
-        }}
-      >
-        Test Button
-      </button>
-    </div>
-  );
+// Start loading
+updateProgress('Starting app...');
+
+// Debug: Log environment and device info
+const isMobile = /iPhone|iPad|Android/i.test(navigator.userAgent);
+console.log('🔧 Environment:', {
+  API_URL: import.meta.env.VITE_API_URL || 'not set',
+  WS_URL: import.meta.env.VITE_WS_URL || 'not set',
+  MODE: import.meta.env.MODE,
+  isMobile,
+});
+
+updateProgress('Checking Telegram...');
+
+// Telegram WebApp should already be initialized in index.html
+const tg = (window as any).Telegram?.WebApp;
+if (tg) {
+  console.log('✅ Telegram WebApp ready, user:', tg.initDataUnsafe?.user?.first_name || 'Guest');
+  updateProgress('Telegram connected');
+} else {
+  console.log('⚠️ Not in Telegram WebApp (browser mode)');
+  updateProgress('Browser mode');
 }
 
-// Render immediately
-debug('Creating root');
+// Render app
+updateProgress('Loading components...');
+
 try {
   const rootEl = document.getElementById('root');
-  if (!rootEl) throw new Error('No root element');
-  
-  debug('Rendering...');
+  if (!rootEl) {
+    throw new Error('Root element not found');
+  }
+
+  updateProgress('Rendering app...');
+
+  // Create wrapper component that hides loading after mount
+  const AppWithLoading = () => {
+    React.useEffect(() => {
+      debug('App MOUNTED');
+      (window as any).hideLoading?.();
+    }, []);
+    return <App />;
+  };
+
   createRoot(rootEl).render(
     <StrictMode>
-      <MinimalApp />
-    </StrictMode>
+      <AppWithLoading />
+    </StrictMode>,
   );
+  
   debug('Render complete');
-} catch (e) {
-  debug('ERROR: ' + (e as Error).message);
-  (window as any).showLoadingError?.('Error: ' + (e as Error).message);
+
+} catch (error) {
+  const errorMessage = (error as Error).message || 'Unknown error';
+  showError('Failed to load: ' + errorMessage + '<br><br>Please tap Retry below.');
 }

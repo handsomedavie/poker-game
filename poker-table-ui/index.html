@@ -92,6 +92,23 @@
     
     <!-- Initialize Telegram WebApp immediately -->
     <script>
+      // Mobile fallback - redirect to mobile.html if React doesn't load
+      var isMobile = /iPhone|iPad|Android/i.test(navigator.userAgent);
+      var isTelegram = window.Telegram && window.Telegram.WebApp;
+      
+      // If mobile Telegram and first attempt, set up fallback
+      if (isMobile && isTelegram && !sessionStorage.getItem('reactAttempted')) {
+        sessionStorage.setItem('reactAttempted', 'true');
+        
+        // If React doesn't load within 5 seconds, redirect to mobile.html
+        window.mobileTimeout = setTimeout(function() {
+          if (!window.__APP_LOADED__) {
+            console.log('⚠️ React not loaded, redirecting to mobile.html');
+            window.location.href = '/mobile.html' + window.location.search;
+          }
+        }, 5000);
+      }
+      
       // Debug log for mobile
       var debugLog = [];
       window.addDebug = function(msg) {
