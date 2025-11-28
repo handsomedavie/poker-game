@@ -3,11 +3,98 @@
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>poker-table-ui</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>Poker House</title>
+    <!-- Telegram WebApp SDK - load first -->
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <!-- Critical inline styles for loading screen -->
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body { 
+        width: 100%; 
+        height: 100%; 
+        background: #0f172a; 
+        overflow: hidden;
+      }
+      #root { width: 100%; height: 100%; }
+      .loading-screen {
+        position: fixed;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background: #0f172a;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        z-index: 9999;
+      }
+      .loading-spinner {
+        width: 50px;
+        height: 50px;
+        border: 4px solid rgba(255,255,255,0.1);
+        border-top-color: #22c55e;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+      }
+      .loading-text {
+        margin-top: 20px;
+        font-size: 18px;
+        color: #94a3b8;
+      }
+      .loading-error {
+        display: none;
+        margin-top: 20px;
+        padding: 15px 25px;
+        background: #dc2626;
+        border-radius: 8px;
+        font-size: 14px;
+      }
+      @keyframes spin {
+        to { transform: rotate(360deg); }
+      }
+    </style>
   </head>
   <body>
+    <!-- Loading screen shown immediately -->
+    <div id="loading" class="loading-screen">
+      <div class="loading-spinner"></div>
+      <div class="loading-text">Loading Poker House...</div>
+      <div id="loading-error" class="loading-error">
+        Failed to load. Please try again.
+      </div>
+    </div>
+    
     <div id="root"></div>
+    
+    <!-- Initialize Telegram WebApp immediately -->
+    <script>
+      // Telegram WebApp init
+      if (window.Telegram && window.Telegram.WebApp) {
+        window.Telegram.WebApp.ready();
+        window.Telegram.WebApp.expand();
+        console.log('✅ Telegram WebApp initialized in HTML');
+      }
+      
+      // Loading timeout - show error after 15 seconds
+      window.loadingTimeout = setTimeout(function() {
+        var errorEl = document.getElementById('loading-error');
+        if (errorEl) {
+          errorEl.style.display = 'block';
+          console.error('❌ App failed to load within 15 seconds');
+        }
+      }, 15000);
+      
+      // Function to hide loading screen (called from React)
+      window.hideLoading = function() {
+        clearTimeout(window.loadingTimeout);
+        var loadingEl = document.getElementById('loading');
+        if (loadingEl) {
+          loadingEl.style.display = 'none';
+        }
+      };
+    </script>
+    
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
