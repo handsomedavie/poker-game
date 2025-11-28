@@ -136,14 +136,21 @@
         window.showLoadingError('App failed to load after ' + elapsed + 's.<br>Try closing and reopening the app.');
       }, 60000);
       
-      // Progress updates every 5 seconds
+      // Progress updates every 3 seconds - always show timer
       var progressInterval = setInterval(function() {
         var elapsed = Math.round((Date.now() - loadStartTime) / 1000);
         var progressEl = document.getElementById('loading-progress');
-        if (progressEl && progressEl.textContent.indexOf('Loading') >= 0) {
-          progressEl.textContent = 'Loading... ' + elapsed + 's';
+        var loadingEl = document.getElementById('loading');
+        // Only update if loading screen is visible and not showing error
+        if (progressEl && loadingEl && loadingEl.style.display !== 'none') {
+          var errorEl = document.getElementById('loading-error');
+          if (!errorEl || errorEl.style.display === 'none') {
+            progressEl.textContent = 'Downloading app... ' + elapsed + 's';
+          }
+        } else {
+          clearInterval(progressInterval);
         }
-      }, 5000);
+      }, 3000);
     </script>
     
     <script type="module" src="/src/main.tsx" onerror="window.showLoadingError('Failed to load app scripts. Your browser may not support this app.')"></script>

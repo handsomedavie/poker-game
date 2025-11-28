@@ -35,34 +35,22 @@ START_BALANCE = 1000
 
 app = FastAPI(title="Poker Mini App Server")
 
-# CORS for production
-ALLOWED_ORIGINS = [
-    "https://*.netlify.app",
-    "https://*.vercel.app",
-    "https://t.me",
-    "http://localhost:5173",
-    "http://localhost:3000",
-    "http://127.0.0.1:5173",
-]
+# CORS - allow all origins for Telegram Mini App compatibility
+# Telegram WebView sends requests from various origins
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Allow all for Telegram compatibility
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
-# In production, be more restrictive; in dev, allow all
-if os.getenv("RAILWAY_ENVIRONMENT") or os.getenv("PRODUCTION"):
-    app.add_middleware(
-        CORSMiddleware,
-        allow_origins=ALLOWED_ORIGINS,
-        allow_credentials=True,
-        allow_methods=["*"],
-        allow_headers=["*"],
-    )
-else:
-    app.add_middleware(
-        CORSMiddleware,
-        allow_origins=["*"],
-        allow_credentials=True,
-        allow_methods=["*"],
-        allow_headers=["*"],
-    )
 
+
+@app.get("/health")
+async def health_check():
+    """Health check endpoint for monitoring"""
+    return {"status": "ok", "service": "poker-backend"}
 
 
 @app.get("/")
@@ -71,7 +59,7 @@ async def index():
     return JSONResponse({
         "status": "ok",
         "app": "Poker Mini App API",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "endpoints": {
             "lobby": "/api/lobby",
             "user": "/api/me",
