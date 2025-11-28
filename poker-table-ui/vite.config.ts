@@ -1,30 +1,40 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
+import legacy from '@vitejs/plugin-legacy'
 
 // https://vite.dev/config/
 export default defineConfig({
-  plugins: [react()],
+  plugins: [
+    react(),
+    // Legacy plugin for mobile Telegram WebView compatibility
+    legacy({
+      targets: ['defaults', 'not IE 11', 'iOS >= 12', 'Safari >= 12', 'Chrome >= 64'],
+      additionalLegacyPolyfills: ['regenerator-runtime/runtime'],
+      renderLegacyChunks: true,
+      polyfills: true,
+      modernPolyfills: true
+    })
+  ],
   build: {
     outDir: 'dist',
     sourcemap: false,
-    // Target older browsers for mobile compatibility
     target: 'es2015',
-    // Reduce chunk size for faster mobile loading
+    minify: 'terser',
+    cssMinify: true,
     chunkSizeWarningLimit: 500,
     rollupOptions: {
       output: {
         manualChunks: {
-          react: ['react', 'react-dom'],
+          vendor: ['react', 'react-dom'],
         },
       },
     },
   },
-  // Ensure compatibility with older mobile browsers
   esbuild: {
     target: 'es2015',
   },
   server: {
-    // Proxy only for local development
+    host: true,
     proxy: {
       '/api': {
         target: 'http://localhost:8000',
