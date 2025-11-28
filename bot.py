@@ -25,7 +25,8 @@ logger = logging.getLogger(__name__)
 # Configuration
 BOT_TOKEN = os.environ.get("TELEGRAM_TOKEN", "")
 BOT_USERNAME = os.environ.get("BOT_USERNAME", "pokerhouse77bot")
-WEBAPP_URL = os.environ.get("WEBAPP_URL", "https://dapper-heliotrope-03aa40.netlify.app")
+# Use mobile.html for better compatibility with mobile Telegram WebView
+WEBAPP_URL = os.environ.get("WEBAPP_URL", "https://dapper-heliotrope-03aa40.netlify.app/mobile.html")
 
 
 def get_main_keyboard() -> InlineKeyboardMarkup:
@@ -54,7 +55,9 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     args = context.args
     if args and args[0].startswith("lobby_"):
         lobby_code = args[0].replace("lobby_", "")
-        lobby_url = f"{WEBAPP_URL}?lobby={lobby_code}"
+        # Use mobile.html with lobby parameter
+        base_url = WEBAPP_URL.replace("/mobile.html", "")
+        lobby_url = f"{base_url}/mobile.html?lobby={lobby_code}"
         
         keyboard = [[
             InlineKeyboardButton(
