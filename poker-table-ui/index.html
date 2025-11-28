@@ -134,6 +134,11 @@
       };
     </script>
     
-    <script type="module" src="/src/main.tsx"></script>
+    <script type="module" src="/src/main.tsx" onerror="window.showLoadingError('Failed to load app scripts. Your browser may not support this app.')"></script>
+    
+    <!-- Fallback for browsers that don't support modules -->
+    <script nomodule>
+      window.showLoadingError('Your browser is too old. Please update Telegram or use a modern browser.');
+    </script>
   </body>
 </html>
