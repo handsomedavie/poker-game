@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Poker House</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            color: white;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        
+        .container {
+            padding: 20px;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            text-align: center;
+            padding: 30px 20px;
+            margin-bottom: 20px;
+        }
+        
+        .header h1 {
+            font-size: 32px;
+            margin-bottom: 10px;
+            color: #22c55e;
+        }
+        
+        .header p {
+            font-size: 16px;
+            color: #94a3b8;
+        }
+        
+        .balance-card {
+            background: linear-gradient(135deg, #1e3a5f 0%, #0f172a 100%);
+            border: 1px solid #334155;
+            border-radius: 16px;
+            padding: 20px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        .balance-label {
+            font-size: 14px;
+            color: #64748b;
+            margin-bottom: 5px;
+        }
+        
+        .balance-amount {
+            font-size: 28px;
+            font-weight: bold;
+            color: #4ade80;
+        }
+        
+        .menu-grid {
+            display: grid;
+            gap: 16px;
+        }
+        
+        .menu-card {
+            background: linear-gradient(135deg, #1e3a5f 0%, #0f172a 100%);
+            border: 1px solid #334155;
+            border-radius: 16px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        .menu-card:active {
+            transform: scale(0.97);
+            border-color: #3b82f6;
+        }
+        
+        .menu-icon {
+            font-size: 40px;
+            margin-bottom: 10px;
+        }
+        
+        .menu-title {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 6px;
+            color: #f1f5f9;
+        }
+        
+        .menu-description {
+            font-size: 13px;
+            color: #64748b;
+            line-height: 1.4;
+        }
+        
+        .private-btn {
+            width: 100%;
+            margin-top: 20px;
+            padding: 16px;
+            background: linear-gradient(135deg, #d97706, #f59e0b);
+            border: none;
+            border-radius: 14px;
+            color: #0f172a;
+            font-size: 18px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+        
+        .private-btn:active {
+            transform: scale(0.97);
+        }
+        
+        .loading {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: #0f172a;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            border-top-color: #22c55e;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .hidden {
+            display: none !important;
+        }
+        
+        .debug {
+            position: fixed;
+            bottom: 10px;
+            left: 10px;
+            right: 10px;
+            font-size: 10px;
+            color: #64748b;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div id="loading" class="loading">
+        <div class="spinner"></div>
+        <p>Loading Poker House...</p>
+        <div id="debug" class="debug"></div>
+    </div>
+
+    <div id="app" class="hidden">
+        <div class="container">
+            <div class="header">
+                <h1>🎰 Poker House</h1>
+                <p id="username">Welcome!</p>
+            </div>
+            
+            <div class="balance-card">
+                <div class="balance-label">Balance</div>
+                <div class="balance-amount">$1,000</div>
+            </div>
+            
+            <div class="menu-grid">
+                <div class="menu-card" onclick="openMode('tournament')">
+                    <div class="menu-icon">🏆</div>
+                    <div class="menu-title">Tournament</div>
+                    <div class="menu-description">Compete in multi-table tournaments for big prizes</div>
+                </div>
+                
+                <div class="menu-card" onclick="openMode('bounty')">
+                    <div class="menu-icon">🎯</div>
+                    <div class="menu-title">Bounty Hunter</div>
+                    <div class="menu-description">Knockout poker with rewards for eliminations</div>
+                </div>
+                
+                <div class="menu-card" onclick="openMode('sitgo')">
+                    <div class="menu-icon">⚡</div>
+                    <div class="menu-title">Sit & Go</div>
+                    <div class="menu-description">Fast-paced single table tournaments</div>
+                </div>
+            </div>
+            
+            <button class="private-btn" onclick="createPrivate()">
+                🎰 Create Private Game
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Debug helper
+        var debugLog = [];
+        function addDebug(msg) {
+            debugLog.push(msg);
+            var el = document.getElementById('debug');
+            if (el) el.textContent = debugLog.slice(-3).join(' → ');
+            console.log('[mobile.html] ' + msg);
+        }
+        
+        addDebug('Script start');
+        
+        // Initialize Telegram WebApp
+        var tg = window.Telegram && window.Telegram.WebApp;
+        if (tg) {
+            tg.ready();
+            tg.expand();
+            addDebug('TG ready');
+        } else {
+            addDebug('No TG');
+        }
+        
+        // Get user info
+        var user = tg && tg.initDataUnsafe && tg.initDataUnsafe.user;
+        var userName = user ? user.first_name : 'Guest';
+        
+        addDebug('User: ' + userName);
+        
+        // Show app after short delay
+        setTimeout(function() {
+            document.getElementById('loading').classList.add('hidden');
+            document.getElementById('app').classList.remove('hidden');
+            document.getElementById('username').textContent = 'Hello, ' + userName + '! 👋';
+            addDebug('App shown');
+        }, 300);
+        
+        // Menu handlers
+        function openMode(mode) {
+            addDebug('Mode: ' + mode);
+            
+            var messages = {
+                tournament: '🏆 Tournament mode - Coming soon!',
+                bounty: '🎯 Bounty Hunter - Coming soon!',
+                sitgo: '⚡ Sit & Go - Coming soon!'
+            };
+            
+            if (tg && tg.showAlert) {
+                tg.showAlert(messages[mode] || 'Coming soon!');
+            } else {
+                alert(messages[mode] || 'Coming soon!');
+            }
+        }
+        
+        function createPrivate() {
+            addDebug('Create private');
+            if (tg && tg.showAlert) {
+                tg.showAlert('🎰 Private games coming soon!');
+            } else {
+                alert('🎰 Private games coming soon!');
+            }
+        }
+        
+        addDebug('Ready');
+    </script>
+</body>
+</html>
