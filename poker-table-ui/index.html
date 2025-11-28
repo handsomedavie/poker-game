@@ -49,6 +49,23 @@
         background: #dc2626;
         border-radius: 8px;
         font-size: 14px;
+        line-height: 1.5;
+      }
+      .loading-retry {
+        display: none;
+        margin-top: 15px;
+        padding: 12px 24px;
+        background: #22c55e;
+        border: none;
+        border-radius: 8px;
+        color: white;
+        font-size: 16px;
+        cursor: pointer;
+      }
+      .loading-progress {
+        margin-top: 10px;
+        font-size: 12px;
+        color: #64748b;
       }
       @keyframes spin {
         to { transform: rotate(360deg); }
@@ -60,9 +77,13 @@
     <div id="loading" class="loading-screen">
       <div class="loading-spinner"></div>
       <div class="loading-text">Loading Poker House...</div>
+      <div id="loading-progress" class="loading-progress">Initializing...</div>
       <div id="loading-error" class="loading-error">
         Failed to load. Please try again.
       </div>
+      <button id="loading-retry" class="loading-retry" onclick="window.location.reload()">
+        Tap to Retry
+      </button>
     </div>
     
     <div id="root"></div>
@@ -76,14 +97,32 @@
         console.log('✅ Telegram WebApp initialized in HTML');
       }
       
-      // Loading timeout - show error after 15 seconds
-      window.loadingTimeout = setTimeout(function() {
+      // Update progress text
+      window.updateLoadingProgress = function(text) {
+        var progressEl = document.getElementById('loading-progress');
+        if (progressEl) progressEl.textContent = text;
+      };
+      
+      // Show error with retry button
+      window.showLoadingError = function(message) {
         var errorEl = document.getElementById('loading-error');
+        var retryEl = document.getElementById('loading-retry');
+        var spinnerEl = document.querySelector('.loading-spinner');
         if (errorEl) {
           errorEl.style.display = 'block';
-          console.error('❌ App failed to load within 15 seconds');
+          errorEl.innerHTML = message;
         }
-      }, 15000);
+        if (retryEl) retryEl.style.display = 'block';
+        if (spinnerEl) spinnerEl.style.display = 'none';
+      };
+      
+      // Loading timeout - show error after 30 seconds (mobile needs more time)
+      var loadStartTime = Date.now();
+      window.loadingTimeout = setTimeout(function() {
+        var elapsed = Math.round((Date.now() - loadStartTime) / 1000);
+        window.showLoadingError('App failed to load after ' + elapsed + 's.<br>Try reloading the page.');
+        console.error('❌ App failed to load within 30 seconds');
+      }, 30000);
       
       // Function to hide loading screen (called from React)
       window.hideLoading = function() {
