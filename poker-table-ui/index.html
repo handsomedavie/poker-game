@@ -129,12 +129,21 @@
         window.updateLoadingProgress('Loading app...');
       }
       
-      // Loading timeout
+      // Loading timeout - 60 seconds for slow mobile networks
       var loadStartTime = Date.now();
       window.loadingTimeout = setTimeout(function() {
         var elapsed = Math.round((Date.now() - loadStartTime) / 1000);
-        window.showLoadingError('App failed to load after ' + elapsed + 's.<br>Bundle may be too large for mobile.');
-      }, 30000);
+        window.showLoadingError('App failed to load after ' + elapsed + 's.<br>Try closing and reopening the app.');
+      }, 60000);
+      
+      // Progress updates every 5 seconds
+      var progressInterval = setInterval(function() {
+        var elapsed = Math.round((Date.now() - loadStartTime) / 1000);
+        var progressEl = document.getElementById('loading-progress');
+        if (progressEl && progressEl.textContent.indexOf('Loading') >= 0) {
+          progressEl.textContent = 'Loading... ' + elapsed + 's';
+        }
+      }, 5000);
     </script>
     
     <script type="module" src="/src/main.tsx" onerror="window.showLoadingError('Failed to load app scripts. Your browser may not support this app.')"></script>
