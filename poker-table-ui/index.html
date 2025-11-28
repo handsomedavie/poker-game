@@ -84,17 +84,30 @@
       <button id="loading-retry" class="loading-retry" onclick="window.location.reload()">
         Tap to Retry
       </button>
+      <!-- Debug info for mobile -->
+      <div id="debug-info" style="margin-top:20px;font-size:11px;color:#64748b;max-width:300px;word-break:break-all;"></div>
     </div>
     
     <div id="root"></div>
     
     <!-- Initialize Telegram WebApp immediately -->
     <script>
+      // Debug log for mobile
+      var debugLog = [];
+      window.addDebug = function(msg) {
+        debugLog.push(msg);
+        var el = document.getElementById('debug-info');
+        if (el) el.textContent = debugLog.slice(-5).join(' → ');
+        console.log('[DEBUG] ' + msg);
+      };
+      
+      window.addDebug('Script start');
+      
       // FIRST: Define all functions
       window.updateLoadingProgress = function(text) {
         var progressEl = document.getElementById('loading-progress');
         if (progressEl) progressEl.textContent = text;
-        console.log('Progress: ' + text);
+        window.addDebug(text);
       };
       
       window.showLoadingError = function(message) {

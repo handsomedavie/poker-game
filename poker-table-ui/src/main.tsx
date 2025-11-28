@@ -4,17 +4,23 @@ import './index.css'
 import App from './App.tsx'
 
 // Helper to update loading progress
+const debug = (msg: string) => {
+  console.log('[main.tsx] ' + msg);
+  (window as any).addDebug?.(msg);
+};
+
 const updateProgress = (text: string) => {
-  console.log('📊 ' + text);
+  debug(text);
   (window as any).updateLoadingProgress?.(text);
 };
 
 const showError = (message: string) => {
-  console.error('❌ ' + message);
+  debug('ERROR: ' + message);
   (window as any).showLoadingError?.(message);
 };
 
 // Start loading
+debug('main.tsx executing');
 updateProgress('Starting app...');
 
 // Debug: Log environment and device info
