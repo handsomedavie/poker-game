@@ -1,4 +1,4 @@
-import { StrictMode } from 'react'
+import React, { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App.tsx'
@@ -49,15 +49,20 @@ try {
   
   updateProgress('Rendering app...');
   
+  // Create wrapper component that hides loading after mount
+  const AppWithLoading = () => {
+    React.useEffect(() => {
+      console.log('✅ App mounted successfully');
+      (window as any).hideLoading?.();
+    }, []);
+    return <App />;
+  };
+  
   createRoot(rootEl).render(
     <StrictMode>
-      <App />
+      <AppWithLoading />
     </StrictMode>,
   );
-  
-  // Hide loading screen after React renders
-  console.log('✅ React rendered successfully');
-  (window as any).hideLoading?.();
   
 } catch (error) {
   const errorMessage = (error as Error).message || 'Unknown error';

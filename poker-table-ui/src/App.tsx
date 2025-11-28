@@ -1,22 +1,37 @@
-import { useState, useEffect, useCallback, Suspense } from 'react';
-import { PokerTable } from './components/PokerTable/PokerTable';
-import { LobbyPage } from './components/Lobby';
+import { useState, useEffect, useCallback, Suspense, lazy } from 'react';
+
+// Lazy load heavy components - they will be loaded on demand
+const PokerTable = lazy(() => import('./components/PokerTable/PokerTable').then(m => ({ default: m.PokerTable })));
+const LobbyPage = lazy(() => import('./components/Lobby').then(m => ({ default: m.LobbyPage })));
+
+// MainMenu loads immediately as it's the first screen
 import { MainMenu } from './components/MainMenu';
 
 type AppView = 'menu' | 'table' | 'private-lobby';
 
-// Simple loading fallback
+// Loading fallback for lazy components
 const LoadingFallback = () => (
   <div style={{
     display: 'flex',
+    flexDirection: 'column',
     alignItems: 'center',
     justifyContent: 'center',
     height: '100vh',
     background: '#0f172a',
     color: 'white',
-    fontSize: '18px'
+    fontSize: '18px',
+    gap: '15px'
   }}>
-    Loading...
+    <div style={{
+      width: '40px',
+      height: '40px',
+      border: '3px solid rgba(255,255,255,0.1)',
+      borderTopColor: '#22c55e',
+      borderRadius: '50%',
+      animation: 'spin 1s linear infinite'
+    }} />
+    <span>Loading...</span>
+    <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
   </div>
 );
 
@@ -115,19 +130,21 @@ function App() {
     );
   }
 
-  // Private Lobby
+  // Private Lobby (lazy loaded)
   if (view === 'private-lobby') {
     return (
-      <LobbyPage
-        onBackToTable={handleBackToMenu}
-        onStartGame={handleStartGame}
-      />
+      <Suspense fallback={<LoadingFallback />}>
+        <LobbyPage
+          onBackToTable={handleBackToMenu}
+          onStartGame={handleStartGame}
+        />
+      </Suspense>
     );
   }
 
-  // Poker Table
+  // Poker Table (lazy loaded)
   return (
-    <>
+    <Suspense fallback={<LoadingFallback />}>
       <PokerTable tableId={tableId} />
       {/* Back to Menu Button */}
       <button
@@ -149,7 +166,7 @@ function App() {
       >
         ← Menu
       </button>
-    </>
+    </Suspense>
   );
 }
 
