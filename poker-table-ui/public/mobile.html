@@ -2,196 +2,473 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0">
     <title>Poker House</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         
         body {
-            background: radial-gradient(circle at top, #1f2937 0%, #020617 55%, #020617 100%);
+            background: radial-gradient(ellipse at top, #1a2332 0%, #0a0f18 50%, #050810 100%);
             color: #e2e8f0;
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
             min-height: 100vh;
             overflow-x: hidden;
         }
-        
-        .container {
-            padding: 20px 16px 24px;
-            max-width: 480px;
-            margin: 0 auto;
-        }
 
-        .app-layout {
+        .hidden { display: none !important; }
+
+        /* ═══════════════════════════════════════════════════
+           SPLASH SCREEN STYLES
+           ═══════════════════════════════════════════════════ */
+        #splashScreen {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            z-index: 9999;
+            background: radial-gradient(ellipse at center, #1a2840 0%, #0d1520 40%, #050810 100%);
             display: flex;
-            gap: 20px;
-            align-items: flex-start;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
         }
 
-        .left-column {
-            flex: 1 1 0;
-            min-width: 0;
+        .splash-bg-glow {
+            position: absolute;
+            width: 300px; height: 300px;
+            background: radial-gradient(circle, rgba(251,146,60,0.15) 0%, transparent 70%);
+            border-radius: 50%;
+            animation: pulseGlow 2s ease-in-out infinite;
         }
 
-        .right-sidebar {
-            width: 260px;
-            background: #0b1220;
-            border-radius: 18px;
-            border: 1px solid #1e293b;
-            padding: 18px 16px 16px;
-            box-shadow: 0 18px 45px rgba(15, 23, 42, 0.95);
+        @keyframes pulseGlow {
+            0%, 100% { transform: scale(1); opacity: 0.5; }
+            50% { transform: scale(1.2); opacity: 0.8; }
         }
-        
-        .header {
-            text-align: left;
-            padding: 8px 4px 18px;
-            margin-bottom: 12px;
-        }
-        
-        .header h1 {
-            font-size: 26px;
-            margin-bottom: 6px;
-            color: #e5e7eb;
-        }
-        
-        .header p {
-            font-size: 14px;
-            color: #9ca3af;
-        }
-        
-        .balance-card {
-            background: radial-gradient(circle at top, rgba(34, 197, 94, 0.18) 0%, rgba(15, 23, 42, 0.95) 55%, rgba(15, 23, 42, 1) 100%);
-            border: 1px solid #22c55e33;
-            border-radius: 18px;
-            padding: 18px 20px;
-            text-align: left;
-            margin-bottom: 20px;
-            box-shadow: 0 18px 45px rgba(15, 23, 42, 0.9);
-        }
-        
-        .balance-label {
-            font-size: 12px;
-            letter-spacing: 0.06em;
-            text-transform: uppercase;
-            color: #64748b;
-            margin-bottom: 4px;
-        }
-        
-        .balance-amount {
-            font-size: 26px;
+
+        .splash-title {
+            font-size: 32px;
             font-weight: 700;
-            color: #4ade80;
+            color: #f8fafc;
+            margin-bottom: 30px;
+            opacity: 0;
+            transform: translateY(-30px);
+            animation: fadeInDown 0.6s ease-out 0.3s forwards;
         }
-        
-        .menu-grid {
-            display: grid;
-            gap: 12px;
+
+        .splash-cowboy {
+            font-size: 80px;
+            margin-bottom: 24px;
+            transform: scale(0);
+            animation: bounceIn 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55) 0.1s forwards;
         }
-        
-        .menu-card {
-            background: linear-gradient(135deg, #1e293b 0%, #020617 100%);
-            border: 2px solid #1f2937;
-            border-radius: 16px;
-            padding: 16px 16px 18px;
-            cursor: pointer;
-            transition: transform 0.16s ease, box-shadow 0.16s ease, border-color 0.16s ease, background 0.16s ease;
-            -webkit-tap-highlight-color: transparent;
-            box-shadow: 0 10px 24px rgba(15, 23, 42, 0.75);
+
+        .splash-wave {
+            display: inline-block;
+            animation: wave 1s ease-in-out infinite;
+            transform-origin: 70% 70%;
         }
-        
-        .menu-card:active {
-            transform: translateY(1px) scale(0.99);
-            border-color: #3b82f6;
-            box-shadow: 0 6px 18px rgba(15, 23, 42, 0.9);
-            background: radial-gradient(circle at top, rgba(59, 130, 246, 0.2) 0%, #020617 65%, #020617 100%);
+
+        @keyframes wave {
+            0%, 100% { transform: rotate(0deg); }
+            25% { transform: rotate(20deg); }
+            75% { transform: rotate(-10deg); }
         }
-        
-        .menu-icon {
-            font-size: 34px;
-            margin-bottom: 8px;
+
+        @keyframes bounceIn {
+            0% { transform: scale(0); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
         }
-        
-        .menu-title {
+
+        @keyframes fadeInDown {
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeInUp {
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .splash-phrase {
             font-size: 18px;
-            font-weight: 600;
-            margin-bottom: 4px;
-            color: #e5e7eb;
-        }
-        
-        .menu-description {
-            font-size: 13px;
             color: #94a3b8;
-            line-height: 1.4;
-        }
-        
-        .private-btn {
-            width: 100%;
-            margin-top: 20px;
-            padding: 14px 16px;
-            background: linear-gradient(135deg, #d97706, #f59e0b);
-            border: none;
-            border-radius: 14px;
-            color: #111827;
-            font-size: 16px;
-            font-weight: 700;
-            cursor: pointer;
-            box-shadow: 0 14px 30px rgba(148, 92, 16, 0.7);
-        }
-        
-        .private-btn:active {
-            transform: translateY(1px) scale(0.99);
-            box-shadow: 0 8px 18px rgba(148, 92, 16, 0.8);
+            text-align: center;
+            padding: 0 30px;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInUp 0.6s ease-out 0.8s forwards;
         }
 
-        .sidebar-header {
+        /* ═══════════════════════════════════════════════════
+           MAIN MENU STYLES
+           ═══════════════════════════════════════════════════ */
+        #mainMenu {
+            min-height: 100vh;
+            padding: 16px;
+        }
+
+        .profile-bar {
             display: flex;
             align-items: center;
             gap: 12px;
-            margin-bottom: 18px;
+            background: linear-gradient(135deg, #111827 0%, #0a0f18 100%);
+            border: 1px solid #1e293b;
+            border-radius: 16px;
+            padding: 12px 14px;
+            margin-bottom: 20px;
         }
 
-        .sidebar-avatar {
-            width: 56px;
-            height: 56px;
-            border-radius: 999px;
-            background: radial-gradient(circle at top left, #fb923c, #f97316, #b45309);
+        .profile-avatar {
+            width: 48px; height: 48px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #fb923c, #f97316);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 26px;
+            font-size: 22px;
+            font-weight: 700;
+            color: #fefce8;
+            border: 2px solid #fed7aa;
+            flex-shrink: 0;
+        }
+
+        .profile-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .profile-name {
+            font-size: 15px;
+            font-weight: 600;
+            color: #e5e7eb;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .profile-handle {
+            font-size: 12px;
+            color: #64748b;
+        }
+
+        .profile-balance {
+            text-align: center;
+            padding: 0 12px;
+            border-left: 1px solid #1e293b;
+            border-right: 1px solid #1e293b;
+        }
+
+        .profile-balance-label {
+            font-size: 10px;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .profile-balance-amount {
+            font-size: 18px;
+            font-weight: 700;
+            color: #4ade80;
+        }
+
+        .profile-actions {
+            display: flex;
+            gap: 6px;
+            flex-shrink: 0;
+        }
+
+        .profile-action-btn {
+            width: 36px; height: 36px;
+            border-radius: 10px;
+            border: none;
+            background: #1e293b;
+            color: #e5e7eb;
+            font-size: 16px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            -webkit-tap-highlight-color: transparent;
+            transition: background 0.15s, transform 0.15s;
+        }
+
+        .profile-action-btn:active {
+            transform: scale(0.95);
+            background: #334155;
+        }
+
+        .profile-action-btn.primary {
+            background: linear-gradient(135deg, #eab308, #facc15);
+            color: #111827;
+        }
+
+        /* Game Modes Grid */
+        .game-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .game-card {
+            aspect-ratio: 1;
+            border-radius: 20px;
+            padding: 16px;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            border: 2px solid transparent;
+            transition: transform 0.2s, box-shadow 0.2s;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .game-card:active {
+            transform: scale(0.97);
+        }
+
+        .game-card.tournament {
+            background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
+            border-color: #3b82f6;
+            box-shadow: 0 8px 30px rgba(37, 99, 235, 0.4);
+        }
+
+        .game-card.bounty {
+            background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
+            border-color: #ef4444;
+            box-shadow: 0 8px 30px rgba(220, 38, 38, 0.4);
+        }
+
+        .game-card.sitgo {
+            background: linear-gradient(135deg, #7c3aed 0%, #5b21b6 100%);
+            border-color: #8b5cf6;
+            box-shadow: 0 8px 30px rgba(124, 58, 237, 0.4);
+        }
+
+        .game-card.private {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            border-color: #fbbf24;
+            box-shadow: 0 8px 30px rgba(245, 158, 11, 0.4);
+        }
+
+        .game-card-icon {
+            font-size: 42px;
+            margin-bottom: 8px;
+        }
+
+        .game-card-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 4px;
+        }
+
+        .game-card-desc {
+            font-size: 11px;
+            color: rgba(255,255,255,0.75);
+            line-height: 1.3;
+        }
+
+        /* ═══════════════════════════════════════════════════
+           LOBBY SCREEN STYLES
+           ═══════════════════════════════════════════════════ */
+        #lobbyScreen {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .lobby-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            background: #0a0f18;
+            border-bottom: 1px solid #1e293b;
+        }
+
+        .back-btn {
+            width: 40px; height: 40px;
+            border-radius: 12px;
+            border: none;
+            background: #1e293b;
+            color: #e5e7eb;
+            font-size: 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .back-btn:active {
+            background: #334155;
+        }
+
+        .lobby-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #e5e7eb;
+        }
+
+        .lobby-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        @media (min-width: 768px) {
+            .lobby-content {
+                flex-direction: row;
+            }
+            .lobby-tables { flex: 1; }
+            .lobby-sidebar { width: 280px; }
+        }
+
+        .lobby-tables {
+            flex: 1;
+            padding: 16px;
+            overflow-y: auto;
+        }
+
+        .lobby-tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 16px;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .lobby-tab {
+            padding: 10px 16px;
+            border-radius: 10px;
+            border: none;
+            background: #1e293b;
+            color: #94a3b8;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            white-space: nowrap;
+            -webkit-tap-highlight-color: transparent;
+            transition: background 0.15s, color 0.15s;
+        }
+
+        .lobby-tab.active {
+            background: #3b82f6;
+            color: #fff;
+        }
+
+        .table-card {
+            background: linear-gradient(135deg, #111827 0%, #0a0f18 100%);
+            border: 1px solid #1e293b;
+            border-radius: 14px;
+            padding: 14px;
+            margin-bottom: 12px;
+        }
+
+        .table-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 10px;
+        }
+
+        .table-name {
+            font-size: 15px;
+            font-weight: 600;
+            color: #e5e7eb;
+        }
+
+        .table-status {
+            font-size: 11px;
+            padding: 4px 8px;
+            border-radius: 6px;
+            background: #22c55e20;
+            color: #22c55e;
+        }
+
+        .table-status.waiting { background: #f59e0b20; color: #f59e0b; }
+        .table-status.full { background: #ef444420; color: #ef4444; }
+
+        .table-info {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 12px;
+            font-size: 12px;
+            color: #94a3b8;
+        }
+
+        .table-info span { display: flex; align-items: center; gap: 4px; }
+
+        .join-btn {
+            width: 100%;
+            padding: 10px;
+            border-radius: 10px;
+            border: none;
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            color: #fff;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .join-btn:active { opacity: 0.9; }
+
+        /* Lobby Sidebar */
+        .lobby-sidebar {
+            background: #0b1220;
+            border-top: 1px solid #1e293b;
+            padding: 16px;
+        }
+
+        @media (min-width: 768px) {
+            .lobby-sidebar {
+                border-top: none;
+                border-left: 1px solid #1e293b;
+            }
+        }
+
+        .sidebar-profile {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            padding-bottom: 16px;
+            border-bottom: 1px solid #1e293b;
+            margin-bottom: 16px;
+        }
+
+        .sidebar-avatar {
+            width: 64px; height: 64px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #fb923c, #f97316);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
             font-weight: 700;
             color: #fefce8;
             border: 3px solid #fed7aa;
+            margin-bottom: 10px;
         }
 
-        .sidebar-user-name {
+        .sidebar-name {
             font-size: 16px;
             font-weight: 600;
             color: #e5e7eb;
         }
 
-        .sidebar-user-handle {
+        .sidebar-handle {
             font-size: 12px;
-            color: #9ca3af;
+            color: #64748b;
+            margin-bottom: 8px;
         }
 
-        .sidebar-balance-card {
-            margin-top: 6px;
-            margin-bottom: 18px;
-            padding: 10px 12px 12px;
-            border-radius: 14px;
-            background: linear-gradient(135deg, rgba(34, 197, 94, 0.14), rgba(15, 23, 42, 0.95));
-            border: 1px solid #22c55e33;
-        }
-
-        .sidebar-balance-label {
-            font-size: 12px;
-            color: #9ca3af;
-            margin-bottom: 2px;
-        }
-
-        .sidebar-balance-amount {
-            font-size: 22px;
+        .sidebar-balance {
+            font-size: 24px;
             font-weight: 700;
             color: #4ade80;
         }
@@ -200,7 +477,7 @@
             display: flex;
             flex-direction: column;
             gap: 8px;
-            margin-bottom: 18px;
+            margin-bottom: 16px;
         }
 
         .sidebar-btn {
@@ -209,10 +486,10 @@
             gap: 10px;
             width: 100%;
             height: 44px;
-            padding: 0 12px;
+            padding: 0 14px;
             border-radius: 12px;
             border: none;
-            background: #111827;
+            background: #1e293b;
             color: #e5e7eb;
             font-size: 14px;
             font-weight: 500;
@@ -220,283 +497,368 @@
             -webkit-tap-highlight-color: transparent;
         }
 
-        .sidebar-btn-icon {
-            font-size: 18px;
-        }
+        .sidebar-btn:active { background: #334155; }
 
-        .sidebar-btn-primary {
+        .sidebar-btn.primary {
             background: linear-gradient(135deg, #eab308, #facc15);
             color: #111827;
         }
 
         .sidebar-stats {
             display: flex;
-            justify-content: space-between;
-            gap: 10px;
-            margin-top: 4px;
-        }
-
-        .sidebar-stat-item {
-            flex: 1;
+            justify-content: space-around;
             text-align: center;
         }
 
-        .sidebar-stat-value {
-            font-size: 16px;
+        .stat-value {
+            font-size: 18px;
             font-weight: 600;
+            color: #e5e7eb;
         }
 
-        .sidebar-stat-label {
+        .stat-value.green { color: #22c55e; }
+
+        .stat-label {
             font-size: 11px;
-            color: #9ca3af;
+            color: #64748b;
         }
-        
-        .loading {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: #0f172a;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-        }
-        
-        .spinner {
-            width: 50px;
-            height: 50px;
-            border: 4px solid rgba(255, 255, 255, 0.1);
-            border-top-color: #22c55e;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin-bottom: 20px;
-        }
-        
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-        
-        .hidden {
-            display: none !important;
-        }
-        
+
+        /* Debug */
         .debug {
             position: fixed;
-            bottom: 10px;
-            left: 10px;
-            right: 10px;
-            font-size: 10px;
-            color: #64748b;
+            bottom: 6px;
+            left: 6px;
+            right: 6px;
+            font-size: 9px;
+            color: #475569;
             text-align: center;
+            pointer-events: none;
         }
     </style>
 </head>
 <body>
-    <div id="loading" class="loading">
-        <div class="spinner"></div>
-        <p>Loading Poker House...</p>
-        <div id="debug" class="debug"></div>
+
+    <!-- ═══════════════════════════════════════════════════
+         SCREEN 1: SPLASH SCREEN
+         ═══════════════════════════════════════════════════ -->
+    <div id="splashScreen">
+        <div class="splash-bg-glow"></div>
+        <h1 class="splash-title">🎰 Poker House</h1>
+        <div class="splash-cowboy">
+            🤠<span class="splash-wave">👋</span>
+        </div>
+        <p class="splash-phrase" id="splashPhrase"></p>
     </div>
 
-    <div id="app" class="hidden">
-        <div class="container">
-            <div class="app-layout">
-                <!-- LEFT COLUMN: main content -->
-                <div class="left-column">
-                    <div class="header">
-                        <h1>🎰 Poker House</h1>
-                        <p id="username">Welcome!</p>
-                    </div>
-                    
-                    <div class="balance-card">
-                        <div class="balance-label">Balance</div>
-                        <div class="balance-amount">$1,000</div>
-                    </div>
-                    
-                    <div class="menu-grid">
-                        <div class="menu-card" onclick="openMode('tournament')">
-                            <div class="menu-icon">🏆</div>
-                            <div class="menu-title">Tournament</div>
-                            <div class="menu-description">Compete in multi-table tournaments for big prizes</div>
-                        </div>
-                        
-                        <div class="menu-card" onclick="openMode('bounty')">
-                            <div class="menu-icon">🎯</div>
-                            <div class="menu-title">Bounty Hunter</div>
-                            <div class="menu-description">Knockout poker with rewards for eliminations</div>
-                        </div>
-                        
-                        <div class="menu-card" onclick="openMode('sitgo')">
-                            <div class="menu-icon">⚡</div>
-                            <div class="menu-title">Sit & Go</div>
-                            <div class="menu-description">Fast-paced single table tournaments</div>
-                        </div>
-                    </div>
-                    
-                    <button class="private-btn" onclick="createPrivate()">
-                        🎰 Create Private Game
+    <!-- ═══════════════════════════════════════════════════
+         SCREEN 2: MAIN MENU
+         ═══════════════════════════════════════════════════ -->
+    <div id="mainMenu" class="hidden">
+        <!-- Horizontal Profile Bar -->
+        <div class="profile-bar">
+            <div class="profile-avatar" id="menuAvatar">P</div>
+            <div class="profile-info">
+                <div class="profile-name" id="menuName">Player</div>
+                <div class="profile-handle" id="menuHandle"></div>
+            </div>
+            <div class="profile-balance">
+                <div class="profile-balance-label">Balance</div>
+                <div class="profile-balance-amount" id="menuBalance">$1,000</div>
+            </div>
+            <div class="profile-actions">
+                <button class="profile-action-btn primary" onclick="handleDeposit()" title="Deposit">💳</button>
+                <button class="profile-action-btn" onclick="handleWithdraw()" title="Withdraw">💰</button>
+                <button class="profile-action-btn" onclick="handleHistory()" title="History">📋</button>
+                <button class="profile-action-btn" onclick="handleSettings()" title="Settings">⚙️</button>
+            </div>
+        </div>
+
+        <!-- Game Modes Grid 2x2 -->
+        <div class="game-grid">
+            <div class="game-card tournament" onclick="openLobby('tournament')">
+                <div class="game-card-icon">🏆</div>
+                <div class="game-card-title">Tournament</div>
+                <div class="game-card-desc">Multi-table poker for big prizes</div>
+            </div>
+            <div class="game-card bounty" onclick="openLobby('bounty')">
+                <div class="game-card-icon">🎯</div>
+                <div class="game-card-title">Bounty Hunter</div>
+                <div class="game-card-desc">Knockout rewards for eliminations</div>
+            </div>
+            <div class="game-card sitgo" onclick="openLobby('sitgo')">
+                <div class="game-card-icon">⚡</div>
+                <div class="game-card-title">Sit & Go</div>
+                <div class="game-card-desc">Fast single-table tournaments</div>
+            </div>
+            <div class="game-card private" onclick="openLobby('private')">
+                <div class="game-card-icon">🎰</div>
+                <div class="game-card-title">Private Game</div>
+                <div class="game-card-desc">Create or join private tables</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════
+         SCREEN 3: GAME LOBBY
+         ═══════════════════════════════════════════════════ -->
+    <div id="lobbyScreen" class="hidden">
+        <div class="lobby-header">
+            <button class="back-btn" onclick="goBack()">←</button>
+            <h2 class="lobby-title" id="lobbyTitle">Tournament Lobby</h2>
+        </div>
+
+        <div class="lobby-content">
+            <!-- Left: Tables List -->
+            <div class="lobby-tables">
+                <div class="lobby-tabs">
+                    <button class="lobby-tab active" onclick="switchTab(this, 'all')">All Tables</button>
+                    <button class="lobby-tab" onclick="switchTab(this, 'low')">Low Stakes</button>
+                    <button class="lobby-tab" onclick="switchTab(this, 'mid')">Mid Stakes</button>
+                    <button class="lobby-tab" onclick="switchTab(this, 'high')">High Stakes</button>
+                </div>
+
+                <div id="tablesList">
+                    <!-- Tables will be rendered here -->
+                </div>
+            </div>
+
+            <!-- Right: Player Sidebar -->
+            <div class="lobby-sidebar">
+                <div class="sidebar-profile">
+                    <div class="sidebar-avatar" id="lobbyAvatar">P</div>
+                    <div class="sidebar-name" id="lobbyName">Player</div>
+                    <div class="sidebar-handle" id="lobbyHandle"></div>
+                    <div class="sidebar-balance" id="lobbyBalance">$1,000</div>
+                </div>
+
+                <div class="sidebar-buttons">
+                    <button class="sidebar-btn primary" onclick="handleDeposit()">
+                        <span>💳</span><span>Deposit</span>
+                    </button>
+                    <button class="sidebar-btn" onclick="handleWithdraw()">
+                        <span>💰</span><span>Withdraw</span>
+                    </button>
+                    <button class="sidebar-btn" onclick="handleHistory()">
+                        <span>📋</span><span>History</span>
+                    </button>
+                    <button class="sidebar-btn" onclick="handleSettings()">
+                        <span>⚙️</span><span>Settings</span>
                     </button>
                 </div>
 
-                <!-- RIGHT COLUMN: player sidebar -->
-                <div class="right-sidebar">
-                    <div class="sidebar-header">
-                        <div class="sidebar-avatar" id="sidebarAvatar">P</div>
-                        <div>
-                            <div class="sidebar-user-name" id="sidebarUserName">Player</div>
-                            <div class="sidebar-user-handle" id="sidebarUserHandle"></div>
-                        </div>
+                <div class="sidebar-stats">
+                    <div>
+                        <div class="stat-value">24</div>
+                        <div class="stat-label">Games</div>
                     </div>
-
-                    <div class="sidebar-balance-card">
-                        <div class="sidebar-balance-label">Balance</div>
-                        <div class="sidebar-balance-amount" id="sidebarBalance">$1,000</div>
-                    </div>
-
-                    <div class="sidebar-buttons">
-                        <button class="sidebar-btn sidebar-btn-primary" id="depositBtn">
-                            <span class="sidebar-btn-icon">💳</span>
-                            <span>Deposit</span>
-                        </button>
-                        <button class="sidebar-btn" id="withdrawBtn">
-                            <span class="sidebar-btn-icon">💰</span>
-                            <span>Withdraw</span>
-                        </button>
-                        <button class="sidebar-btn" id="historyBtn">
-                            <span class="sidebar-btn-icon">📋</span>
-                            <span>History</span>
-                        </button>
-                        <button class="sidebar-btn" id="settingsBtn">
-                            <span class="sidebar-btn-icon">⚙️</span>
-                            <span>Settings</span>
-                        </button>
-                    </div>
-
-                    <div class="sidebar-stats">
-                        <div class="sidebar-stat-item">
-                            <div class="sidebar-stat-value">24</div>
-                            <div class="sidebar-stat-label">Games</div>
-                        </div>
-                        <div class="sidebar-stat-item">
-                            <div class="sidebar-stat-value" style="color:#22c55e;">58%</div>
-                            <div class="sidebar-stat-label">Win Rate</div>
-                        </div>
+                    <div>
+                        <div class="stat-value green">58%</div>
+                        <div class="stat-label">Win Rate</div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
+    <div id="debugInfo" class="debug"></div>
+
     <script>
-        // Debug helper
+        // ═══════════════════════════════════════════════════
+        // DEBUG & INITIALIZATION
+        // ═══════════════════════════════════════════════════
         var debugLog = [];
         function addDebug(msg) {
             debugLog.push(msg);
-            var el = document.getElementById('debug');
+            var el = document.getElementById('debugInfo');
             if (el) el.textContent = debugLog.slice(-3).join(' → ');
-            console.log('[mobile.html] ' + msg);
+            console.log('[mobile] ' + msg);
         }
-        
-        addDebug('Script start');
-        
-        // Initialize Telegram WebApp
+
+        addDebug('Init');
+
+        // Telegram WebApp
         var tg = window.Telegram && window.Telegram.WebApp;
         if (tg) {
             tg.ready();
             tg.expand();
-            addDebug('TG ready');
-        } else {
-            addDebug('No TG');
+            addDebug('TG OK');
         }
-        
-        // Get user info
+
+        // User info
         var user = tg && tg.initDataUnsafe && tg.initDataUnsafe.user;
         var userName = user ? user.first_name : 'Guest';
-        
+        var userHandle = user && user.username ? '@' + user.username : '';
+        var userInitial = userName ? userName.charAt(0).toUpperCase() : 'P';
+
         addDebug('User: ' + userName);
-        
-        // Show app after short delay
+
+        // ═══════════════════════════════════════════════════
+        // SPLASH SCREEN
+        // ═══════════════════════════════════════════════════
+        var welcomePhrases = [
+            "Welcome, cowboy. Let's play!",
+            "Howdy, partner! Ready to go all-in?",
+            "Saddle up, gunslinger. Fortune awaits!",
+            "Time to show your poker face, partner!",
+            "Draw your cards, cowboy. Let the game begin!"
+        ];
+
+        var randomPhrase = welcomePhrases[Math.floor(Math.random() * welcomePhrases.length)];
+        document.getElementById('splashPhrase').textContent = randomPhrase;
+
+        // Transition to main menu after 3 seconds
         setTimeout(function() {
-            document.getElementById('loading').classList.add('hidden');
-            document.getElementById('app').classList.remove('hidden');
-            document.getElementById('username').textContent = 'Hello, ' + userName + '! 👋';
+            document.getElementById('splashScreen').classList.add('hidden');
+            document.getElementById('mainMenu').classList.remove('hidden');
+            updateUserUI();
+            addDebug('Menu shown');
+        }, 3000);
 
-            // Fill sidebar user info
-            var sidebarNameEl = document.getElementById('sidebarUserName');
-            var sidebarHandleEl = document.getElementById('sidebarUserHandle');
-            var avatarEl = document.getElementById('sidebarAvatar');
-            if (sidebarNameEl) sidebarNameEl.textContent = userName || 'Player';
-            if (sidebarHandleEl && user && user.username) {
-                sidebarHandleEl.textContent = '@' + user.username;
-            }
-            if (avatarEl && userName) {
-                avatarEl.textContent = (userName.charAt(0) || 'P').toUpperCase();
-            }
+        // ═══════════════════════════════════════════════════
+        // UI UPDATES
+        // ═══════════════════════════════════════════════════
+        function updateUserUI() {
+            // Main menu
+            var menuAvatar = document.getElementById('menuAvatar');
+            var menuName = document.getElementById('menuName');
+            var menuHandle = document.getElementById('menuHandle');
+            if (menuAvatar) menuAvatar.textContent = userInitial;
+            if (menuName) menuName.textContent = userName || 'Player';
+            if (menuHandle) menuHandle.textContent = userHandle;
 
-            addDebug('App shown');
-        }, 300);
-        
-        // Menu handlers
-        function openMode(mode) {
-            addDebug('Mode: ' + mode);
-            
-            var messages = {
-                tournament: '🏆 Tournament mode - Coming soon!',
-                bounty: '🎯 Bounty Hunter - Coming soon!',
-                sitgo: '⚡ Sit & Go - Coming soon!'
+            // Lobby sidebar
+            var lobbyAvatar = document.getElementById('lobbyAvatar');
+            var lobbyName = document.getElementById('lobbyName');
+            var lobbyHandle = document.getElementById('lobbyHandle');
+            if (lobbyAvatar) lobbyAvatar.textContent = userInitial;
+            if (lobbyName) lobbyName.textContent = userName || 'Player';
+            if (lobbyHandle) lobbyHandle.textContent = userHandle;
+        }
+
+        // ═══════════════════════════════════════════════════
+        // NAVIGATION
+        // ═══════════════════════════════════════════════════
+        var currentMode = '';
+
+        function openLobby(mode) {
+            currentMode = mode;
+            addDebug('Open: ' + mode);
+
+            var titles = {
+                tournament: '🏆 Tournament Lobby',
+                bounty: '🎯 Bounty Hunter Lobby',
+                sitgo: '⚡ Sit & Go Lobby',
+                private: '🎰 Private Games'
             };
-            
+
+            document.getElementById('lobbyTitle').textContent = titles[mode] || 'Lobby';
+            document.getElementById('mainMenu').classList.add('hidden');
+            document.getElementById('lobbyScreen').classList.remove('hidden');
+
+            renderTables(mode);
+        }
+
+        function goBack() {
+            addDebug('Back');
+            document.getElementById('lobbyScreen').classList.add('hidden');
+            document.getElementById('mainMenu').classList.remove('hidden');
+        }
+
+        function switchTab(btn, filter) {
+            var tabs = document.querySelectorAll('.lobby-tab');
+            tabs.forEach(function(t) { t.classList.remove('active'); });
+            btn.classList.add('active');
+            renderTables(currentMode, filter);
+        }
+
+        // ═══════════════════════════════════════════════════
+        // TABLES DATA & RENDERING
+        // ═══════════════════════════════════════════════════
+        var tablesData = {
+            tournament: [
+                { name: 'Daily Freeroll', buyIn: 'Free', players: '45/100', blinds: '50/100', status: 'open' },
+                { name: 'Sunday Major', buyIn: '$50', players: '120/200', blinds: '100/200', status: 'open' },
+                { name: 'High Roller', buyIn: '$500', players: '18/20', blinds: '500/1000', status: 'waiting' }
+            ],
+            bounty: [
+                { name: 'Headhunter $10', buyIn: '$10', players: '32/50', blinds: '25/50', status: 'open' },
+                { name: 'Knockout King', buyIn: '$25', players: '64/100', blinds: '50/100', status: 'open' }
+            ],
+            sitgo: [
+                { name: 'Turbo 6-Max', buyIn: '$5', players: '4/6', blinds: '25/50', status: 'waiting' },
+                { name: 'Hyper 9-Max', buyIn: '$10', players: '9/9', blinds: '50/100', status: 'full' },
+                { name: 'Standard 6-Max', buyIn: '$20', players: '2/6', blinds: '25/50', status: 'open' }
+            ],
+            private: [
+                { name: 'Friends Only', buyIn: '$10', players: '3/8', blinds: '10/20', status: 'waiting' },
+                { name: 'VIP Room', buyIn: '$100', players: '5/6', blinds: '50/100', status: 'open' }
+            ]
+        };
+
+        function renderTables(mode, filter) {
+            var tables = tablesData[mode] || [];
+            var container = document.getElementById('tablesList');
+            var html = '';
+
+            tables.forEach(function(table) {
+                var statusClass = table.status === 'waiting' ? 'waiting' : (table.status === 'full' ? 'full' : '');
+                var statusText = table.status === 'open' ? 'Open' : (table.status === 'waiting' ? 'Starting...' : 'Full');
+
+                html += '<div class="table-card">' +
+                    '<div class="table-card-header">' +
+                        '<div class="table-name">' + table.name + '</div>' +
+                        '<div class="table-status ' + statusClass + '">' + statusText + '</div>' +
+                    '</div>' +
+                    '<div class="table-info">' +
+                        '<span>💰 ' + table.buyIn + '</span>' +
+                        '<span>👥 ' + table.players + '</span>' +
+                        '<span>🎯 ' + table.blinds + '</span>' +
+                    '</div>' +
+                    '<button class="join-btn" onclick="joinTable(\'' + table.name + '\')">Join Table</button>' +
+                '</div>';
+            });
+
+            if (tables.length === 0) {
+                html = '<div style="text-align:center;color:#64748b;padding:40px;">No tables available</div>';
+            }
+
+            container.innerHTML = html;
+        }
+
+        function joinTable(tableName) {
+            addDebug('Join: ' + tableName);
+            showAlert('🎮 Joining "' + tableName + '"...\n\nGame feature coming soon!');
+        }
+
+        // ═══════════════════════════════════════════════════
+        // BUTTON HANDLERS
+        // ═══════════════════════════════════════════════════
+        function showAlert(msg) {
             if (tg && tg.showAlert) {
-                tg.showAlert(messages[mode] || 'Coming soon!');
+                tg.showAlert(msg);
             } else {
-                alert(messages[mode] || 'Coming soon!');
-            }
-        }
-        
-        function createPrivate() {
-            addDebug('Create private');
-            if (tg && tg.showAlert) {
-                tg.showAlert('🎰 Private games coming soon!');
-            } else {
-                alert('🎰 Private games coming soon!');
+                alert(msg);
             }
         }
 
-        // Sidebar button handlers (placeholders)
-        var depositBtn = document.getElementById('depositBtn');
-        var withdrawBtn = document.getElementById('withdrawBtn');
-        var historyBtn = document.getElementById('historyBtn');
-        var settingsBtn = document.getElementById('settingsBtn');
+        function handleDeposit() {
+            addDebug('Deposit');
+            showAlert('💳 Deposit feature coming soon!');
+        }
 
-        if (depositBtn) {
-            depositBtn.onclick = function () {
-                addDebug('Deposit click');
-                if (tg && tg.showAlert) tg.showAlert('💳 Deposit feature coming soon');
-                else alert('💳 Deposit feature coming soon');
-            };
+        function handleWithdraw() {
+            addDebug('Withdraw');
+            showAlert('💰 Withdraw feature coming soon!');
         }
-        if (withdrawBtn) {
-            withdrawBtn.onclick = function () {
-                addDebug('Withdraw click');
-                if (tg && tg.showAlert) tg.showAlert('💰 Withdraw feature coming soon');
-                else alert('💰 Withdraw feature coming soon');
-            };
+
+        function handleHistory() {
+            addDebug('History');
+            showAlert('📋 Transaction history coming soon!');
         }
-        if (historyBtn) {
-            historyBtn.onclick = function () {
-                addDebug('History click');
-                if (tg && tg.showAlert) tg.showAlert('📋 History feature coming soon');
-                else alert('📋 History feature coming soon');
-            };
-        }
-        if (settingsBtn) {
-            settingsBtn.onclick = function () {
-                addDebug('Settings click');
-                if (tg && tg.showAlert) tg.showAlert('⚙️ Settings feature coming soon');
-                else alert('⚙️ Settings feature coming soon');
-            };
+
+        function handleSettings() {
+            addDebug('Settings');
+            showAlert('⚙️ Settings coming soon!');
         }
 
         addDebug('Ready');
