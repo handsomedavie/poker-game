@@ -842,6 +842,116 @@
         @media (orientation: landscape) {
             .rotation-hint { display: none; }
         }
+
+        /* Winner Popup */
+        .winner-popup {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.85);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 300;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .winner-badge {
+            background: linear-gradient(145deg, #1a1a2e, #16213e);
+            border: 3px solid #fbbf24;
+            border-radius: 20px;
+            padding: 30px 50px;
+            text-align: center;
+            box-shadow: 0 0 60px rgba(251,191,36,0.4);
+            animation: scaleIn 0.4s ease;
+        }
+
+        @keyframes scaleIn {
+            from { transform: scale(0.5); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        .winner-icon {
+            font-size: 60px;
+            margin-bottom: 10px;
+        }
+
+        .winner-name {
+            font-size: 24px;
+            font-weight: 700;
+            color: #fbbf24;
+            margin-bottom: 8px;
+        }
+
+        .winner-hand {
+            font-size: 18px;
+            color: #a3e635;
+            margin-bottom: 12px;
+        }
+
+        .winner-amount {
+            font-size: 28px;
+            font-weight: 700;
+            color: #4ade80;
+        }
+
+        /* Player Timer */
+        .player-timer {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: #fbbf24;
+            color: #000;
+            font-size: 10px;
+            font-weight: 700;
+            padding: 2px 6px;
+            border-radius: 10px;
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        /* Player Bet */
+        .player-bet {
+            font-size: 10px;
+            color: #fbbf24;
+            font-weight: 600;
+            margin-top: 2px;
+        }
+
+        /* Disabled buttons */
+        .action-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Device-specific styles */
+        .device-mobile .poker-table {
+            width: 90%;
+            max-width: none;
+        }
+
+        .device-mobile .action-btn {
+            padding: 10px 16px;
+            font-size: 13px;
+        }
+
+        .device-desktop .poker-table {
+            width: 70%;
+            max-width: 500px;
+        }
+
+        .device-desktop .action-btn {
+            padding: 14px 28px;
+            font-size: 16px;
+        }
     </style>
 </head>
 <body>
@@ -1251,22 +1361,196 @@
         }
 
         // ═══════════════════════════════════════════════════
-        // POKER TABLE
+        // DEVICE DETECTION
         // ═══════════════════════════════════════════════════
-        var currentTableName = '';
-        var currentTableBlinds = '';
-        var pot = 0;
-        var demoPlayers = [
-            { name: 'You', chips: 1000, seat: 0, isHero: true },
-            { name: 'Alex', chips: 850, seat: 1 },
-            { name: 'Maria', chips: 1200, seat: 3, isDealer: true },
-            { name: 'John', chips: 650, seat: 4, folded: true },
-            { name: 'Kate', chips: 920, seat: 5 }
-        ];
+        var deviceType = (function() {
+            var ua = navigator.userAgent;
+            var isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(ua);
+            var isTablet = /(tablet|ipad|playbook|silk)|(android(?!.*mobi))/i.test(ua.toLowerCase());
+            var w = window.innerWidth;
+            if (isMobile && w < 768) return 'mobile';
+            if (isTablet || (w >= 768 && w < 1024)) return 'tablet';
+            return 'desktop';
+        })();
+        document.body.classList.add('device-' + deviceType);
+        addDebug('Device: ' + deviceType);
 
+        // ═══════════════════════════════════════════════════
+        // CARD DECK & HAND EVALUATION
+        // ═══════════════════════════════════════════════════
+        var RANKS = ['2','3','4','5','6','7','8','9','10','J','Q','K','A'];
+        var SUITS = ['♥','♦','♣','♠'];
+        var RANK_VALUES = {'2':2,'3':3,'4':4,'5':5,'6':6,'7':7,'8':8,'9':9,'10':10,'J':11,'Q':12,'K':13,'A':14};
+        var RANK_NAMES = {14:'Ace',13:'King',12:'Queen',11:'Jack',10:'Ten',9:'Nine',8:'Eight',7:'Seven',6:'Six',5:'Five',4:'Four',3:'Three',2:'Two'};
+
+        function createDeck() {
+            var deck = [];
+            SUITS.forEach(function(suit) {
+                RANKS.forEach(function(rank) {
+                    deck.push({ rank: rank, suit: suit });
+                });
+            });
+            // Shuffle
+            for (var i = deck.length - 1; i > 0; i--) {
+                var j = Math.floor(Math.random() * (i + 1));
+                var temp = deck[i]; deck[i] = deck[j]; deck[j] = temp;
+            }
+            return deck;
+        }
+
+        function getCardValue(card) { return RANK_VALUES[card.rank] || 0; }
+        function isRed(suit) { return suit === '♥' || suit === '♦'; }
+        function formatCard(card) { return card.rank + card.suit; }
+
+        function evaluateHand(cards) {
+            if (cards.length < 5) return { rank: 0, name: 'Not enough cards', cards: [] };
+            
+            // Get all 5-card combinations
+            var combos = getCombinations(cards, 5);
+            var best = null;
+            
+            combos.forEach(function(combo) {
+                var result = evaluateFiveCards(combo);
+                if (!best || result.rank > best.rank) best = result;
+            });
+            
+            return best || { rank: 0, name: 'High Card', cards: cards.slice(0,5) };
+        }
+
+        function getCombinations(arr, size) {
+            if (size === 1) return arr.map(function(x) { return [x]; });
+            if (size > arr.length) return [];
+            var result = [];
+            for (var i = 0; i <= arr.length - size; i++) {
+                var head = arr[i];
+                var tails = getCombinations(arr.slice(i + 1), size - 1);
+                tails.forEach(function(tail) { result.push([head].concat(tail)); });
+            }
+            return result;
+        }
+
+        function evaluateFiveCards(cards) {
+            var sorted = cards.slice().sort(function(a,b) { return getCardValue(b) - getCardValue(a); });
+            var values = sorted.map(getCardValue);
+            var suits = sorted.map(function(c) { return c.suit; });
+            
+            var isFlush = suits.every(function(s) { return s === suits[0]; });
+            var isStraight = checkStraight(values);
+            var groups = groupByValue(values);
+            var counts = Object.values(groups).sort(function(a,b) { return b - a; });
+            
+            // Royal Flush
+            if (isFlush && isStraight && values[0] === 14 && values[4] === 10) {
+                return { rank: 10, name: 'Royal Flush', cards: sorted };
+            }
+            // Straight Flush
+            if (isFlush && isStraight) {
+                return { rank: 9, name: 'Straight Flush', cards: sorted };
+            }
+            // Four of a Kind
+            if (counts[0] === 4) {
+                return { rank: 8, name: 'Four of a Kind', cards: sorted };
+            }
+            // Full House
+            if (counts[0] === 3 && counts[1] === 2) {
+                return { rank: 7, name: 'Full House', cards: sorted };
+            }
+            // Flush
+            if (isFlush) {
+                return { rank: 6, name: 'Flush', cards: sorted };
+            }
+            // Straight
+            if (isStraight) {
+                return { rank: 5, name: 'Straight', cards: sorted };
+            }
+            // Three of a Kind
+            if (counts[0] === 3) {
+                return { rank: 4, name: 'Three of a Kind', cards: sorted };
+            }
+            // Two Pair
+            if (counts[0] === 2 && counts[1] === 2) {
+                return { rank: 3, name: 'Two Pair', cards: sorted };
+            }
+            // One Pair
+            if (counts[0] === 2) {
+                return { rank: 2, name: 'One Pair', cards: sorted };
+            }
+            // High Card
+            return { rank: 1, name: 'High Card', cards: sorted };
+        }
+
+        function checkStraight(values) {
+            for (var i = 0; i < 4; i++) {
+                if (values[i] - values[i+1] !== 1) {
+                    // Check wheel (A-2-3-4-5)
+                    if (i === 0 && values[0] === 14 && values[1] === 5 && values[2] === 4 && values[3] === 3 && values[4] === 2) {
+                        return true;
+                    }
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        function groupByValue(values) {
+            var groups = {};
+            values.forEach(function(v) { groups[v] = (groups[v] || 0) + 1; });
+            return groups;
+        }
+
+        // ═══════════════════════════════════════════════════
+        // GAME STATE
+        // ═══════════════════════════════════════════════════
+        var gameState = {
+            phase: 'waiting', // waiting, preflop, flop, turn, river, showdown
+            deck: [],
+            communityCards: [],
+            pot: 0,
+            currentBet: 0,
+            smallBlind: 10,
+            bigBlind: 20,
+            dealerSeat: 0,
+            currentPlayerSeat: null,
+            timeRemaining: 30,
+            timerInterval: null,
+            players: [
+                { seat: 0, name: userName || 'You', chips: userBalance, cards: [], bet: 0, status: 'active', isHero: true },
+                { seat: 1, name: 'Alex', chips: 850, cards: [], bet: 0, status: 'active' },
+                { seat: 3, name: 'Maria', chips: 1200, cards: [], bet: 0, status: 'active' },
+                { seat: 4, name: 'John', chips: 950, cards: [], bet: 0, status: 'active' },
+                { seat: 5, name: 'Kate', chips: 720, cards: [], bet: 0, status: 'active' }
+            ]
+        };
+
+        function getPlayer(seat) {
+            return gameState.players.find(function(p) { return p.seat === seat; });
+        }
+
+        function getHero() {
+            return gameState.players.find(function(p) { return p.isHero; });
+        }
+
+        function getActivePlayers() {
+            return gameState.players.filter(function(p) { return p.status === 'active'; });
+        }
+
+        function getNextActiveSeat(currentSeat) {
+            var seats = gameState.players.map(function(p) { return p.seat; }).sort(function(a,b) { return a - b; });
+            var idx = seats.indexOf(currentSeat);
+            for (var i = 1; i <= seats.length; i++) {
+                var nextIdx = (idx + i) % seats.length;
+                var nextSeat = seats[nextIdx];
+                var player = getPlayer(nextSeat);
+                if (player && player.status === 'active') return nextSeat;
+            }
+            return null;
+        }
+
+        // ═══════════════════════════════════════════════════
+        // GAME FLOW
+        // ═══════════════════════════════════════════════════
         function loadPokerTable(tableName) {
             addDebug('Loading: ' + tableName);
-            currentTableName = tableName;
             
             // Find table data
             var tableInfo = null;
@@ -1276,41 +1560,468 @@
                 });
             });
             
-            currentTableBlinds = tableInfo ? tableInfo.blinds : '50/100';
-            pot = 350; // Demo pot
+            // Parse blinds from table info
+            if (tableInfo && tableInfo.blinds) {
+                var blinds = tableInfo.blinds.split('/');
+                gameState.smallBlind = parseInt(blinds[0]) || 10;
+                gameState.bigBlind = parseInt(blinds[1]) || 20;
+            }
             
-            // Update table UI
+            // Update UI
             document.getElementById('tableInfoName').textContent = tableName;
-            document.getElementById('tableInfoBlinds').textContent = 'Blinds: ' + currentTableBlinds;
-            document.getElementById('tablePot').textContent = 'Pot: $' + pot;
+            document.getElementById('tableInfoBlinds').textContent = 'Blinds: ' + gameState.smallBlind + '/' + gameState.bigBlind;
             
-            // Render players
-            renderPlayers();
-            
-            // Render community cards (demo: flop)
-            renderCommunityCards(['A♥', 'K♦', '7♣']);
+            // Reset game state
+            gameState.phase = 'waiting';
+            gameState.pot = 0;
+            gameState.communityCards = [];
+            gameState.players.forEach(function(p) {
+                p.cards = [];
+                p.bet = 0;
+                p.status = 'active';
+            });
             
             // Show table screen
             document.getElementById('lobbyScreen').classList.add('hidden');
             document.getElementById('pokerTableScreen').classList.remove('hidden');
+            
+            // Start first hand after delay
+            setTimeout(startNewHand, 1500);
         }
 
-        function renderPlayers() {
+        function startNewHand() {
+            addDebug('New hand');
+            gameState.phase = 'preflop';
+            gameState.pot = 0;
+            gameState.currentBet = gameState.bigBlind;
+            gameState.communityCards = [];
+            gameState.deck = createDeck();
+            
+            // Reset players
+            gameState.players.forEach(function(p) {
+                p.cards = [];
+                p.bet = 0;
+                if (p.chips > 0) p.status = 'active';
+            });
+            
+            // Rotate dealer
+            gameState.dealerSeat = getNextActiveSeat(gameState.dealerSeat) || 0;
+            
+            // Post blinds
+            var sbSeat = getNextActiveSeat(gameState.dealerSeat);
+            var bbSeat = getNextActiveSeat(sbSeat);
+            
+            var sbPlayer = getPlayer(sbSeat);
+            var bbPlayer = getPlayer(bbSeat);
+            
+            if (sbPlayer) {
+                var sbAmount = Math.min(gameState.smallBlind, sbPlayer.chips);
+                sbPlayer.chips -= sbAmount;
+                sbPlayer.bet = sbAmount;
+                gameState.pot += sbAmount;
+            }
+            
+            if (bbPlayer) {
+                var bbAmount = Math.min(gameState.bigBlind, bbPlayer.chips);
+                bbPlayer.chips -= bbAmount;
+                bbPlayer.bet = bbAmount;
+                gameState.pot += bbAmount;
+            }
+            
+            // Deal cards
+            dealPlayerCards();
+            
+            // First to act is after BB
+            gameState.currentPlayerSeat = getNextActiveSeat(bbSeat);
+            
+            // Update UI
+            updateGameUI();
+            updatePhaseDisplay();
+            
+            // Start timer if not hero's turn
+            startTurnTimer();
+        }
+
+        function dealPlayerCards() {
+            gameState.players.forEach(function(p) {
+                if (p.status === 'active' && gameState.deck.length >= 2) {
+                    p.cards = [gameState.deck.pop(), gameState.deck.pop()];
+                }
+            });
+            
+            // Update hero cards display
+            var hero = getHero();
+            if (hero && hero.cards.length === 2) {
+                var heroCardsEl = document.getElementById('heroCards');
+                heroCardsEl.innerHTML = hero.cards.map(function(card) {
+                    return '<div class="hero-card ' + (isRed(card.suit) ? 'red' : 'black') + '">' +
+                        '<span class="card-rank">' + card.rank + '</span>' +
+                        '<span class="card-suit">' + card.suit + '</span>' +
+                    '</div>';
+                }).join('');
+            }
+        }
+
+        function advancePhase() {
+            clearInterval(gameState.timerInterval);
+            
+            // Reset bets for new round
+            gameState.players.forEach(function(p) { p.bet = 0; });
+            gameState.currentBet = 0;
+            
+            switch(gameState.phase) {
+                case 'preflop':
+                    dealFlop();
+                    break;
+                case 'flop':
+                    dealTurn();
+                    break;
+                case 'turn':
+                    dealRiver();
+                    break;
+                case 'river':
+                    showdown();
+                    break;
+            }
+        }
+
+        function dealFlop() {
+            gameState.phase = 'flop';
+            addDebug('Dealing flop');
+            
+            // Burn one, deal three
+            gameState.deck.pop();
+            for (var i = 0; i < 3; i++) {
+                gameState.communityCards.push(gameState.deck.pop());
+            }
+            
+            updateCommunityCards();
+            updatePhaseDisplay();
+            startBettingRound();
+        }
+
+        function dealTurn() {
+            gameState.phase = 'turn';
+            addDebug('Dealing turn');
+            
+            gameState.deck.pop();
+            gameState.communityCards.push(gameState.deck.pop());
+            
+            updateCommunityCards();
+            updatePhaseDisplay();
+            startBettingRound();
+        }
+
+        function dealRiver() {
+            gameState.phase = 'river';
+            addDebug('Dealing river');
+            
+            gameState.deck.pop();
+            gameState.communityCards.push(gameState.deck.pop());
+            
+            updateCommunityCards();
+            updatePhaseDisplay();
+            startBettingRound();
+        }
+
+        function startBettingRound() {
+            // First to act after dealer
+            gameState.currentPlayerSeat = getNextActiveSeat(gameState.dealerSeat);
+            updateGameUI();
+            startTurnTimer();
+        }
+
+        function showdown() {
+            gameState.phase = 'showdown';
+            addDebug('Showdown!');
+            updatePhaseDisplay();
+            
+            var activePlayers = getActivePlayers();
+            
+            if (activePlayers.length === 1) {
+                // Everyone else folded
+                declareWinner(activePlayers[0], 'Last player standing');
+                return;
+            }
+            
+            // Evaluate hands
+            var results = activePlayers.map(function(player) {
+                var allCards = player.cards.concat(gameState.communityCards);
+                var hand = evaluateHand(allCards);
+                return { player: player, hand: hand };
+            });
+            
+            // Sort by hand rank
+            results.sort(function(a, b) { return b.hand.rank - a.hand.rank; });
+            
+            var winner = results[0].player;
+            var handName = results[0].hand.name;
+            
+            declareWinner(winner, handName);
+        }
+
+        function declareWinner(winner, handName) {
+            addDebug('Winner: ' + winner.name + ' - ' + handName);
+            
+            // Award pot
+            winner.chips += gameState.pot;
+            
+            // Show winner animation
+            showWinnerPopup(winner, handName, gameState.pot);
+            
+            // Update balance if hero won
+            if (winner.isHero) {
+                userBalance = winner.chips;
+                updateBalanceUI();
+            }
+            
+            // Start new hand after delay
+            setTimeout(function() {
+                hideWinnerPopup();
+                startNewHand();
+            }, 5000);
+        }
+
+        // ═══════════════════════════════════════════════════
+        // TIMER SYSTEM
+        // ═══════════════════════════════════════════════════
+        function startTurnTimer() {
+            gameState.timeRemaining = 30;
+            updateTimerDisplay();
+            
+            clearInterval(gameState.timerInterval);
+            gameState.timerInterval = setInterval(function() {
+                gameState.timeRemaining--;
+                updateTimerDisplay();
+                
+                if (gameState.timeRemaining <= 0) {
+                    // Auto-action on timeout
+                    var currentPlayer = getPlayer(gameState.currentPlayerSeat);
+                    if (currentPlayer) {
+                        if (currentPlayer.isHero) {
+                            playerAction('fold'); // Auto-fold hero
+                        } else {
+                            aiAction(currentPlayer); // AI decides
+                        }
+                    }
+                }
+            }, 1000);
+            
+            // If not hero's turn, trigger AI action
+            var currentPlayer = getPlayer(gameState.currentPlayerSeat);
+            if (currentPlayer && !currentPlayer.isHero) {
+                setTimeout(function() {
+                    aiAction(currentPlayer);
+                }, 1500 + Math.random() * 2000); // Random delay 1.5-3.5s
+            }
+        }
+
+        function aiAction(player) {
+            if (gameState.currentPlayerSeat !== player.seat) return;
+            
+            var callAmount = gameState.currentBet - player.bet;
+            var random = Math.random();
+            
+            // Simple AI: 30% fold, 50% call, 20% raise
+            if (callAmount > player.chips * 0.5 || random < 0.15) {
+                // Fold if bet is too high or random fold
+                doPlayerFold(player);
+            } else if (random < 0.8) {
+                // Call
+                doPlayerCall(player);
+            } else {
+                // Raise
+                var raiseAmount = gameState.currentBet + gameState.bigBlind * 2;
+                doPlayerRaise(player, raiseAmount);
+            }
+        }
+
+        // ═══════════════════════════════════════════════════
+        // PLAYER ACTIONS
+        // ═══════════════════════════════════════════════════
+        function playerAction(action) {
+            var hero = getHero();
+            if (!hero || gameState.currentPlayerSeat !== hero.seat) {
+                addDebug('Not your turn!');
+                return;
+            }
+            
+            addDebug('Action: ' + action);
+            
+            switch(action) {
+                case 'fold':
+                    doPlayerFold(hero);
+                    break;
+                case 'call':
+                    doPlayerCall(hero);
+                    break;
+                case 'raise':
+                    var raiseAmount = gameState.currentBet + gameState.bigBlind * 2;
+                    doPlayerRaise(hero, raiseAmount);
+                    break;
+            }
+        }
+
+        function doPlayerFold(player) {
+            player.status = 'folded';
+            addDebug(player.name + ' folds');
+            advanceToNextPlayer();
+        }
+
+        function doPlayerCall(player) {
+            var callAmount = Math.min(gameState.currentBet - player.bet, player.chips);
+            
+            if (callAmount === 0) {
+                addDebug(player.name + ' checks');
+            } else {
+                player.chips -= callAmount;
+                player.bet += callAmount;
+                gameState.pot += callAmount;
+                addDebug(player.name + ' calls $' + callAmount);
+            }
+            
+            updateGameUI();
+            advanceToNextPlayer();
+        }
+
+        function doPlayerRaise(player, totalBet) {
+            var raiseAmount = Math.min(totalBet - player.bet, player.chips);
+            
+            player.chips -= raiseAmount;
+            player.bet += raiseAmount;
+            gameState.pot += raiseAmount;
+            gameState.currentBet = player.bet;
+            
+            addDebug(player.name + ' raises to $' + player.bet);
+            
+            updateGameUI();
+            advanceToNextPlayer();
+        }
+
+        function advanceToNextPlayer() {
+            clearInterval(gameState.timerInterval);
+            
+            // Check if only one player left
+            var activePlayers = getActivePlayers();
+            if (activePlayers.length <= 1) {
+                showdown();
+                return;
+            }
+            
+            // Check if betting round is complete
+            if (isBettingRoundComplete()) {
+                advancePhase();
+                return;
+            }
+            
+            // Next player
+            gameState.currentPlayerSeat = getNextActiveSeat(gameState.currentPlayerSeat);
+            updateGameUI();
+            startTurnTimer();
+        }
+
+        function isBettingRoundComplete() {
+            var activePlayers = getActivePlayers();
+            return activePlayers.every(function(p) {
+                return p.bet === gameState.currentBet || p.chips === 0;
+            });
+        }
+
+        // ═══════════════════════════════════════════════════
+        // UI UPDATES
+        // ═══════════════════════════════════════════════════
+        function updateGameUI() {
+            // Update pot
+            document.getElementById('tablePot').textContent = 'Pot: $' + gameState.pot;
+            
+            // Update players
+            renderPlayersOnTable();
+            
+            // Update action buttons
+            updateActionButtons();
+        }
+
+        function updatePhaseDisplay() {
+            var phaseNames = {
+                'waiting': 'Waiting...',
+                'preflop': 'PRE-FLOP',
+                'flop': 'FLOP',
+                'turn': 'TURN',
+                'river': 'RIVER',
+                'showdown': 'SHOWDOWN'
+            };
+            
+            var phaseEl = document.getElementById('tableInfoBlinds');
+            if (phaseEl) {
+                phaseEl.textContent = phaseNames[gameState.phase] || gameState.phase;
+            }
+        }
+
+        function updateTimerDisplay() {
+            var currentPlayer = getPlayer(gameState.currentPlayerSeat);
+            if (!currentPlayer) return;
+            
+            // Visual indicator on active player
+            renderPlayersOnTable();
+        }
+
+        function updateCommunityCards() {
+            var container = document.getElementById('communityCards');
+            var html = '';
+            
+            gameState.communityCards.forEach(function(card) {
+                html += '<div class="card ' + (isRed(card.suit) ? 'red' : 'black') + '">' +
+                    '<span class="card-rank">' + card.rank + '</span>' +
+                    '<span class="card-suit">' + card.suit + '</span>' +
+                '</div>';
+            });
+            
+            // Hidden cards for remaining slots
+            for (var i = gameState.communityCards.length; i < 5; i++) {
+                html += '<div class="card hidden"></div>';
+            }
+            
+            container.innerHTML = html;
+        }
+
+        function updateActionButtons() {
+            var hero = getHero();
+            var isMyTurn = hero && gameState.currentPlayerSeat === hero.seat;
+            var callAmount = gameState.currentBet - (hero ? hero.bet : 0);
+            
+            var buttonsEl = document.getElementById('actionButtons');
+            var callText = callAmount > 0 ? 'Call $' + callAmount : 'Check';
+            var raiseAmount = gameState.currentBet + gameState.bigBlind * 2;
+            
+            buttonsEl.innerHTML = 
+                '<button class="action-btn fold" onclick="playerAction(\'fold\')" ' + (!isMyTurn ? 'disabled' : '') + '>Fold</button>' +
+                '<button class="action-btn call" onclick="playerAction(\'call\')" ' + (!isMyTurn ? 'disabled' : '') + '>' + callText + '</button>' +
+                '<button class="action-btn raise" onclick="playerAction(\'raise\')" ' + (!isMyTurn ? 'disabled' : '') + '>Raise $' + raiseAmount + '</button>';
+        }
+
+        function renderPlayersOnTable() {
             var container = document.getElementById('playerSeats');
             var html = '';
             
-            demoPlayers.forEach(function(player) {
-                if (player.isHero) return; // Hero is rendered separately
+            gameState.players.forEach(function(player) {
+                if (player.isHero) return;
                 
                 var avatarClass = 'player-avatar';
-                if (player.folded) avatarClass += ' folded';
-                if (player.isDealer) avatarClass += ' dealer';
-                if (player.isActive) avatarClass += ' active';
+                if (player.status === 'folded') avatarClass += ' folded';
+                if (player.seat === gameState.dealerSeat) avatarClass += ' dealer';
+                if (player.seat === gameState.currentPlayerSeat) avatarClass += ' active';
+                
+                var timerHtml = '';
+                if (player.seat === gameState.currentPlayerSeat) {
+                    timerHtml = '<div class="player-timer">' + gameState.timeRemaining + 's</div>';
+                }
                 
                 html += '<div class="player-seat seat-' + player.seat + '">' +
                     '<div class="' + avatarClass + '">' + player.name.charAt(0) + '</div>' +
                     '<div class="player-name">' + player.name + '</div>' +
                     '<div class="player-chips">$' + player.chips + '</div>' +
+                    (player.bet > 0 ? '<div class="player-bet">$' + player.bet + '</div>' : '') +
+                    timerHtml +
                     '<div class="player-cards"><div class="player-card"></div><div class="player-card"></div></div>' +
                 '</div>';
             });
@@ -1318,48 +2029,29 @@
             container.innerHTML = html;
         }
 
-        function renderCommunityCards(cards) {
-            var container = document.getElementById('communityCards');
-            var html = '';
-            
-            cards.forEach(function(card) {
-                var rank = card.slice(0, -1);
-                var suit = card.slice(-1);
-                var isRed = suit === '♥' || suit === '♦';
-                
-                html += '<div class="card ' + (isRed ? 'red' : 'black') + '">' +
-                    '<span class="card-rank">' + rank + '</span>' +
-                    '<span class="card-suit">' + suit + '</span>' +
+        function showWinnerPopup(winner, handName, amount) {
+            var popup = document.createElement('div');
+            popup.id = 'winnerPopup';
+            popup.className = 'winner-popup';
+            popup.innerHTML = 
+                '<div class="winner-badge">' +
+                    '<div class="winner-icon">🏆</div>' +
+                    '<div class="winner-name">' + winner.name + ' wins!</div>' +
+                    '<div class="winner-hand">' + handName + '</div>' +
+                    '<div class="winner-amount">+$' + amount + '</div>' +
                 '</div>';
-            });
-            
-            // Add hidden cards for remaining
-            for (var i = cards.length; i < 5; i++) {
-                html += '<div class="card hidden"></div>';
-            }
-            
-            container.innerHTML = html;
+            document.body.appendChild(popup);
         }
 
-        function playerAction(action) {
-            addDebug('Action: ' + action);
-            
-            if (action === 'fold') {
-                showAlert('You folded. Better luck next hand!');
-                // In real game: send fold to server
-            } else if (action === 'call') {
-                showAlert('You called $100!');
-                pot += 100;
-                document.getElementById('tablePot').textContent = 'Pot: $' + pot;
-            } else if (action === 'raise') {
-                showAlert('Raise to $200!');
-                pot += 200;
-                document.getElementById('tablePot').textContent = 'Pot: $' + pot;
-            }
+        function hideWinnerPopup() {
+            var popup = document.getElementById('winnerPopup');
+            if (popup) popup.remove();
         }
 
         function leaveTable() {
             addDebug('Leave table');
+            clearInterval(gameState.timerInterval);
+            gameState.phase = 'waiting';
             document.getElementById('pokerTableScreen').classList.add('hidden');
             document.getElementById('lobbyScreen').classList.remove('hidden');
         }
