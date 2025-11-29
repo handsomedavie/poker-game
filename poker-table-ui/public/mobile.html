@@ -109,32 +109,30 @@
 
         .profile-bar {
             display: flex;
-            align-items: stretch;
             background: linear-gradient(135deg, #111827 0%, #0a0f18 100%);
             border: 1px solid #1e293b;
             border-radius: 18px;
-            padding: 14px 16px;
-            margin-bottom: 16px;
-            min-height: 88px;
+            padding: 12px;
+            margin-bottom: 14px;
+            gap: 12px;
         }
 
         .profile-left {
             display: flex;
             align-items: center;
             gap: 10px;
-            flex: 0 0 auto;
-            padding-right: 14px;
-            border-right: 1px solid #1e293b;
+            flex: 1;
+            min-width: 0;
         }
 
         .profile-avatar {
-            width: 52px; height: 52px;
+            width: 48px; height: 48px;
             border-radius: 50%;
             background: linear-gradient(135deg, #fb923c, #f97316);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 24px;
+            font-size: 22px;
             font-weight: 700;
             color: #fefce8;
             border: 2px solid #fed7aa;
@@ -149,55 +147,42 @@
         }
 
         .profile-name {
-            font-size: 15px;
+            font-size: 14px;
             font-weight: 600;
             color: #e5e7eb;
-            line-height: 1.2;
+            line-height: 1.3;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         .profile-handle {
-            font-size: 12px;
+            font-size: 11px;
             color: #64748b;
             line-height: 1.2;
         }
 
-        .profile-center {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 0 12px;
-        }
-
-        .profile-balance-label {
-            font-size: 10px;
-            color: #64748b;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .profile-balance-amount {
-            font-size: 20px;
+        .profile-balance {
+            font-size: 18px;
             font-weight: 700;
             color: #4ade80;
+            margin-top: 2px;
         }
 
         .profile-right {
-            display: flex;
-            align-items: center;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
             gap: 6px;
-            padding-left: 14px;
-            border-left: 1px solid #1e293b;
+            flex-shrink: 0;
         }
 
         .profile-action-btn {
-            width: 38px; height: 38px;
-            border-radius: 10px;
+            width: 42px; height: 42px;
+            border-radius: 12px;
             border: none;
             background: #1e293b;
             color: #e5e7eb;
-            font-size: 17px;
+            font-size: 18px;
             cursor: pointer;
             display: flex;
             align-items: center;
@@ -207,7 +192,7 @@
         }
 
         .profile-action-btn:active {
-            transform: scale(0.95);
+            transform: scale(0.93);
             background: #334155;
         }
 
@@ -548,6 +533,315 @@
             text-align: center;
             pointer-events: none;
         }
+
+        /* ═══════════════════════════════════════════════════
+           POKER TABLE SCREEN STYLES
+           ═══════════════════════════════════════════════════ */
+        #pokerTableScreen {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: radial-gradient(ellipse at center, #0d4a2a 0%, #052e19 50%, #021a0e 100%);
+            z-index: 100;
+        }
+
+        .table-header {
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 16px;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.6), transparent);
+            z-index: 10;
+        }
+
+        .table-back-btn {
+            width: 40px; height: 40px;
+            border-radius: 50%;
+            border: none;
+            background: rgba(0,0,0,0.5);
+            color: #fff;
+            font-size: 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .table-info {
+            text-align: center;
+        }
+
+        .table-info-name {
+            font-size: 14px;
+            font-weight: 600;
+            color: #fff;
+        }
+
+        .table-info-blinds {
+            font-size: 11px;
+            color: #a3e635;
+        }
+
+        .table-pot {
+            background: rgba(0,0,0,0.5);
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+            color: #fbbf24;
+        }
+
+        /* Poker Table */
+        .poker-table {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            width: 85%;
+            max-width: 400px;
+            aspect-ratio: 1.6;
+            background: linear-gradient(145deg, #166534 0%, #14532d 50%, #052e19 100%);
+            border-radius: 50%;
+            border: 8px solid #854d0e;
+            box-shadow: 
+                0 0 0 4px #a16207,
+                0 0 40px rgba(0,0,0,0.5),
+                inset 0 0 60px rgba(0,0,0,0.3);
+        }
+
+        .table-felt {
+            position: absolute;
+            top: 12px; left: 12px; right: 12px; bottom: 12px;
+            border: 2px solid rgba(255,255,255,0.1);
+            border-radius: 50%;
+        }
+
+        /* Community Cards */
+        .community-cards {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            display: flex;
+            gap: 6px;
+        }
+
+        .card {
+            width: 42px; height: 60px;
+            background: #fff;
+            border-radius: 6px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+        }
+
+        .card.red { color: #dc2626; }
+        .card.black { color: #1f2937; }
+
+        .card-rank { font-size: 16px; line-height: 1; }
+        .card-suit { font-size: 18px; line-height: 1; }
+
+        .card.hidden {
+            background: linear-gradient(135deg, #1e40af, #1e3a8a);
+            color: transparent;
+        }
+
+        .card.hidden::after {
+            content: '🂠';
+            font-size: 28px;
+            color: #fff;
+        }
+
+        /* Player Seats */
+        .player-seat {
+            position: absolute;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transform: translate(-50%, -50%);
+        }
+
+        .player-avatar {
+            width: 44px; height: 44px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            border: 3px solid #60a5fa;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            font-weight: 700;
+            color: #fff;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+        }
+
+        .player-avatar.active {
+            border-color: #fbbf24;
+            box-shadow: 0 0 20px rgba(251,191,36,0.5);
+        }
+
+        .player-avatar.folded {
+            opacity: 0.4;
+            filter: grayscale(1);
+        }
+
+        .player-avatar.dealer::after {
+            content: 'D';
+            position: absolute;
+            top: -6px; right: -6px;
+            width: 18px; height: 18px;
+            background: #fbbf24;
+            border-radius: 50%;
+            font-size: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #000;
+            font-weight: 700;
+        }
+
+        .player-name {
+            font-size: 11px;
+            color: #fff;
+            margin-top: 4px;
+            text-shadow: 0 1px 3px rgba(0,0,0,0.8);
+        }
+
+        .player-chips {
+            font-size: 10px;
+            color: #a3e635;
+            font-weight: 600;
+        }
+
+        .player-cards {
+            display: flex;
+            gap: 2px;
+            margin-top: 4px;
+        }
+
+        .player-card {
+            width: 26px; height: 38px;
+            background: linear-gradient(135deg, #1e40af, #1e3a8a);
+            border-radius: 4px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+        }
+
+        /* Player positions */
+        .seat-0 { top: 85%; left: 50%; } /* Bottom (hero) */
+        .seat-1 { top: 70%; left: 15%; }
+        .seat-2 { top: 35%; left: 8%; }
+        .seat-3 { top: 10%; left: 30%; }
+        .seat-4 { top: 10%; left: 70%; }
+        .seat-5 { top: 35%; left: 92%; }
+        .seat-6 { top: 70%; left: 85%; }
+
+        /* Hero Section (bottom) */
+        .hero-section {
+            position: absolute;
+            bottom: 0; left: 0; right: 0;
+            padding: 16px;
+            background: linear-gradient(to top, rgba(0,0,0,0.9), transparent);
+        }
+
+        .hero-cards {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .hero-card {
+            width: 52px; height: 76px;
+            background: #fff;
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.5);
+        }
+
+        .hero-card .card-rank { font-size: 22px; }
+        .hero-card .card-suit { font-size: 24px; }
+
+        /* Action Buttons */
+        .action-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .action-btn {
+            padding: 12px 24px;
+            border-radius: 25px;
+            border: none;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            -webkit-tap-highlight-color: transparent;
+            transition: transform 0.15s;
+        }
+
+        .action-btn:active {
+            transform: scale(0.95);
+        }
+
+        .action-btn.fold {
+            background: linear-gradient(135deg, #6b7280, #4b5563);
+            color: #fff;
+        }
+
+        .action-btn.call {
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            color: #fff;
+        }
+
+        .action-btn.raise {
+            background: linear-gradient(135deg, #22c55e, #16a34a);
+            color: #fff;
+        }
+
+        .action-btn.allin {
+            background: linear-gradient(135deg, #dc2626, #b91c1c);
+            color: #fff;
+        }
+
+        /* Rotation hint overlay */
+        .rotation-hint {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.95);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 200;
+        }
+
+        .rotation-icon {
+            font-size: 60px;
+            animation: rotateHint 2s ease-in-out infinite;
+        }
+
+        @keyframes rotateHint {
+            0%, 100% { transform: rotate(0deg); }
+            25% { transform: rotate(-20deg); }
+            75% { transform: rotate(20deg); }
+        }
+
+        .rotation-text {
+            font-size: 18px;
+            color: #fff;
+            margin-top: 16px;
+            text-align: center;
+        }
+
+        @media (orientation: landscape) {
+            .rotation-hint { display: none; }
+        }
     </style>
 </head>
 <body>
@@ -568,18 +862,15 @@
          SCREEN 2: MAIN MENU
          ═══════════════════════════════════════════════════ -->
     <div id="mainMenu" class="hidden">
-        <!-- Horizontal Profile Bar -->
+        <!-- Profile Bar: Avatar+Info | 2x2 Buttons -->
         <div class="profile-bar">
             <div class="profile-left">
                 <div class="profile-avatar" id="menuAvatar">P</div>
                 <div class="profile-info">
                     <div class="profile-name" id="menuName">Player</div>
                     <div class="profile-handle" id="menuHandle"></div>
+                    <div class="profile-balance" id="menuBalance">$1,000</div>
                 </div>
-            </div>
-            <div class="profile-center">
-                <div class="profile-balance-label">Balance</div>
-                <div class="profile-balance-amount" id="menuBalance">$1,000</div>
             </div>
             <div class="profile-right">
                 <button class="profile-action-btn primary" onclick="handleDeposit()" title="Deposit">💳</button>
@@ -672,6 +963,61 @@
                         <div class="stat-label">Win Rate</div>
                     </div>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════
+         SCREEN 4: POKER TABLE
+         ═══════════════════════════════════════════════════ -->
+    <div id="pokerTableScreen" class="hidden">
+        <!-- Rotation hint for portrait mode -->
+        <div class="rotation-hint" id="rotationHint">
+            <div class="rotation-icon">📱🔄</div>
+            <div class="rotation-text">Rotate your device<br>for the best experience</div>
+        </div>
+
+        <!-- Table Header -->
+        <div class="table-header">
+            <button class="table-back-btn" onclick="leaveTable()">←</button>
+            <div class="table-info">
+                <div class="table-info-name" id="tableInfoName">Daily Freeroll</div>
+                <div class="table-info-blinds" id="tableInfoBlinds">Blinds: 50/100</div>
+            </div>
+            <div class="table-pot" id="tablePot">Pot: $0</div>
+        </div>
+
+        <!-- Poker Table -->
+        <div class="poker-table">
+            <div class="table-felt"></div>
+            
+            <!-- Community Cards -->
+            <div class="community-cards" id="communityCards">
+                <!-- Cards will be rendered here -->
+            </div>
+
+            <!-- Player Seats -->
+            <div id="playerSeats">
+                <!-- Players will be rendered here -->
+            </div>
+        </div>
+
+        <!-- Hero Section -->
+        <div class="hero-section">
+            <div class="hero-cards" id="heroCards">
+                <div class="hero-card red">
+                    <span class="card-rank">A</span>
+                    <span class="card-suit">♥</span>
+                </div>
+                <div class="hero-card black">
+                    <span class="card-rank">K</span>
+                    <span class="card-suit">♠</span>
+                </div>
+            </div>
+            <div class="action-buttons" id="actionButtons">
+                <button class="action-btn fold" onclick="playerAction('fold')">Fold</button>
+                <button class="action-btn call" onclick="playerAction('call')">Call $100</button>
+                <button class="action-btn raise" onclick="playerAction('raise')">Raise</button>
             </div>
         </div>
     </div>
@@ -904,11 +1250,118 @@
             }
         }
 
+        // ═══════════════════════════════════════════════════
+        // POKER TABLE
+        // ═══════════════════════════════════════════════════
+        var currentTableName = '';
+        var currentTableBlinds = '';
+        var pot = 0;
+        var demoPlayers = [
+            { name: 'You', chips: 1000, seat: 0, isHero: true },
+            { name: 'Alex', chips: 850, seat: 1 },
+            { name: 'Maria', chips: 1200, seat: 3, isDealer: true },
+            { name: 'John', chips: 650, seat: 4, folded: true },
+            { name: 'Kate', chips: 920, seat: 5 }
+        ];
+
         function loadPokerTable(tableName) {
-            addDebug('Loading table: ' + tableName);
-            // TODO: Navigate to actual poker table
-            // For now, show coming soon message
-            showAlert('🎮 Table "' + tableName + '" loading...\n\nPoker table feature coming soon!');
+            addDebug('Loading: ' + tableName);
+            currentTableName = tableName;
+            
+            // Find table data
+            var tableInfo = null;
+            Object.keys(tablesData).forEach(function(mode) {
+                tablesData[mode].forEach(function(t) {
+                    if (t.name === tableName) tableInfo = t;
+                });
+            });
+            
+            currentTableBlinds = tableInfo ? tableInfo.blinds : '50/100';
+            pot = 350; // Demo pot
+            
+            // Update table UI
+            document.getElementById('tableInfoName').textContent = tableName;
+            document.getElementById('tableInfoBlinds').textContent = 'Blinds: ' + currentTableBlinds;
+            document.getElementById('tablePot').textContent = 'Pot: $' + pot;
+            
+            // Render players
+            renderPlayers();
+            
+            // Render community cards (demo: flop)
+            renderCommunityCards(['A♥', 'K♦', '7♣']);
+            
+            // Show table screen
+            document.getElementById('lobbyScreen').classList.add('hidden');
+            document.getElementById('pokerTableScreen').classList.remove('hidden');
+        }
+
+        function renderPlayers() {
+            var container = document.getElementById('playerSeats');
+            var html = '';
+            
+            demoPlayers.forEach(function(player) {
+                if (player.isHero) return; // Hero is rendered separately
+                
+                var avatarClass = 'player-avatar';
+                if (player.folded) avatarClass += ' folded';
+                if (player.isDealer) avatarClass += ' dealer';
+                if (player.isActive) avatarClass += ' active';
+                
+                html += '<div class="player-seat seat-' + player.seat + '">' +
+                    '<div class="' + avatarClass + '">' + player.name.charAt(0) + '</div>' +
+                    '<div class="player-name">' + player.name + '</div>' +
+                    '<div class="player-chips">$' + player.chips + '</div>' +
+                    '<div class="player-cards"><div class="player-card"></div><div class="player-card"></div></div>' +
+                '</div>';
+            });
+            
+            container.innerHTML = html;
+        }
+
+        function renderCommunityCards(cards) {
+            var container = document.getElementById('communityCards');
+            var html = '';
+            
+            cards.forEach(function(card) {
+                var rank = card.slice(0, -1);
+                var suit = card.slice(-1);
+                var isRed = suit === '♥' || suit === '♦';
+                
+                html += '<div class="card ' + (isRed ? 'red' : 'black') + '">' +
+                    '<span class="card-rank">' + rank + '</span>' +
+                    '<span class="card-suit">' + suit + '</span>' +
+                '</div>';
+            });
+            
+            // Add hidden cards for remaining
+            for (var i = cards.length; i < 5; i++) {
+                html += '<div class="card hidden"></div>';
+            }
+            
+            container.innerHTML = html;
+        }
+
+        function playerAction(action) {
+            addDebug('Action: ' + action);
+            
+            if (action === 'fold') {
+                showAlert('You folded. Better luck next hand!');
+                // In real game: send fold to server
+            } else if (action === 'call') {
+                showAlert('You called $100!');
+                pot += 100;
+                document.getElementById('tablePot').textContent = 'Pot: $' + pot;
+            } else if (action === 'raise') {
+                showAlert('Raise to $200!');
+                pot += 200;
+                document.getElementById('tablePot').textContent = 'Pot: $' + pot;
+            }
+        }
+
+        function leaveTable() {
+            addDebug('Leave table');
+            document.getElementById('pokerTableScreen').classList.add('hidden');
+            document.getElementById('lobbyScreen').classList.remove('hidden');
         }
 
         // ═══════════════════════════════════════════════════
