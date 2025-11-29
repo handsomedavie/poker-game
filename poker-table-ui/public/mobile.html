@@ -2,7 +2,10 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>Poker House</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
@@ -619,39 +622,143 @@
         /* Community Cards */
         .community-cards {
             position: absolute;
-            top: 50%; left: 50%;
+            top: 45%; left: 50%;
             transform: translate(-50%, -50%);
             display: flex;
-            gap: 6px;
+            gap: 8px;
+            z-index: 20;
         }
 
+        /* CARDS - FULLY VISIBLE, NO TRANSPARENCY */
         .card {
-            width: 42px; height: 60px;
-            background: #fff;
-            border-radius: 6px;
+            width: 52px; height: 74px;
+            background: #ffffff !important;
+            border-radius: 8px;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             font-weight: 700;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+            box-shadow: 0 4px 16px rgba(0,0,0,0.5);
+            border: 2px solid #1f2937;
+            opacity: 1 !important;
+            filter: none !important;
         }
 
-        .card.red { color: #dc2626; }
-        .card.black { color: #1f2937; }
+        .card.red { color: #dc2626 !important; }
+        .card.black { color: #000000 !important; }
 
-        .card-rank { font-size: 16px; line-height: 1; }
-        .card-suit { font-size: 18px; line-height: 1; }
+        .card-rank { font-size: 20px; line-height: 1; }
+        .card-suit { font-size: 22px; line-height: 1; }
 
+        /* Hidden cards (back side) */
         .card.hidden {
-            background: linear-gradient(135deg, #1e40af, #1e3a8a);
-            color: transparent;
+            background: linear-gradient(135deg, #1e40af, #1e3a8a) !important;
+            color: transparent !important;
+            opacity: 1 !important;
+            border: 2px solid #3b82f6;
         }
 
         .card.hidden::after {
             content: '🂠';
-            font-size: 28px;
+            font-size: 32px;
             color: #fff;
+        }
+
+        /* ═══════ MOBILE LANDSCAPE OPTIMIZATION ═══════ */
+        @media (max-width: 926px) and (orientation: landscape) {
+            .poker-table {
+                width: 92vw !important;
+                height: 58vh !important;
+                max-width: none;
+                margin: 1vh auto;
+            }
+
+            .community-cards {
+                gap: 10px;
+            }
+
+            .community-cards .card {
+                width: 60px !important;
+                height: 84px !important;
+            }
+
+            .community-cards .card .card-rank {
+                font-size: 24px !important;
+            }
+
+            .community-cards .card .card-suit {
+                font-size: 26px !important;
+            }
+
+            .hero-card {
+                width: 58px !important;
+                height: 82px !important;
+            }
+
+            .hero-card .card-rank {
+                font-size: 26px !important;
+            }
+
+            .hero-card .card-suit {
+                font-size: 28px !important;
+            }
+
+            .betting-controls {
+                padding: 10px 12px;
+            }
+
+            .action-btn {
+                min-height: 48px;
+                font-size: 12px;
+                padding: 0 14px;
+            }
+
+            .bet-slider {
+                min-width: 100px;
+            }
+
+            .quick-bets {
+                gap: 4px;
+            }
+
+            .quick-bet-btn {
+                padding: 4px 8px;
+                font-size: 10px;
+            }
+
+            .player-seat {
+                transform: translate(-50%, -50%) scale(0.9);
+            }
+
+            .pot-center {
+                padding: 6px 14px;
+            }
+
+            .pot-amount {
+                font-size: 16px;
+            }
+        }
+
+        /* LARGER SCREENS LANDSCAPE */
+        @media (min-width: 927px) and (orientation: landscape) {
+            .poker-table {
+                width: 85vw;
+                height: 60vh;
+            }
+
+            .community-cards .card {
+                width: 70px;
+                height: 98px;
+            }
+
+            .community-cards .card .card-rank {
+                font-size: 28px;
+            }
+
+            .community-cards .card .card-suit {
+                font-size: 30px;
+            }
         }
 
         /* Player Seats */
@@ -748,24 +855,31 @@
         .hero-cards {
             display: flex;
             justify-content: center;
-            gap: 8px;
+            gap: 10px;
             margin-bottom: 12px;
         }
 
+        /* HERO CARDS - FULLY VISIBLE, HIGH CONTRAST */
         .hero-card {
-            width: 52px; height: 76px;
-            background: #fff;
-            border-radius: 8px;
+            width: 58px; height: 82px;
+            background: #ffffff !important;
+            border-radius: 10px;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             font-weight: 700;
-            box-shadow: 0 6px 20px rgba(0,0,0,0.5);
+            box-shadow: 0 6px 24px rgba(0,0,0,0.6), 0 0 0 3px rgba(59,130,246,0.4);
+            border: 3px solid #3b82f6;
+            opacity: 1 !important;
+            filter: none !important;
         }
 
-        .hero-card .card-rank { font-size: 22px; }
-        .hero-card .card-suit { font-size: 24px; }
+        .hero-card.red { color: #dc2626 !important; }
+        .hero-card.black { color: #000000 !important; }
+
+        .hero-card .card-rank { font-size: 26px; line-height: 1; }
+        .hero-card .card-suit { font-size: 28px; line-height: 1; }
 
         /* ═══════ BETTING CONTROLS (ported from React) ═══════ */
         .betting-controls {
@@ -1953,6 +2067,26 @@
             // Show table screen
             document.getElementById('lobbyScreen').classList.add('hidden');
             document.getElementById('pokerTableScreen').classList.remove('hidden');
+            
+            // ═══════ MOBILE OPTIMIZATIONS ═══════
+            // Try fullscreen for better experience
+            try {
+                if (document.documentElement.requestFullscreen) {
+                    document.documentElement.requestFullscreen().catch(function() {});
+                } else if (document.documentElement.webkitRequestFullscreen) {
+                    document.documentElement.webkitRequestFullscreen();
+                }
+            } catch(e) {}
+            
+            // Try to lock orientation to landscape
+            try {
+                if (screen.orientation && screen.orientation.lock) {
+                    screen.orientation.lock('landscape').catch(function() {});
+                }
+            } catch(e) {}
+            
+            // Hide address bar on mobile
+            setTimeout(function() { window.scrollTo(0, 1); }, 100);
             
             // Start first hand after delay
             setTimeout(startNewHand, 1500);
