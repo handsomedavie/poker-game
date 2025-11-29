@@ -22,6 +22,7 @@ from fastapi import FastAPI, HTTPException, WebSocket, WebSocketDisconnect, Body
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
+from datetime import datetime
 
 from db import get_user, top_balances, set_display_name
 from lobby_db import (
@@ -32,6 +33,29 @@ from lobby_db import (
 import json
 
 START_BALANCE = 1000
+
+# ═══════════════════════════════════════════════════
+# USER MODELS & STORAGE
+# ═══════════════════════════════════════════════════
+
+class UserInitRequest(BaseModel):
+    telegram_id: int
+    username: Optional[str] = "Player"
+    first_name: Optional[str] = "Guest"
+
+class UserInitResponse(BaseModel):
+    user_id: int
+    balance: int
+    username: str
+    first_name: str
+    created_at: str
+
+class BalanceUpdateRequest(BaseModel):
+    telegram_id: int
+    new_balance: int
+
+# In-memory user storage (replace with database for production)
+users_db: Dict[int, Dict[str, Any]] = {}
 
 app = FastAPI(title="Poker Mini App Server")
 
@@ -1496,6 +1520,98 @@ async def api_start_game(lobby_code: str, request: JoinLobbyRequest):
         "message": message,
         "gameSessionId": game_session_id,
         "lobby": lobby.to_dict() if lobby else None,
+    }
+
+
+# ═══════════════════════════════════════════════════
+# USER REGISTRATION ENDPOINTS
+# ═══════════════════════════════════════════════════
+
+@app.post("/api/user/init", response_model=UserInitResponse)
+async def init_user(data: UserInitRequest):
+    """
+    Initialize or retrieve user by Telegram ID.
+    Creates new user with starting balance if not exists.
+    Returns user data with current balance.
+    """
+    telegram_id = data.telegram_id
+    
+    # Check if user exists
+    if telegram_id in users_db:
+        user = users_db[telegram_id]
+        print(f"👤 User found: {telegram_id} - {user['username']} - ${user['balance']}")
+        return UserInitResponse(
+            user_id=telegram_id,
+            balance=user["balance"],
+            username=user["username"],
+            first_name=user["first_name"],
+            created_at=user["created_at"]
+        )
+    
+    # Create new user with starting balance
+    new_user = {
+        "telegram_id": telegram_id,
+        "username": data.username or "Player",
+        "first_name": data.first_name or "Guest",
+        "balance": START_BALANCE,
+        "created_at": datetime.now().isoformat()
+    }
+    
+    users_db[telegram_id] = new_user
+    print(f"✅ New user created: {telegram_id} - {new_user['username']} - ${START_BALANCE}")
+    
+    return UserInitResponse(
+        user_id=telegram_id,
+        balance=START_BALANCE,
+        username=new_user["username"],
+        first_name=new_user["first_name"],
+        created_at=new_user["created_at"]
+    )
+
+
+@app.post("/api/user/balance/update")
+async def update_user_balance(data: BalanceUpdateRequest):
+    """Update user balance (for game results, deposits, etc.)"""
+    telegram_id = data.telegram_id
+    
+    if telegram_id not in users_db:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    old_balance = users_db[telegram_id]["balance"]
+    users_db[telegram_id]["balance"] = data.new_balance
+    
+    print(f"💰 Balance updated: {telegram_id} - ${old_balance} → ${data.new_balance}")
+    
+    return {
+        "success": True,
+        "telegram_id": telegram_id,
+        "old_balance": old_balance,
+        "new_balance": data.new_balance
+    }
+
+
+@app.get("/api/user/{telegram_id}")
+async def get_user_info(telegram_id: int):
+    """Get user info by Telegram ID"""
+    if telegram_id not in users_db:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    user = users_db[telegram_id]
+    return {
+        "user_id": telegram_id,
+        "username": user["username"],
+        "first_name": user["first_name"],
+        "balance": user["balance"],
+        "created_at": user["created_at"]
+    }
+
+
+@app.get("/api/users/count")
+async def get_users_count():
+    """Get total registered users count"""
+    return {
+        "total_users": len(users_db),
+        "total_balance": sum(u["balance"] for u in users_db.values())
     }
 
 
