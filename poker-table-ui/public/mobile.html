@@ -9,110 +9,246 @@
         * { margin: 0; padding: 0; box-sizing: border-box; }
         
         body {
-            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-            color: white;
+            background: radial-gradient(circle at top, #1f2937 0%, #020617 55%, #020617 100%);
+            color: #e2e8f0;
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
             min-height: 100vh;
             overflow-x: hidden;
         }
         
         .container {
-            padding: 20px;
-            max-width: 500px;
+            padding: 20px 16px 24px;
+            max-width: 480px;
             margin: 0 auto;
+        }
+
+        .app-layout {
+            display: flex;
+            gap: 20px;
+            align-items: flex-start;
+        }
+
+        .left-column {
+            flex: 1 1 0;
+            min-width: 0;
+        }
+
+        .right-sidebar {
+            width: 260px;
+            background: #0b1220;
+            border-radius: 18px;
+            border: 1px solid #1e293b;
+            padding: 18px 16px 16px;
+            box-shadow: 0 18px 45px rgba(15, 23, 42, 0.95);
         }
         
         .header {
-            text-align: center;
-            padding: 30px 20px;
-            margin-bottom: 20px;
+            text-align: left;
+            padding: 8px 4px 18px;
+            margin-bottom: 12px;
         }
         
         .header h1 {
-            font-size: 32px;
-            margin-bottom: 10px;
-            color: #22c55e;
+            font-size: 26px;
+            margin-bottom: 6px;
+            color: #e5e7eb;
         }
         
         .header p {
-            font-size: 16px;
-            color: #94a3b8;
+            font-size: 14px;
+            color: #9ca3af;
         }
         
         .balance-card {
-            background: linear-gradient(135deg, #1e3a5f 0%, #0f172a 100%);
-            border: 1px solid #334155;
-            border-radius: 16px;
-            padding: 20px;
-            text-align: center;
+            background: radial-gradient(circle at top, rgba(34, 197, 94, 0.18) 0%, rgba(15, 23, 42, 0.95) 55%, rgba(15, 23, 42, 1) 100%);
+            border: 1px solid #22c55e33;
+            border-radius: 18px;
+            padding: 18px 20px;
+            text-align: left;
             margin-bottom: 20px;
+            box-shadow: 0 18px 45px rgba(15, 23, 42, 0.9);
         }
         
         .balance-label {
-            font-size: 14px;
+            font-size: 12px;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
             color: #64748b;
-            margin-bottom: 5px;
+            margin-bottom: 4px;
         }
         
         .balance-amount {
-            font-size: 28px;
-            font-weight: bold;
+            font-size: 26px;
+            font-weight: 700;
             color: #4ade80;
         }
         
         .menu-grid {
             display: grid;
-            gap: 16px;
+            gap: 12px;
         }
         
         .menu-card {
-            background: linear-gradient(135deg, #1e3a5f 0%, #0f172a 100%);
-            border: 1px solid #334155;
+            background: linear-gradient(135deg, #1e293b 0%, #020617 100%);
+            border: 2px solid #1f2937;
             border-radius: 16px;
-            padding: 20px;
+            padding: 16px 16px 18px;
             cursor: pointer;
-            transition: all 0.2s ease;
+            transition: transform 0.16s ease, box-shadow 0.16s ease, border-color 0.16s ease, background 0.16s ease;
             -webkit-tap-highlight-color: transparent;
+            box-shadow: 0 10px 24px rgba(15, 23, 42, 0.75);
         }
         
         .menu-card:active {
-            transform: scale(0.97);
+            transform: translateY(1px) scale(0.99);
             border-color: #3b82f6;
+            box-shadow: 0 6px 18px rgba(15, 23, 42, 0.9);
+            background: radial-gradient(circle at top, rgba(59, 130, 246, 0.2) 0%, #020617 65%, #020617 100%);
         }
         
         .menu-icon {
-            font-size: 40px;
-            margin-bottom: 10px;
+            font-size: 34px;
+            margin-bottom: 8px;
         }
         
         .menu-title {
-            font-size: 20px;
+            font-size: 18px;
             font-weight: 600;
-            margin-bottom: 6px;
-            color: #f1f5f9;
+            margin-bottom: 4px;
+            color: #e5e7eb;
         }
         
         .menu-description {
             font-size: 13px;
-            color: #64748b;
+            color: #94a3b8;
             line-height: 1.4;
         }
         
         .private-btn {
             width: 100%;
             margin-top: 20px;
-            padding: 16px;
+            padding: 14px 16px;
             background: linear-gradient(135deg, #d97706, #f59e0b);
             border: none;
             border-radius: 14px;
-            color: #0f172a;
-            font-size: 18px;
+            color: #111827;
+            font-size: 16px;
             font-weight: 700;
             cursor: pointer;
+            box-shadow: 0 14px 30px rgba(148, 92, 16, 0.7);
         }
         
         .private-btn:active {
-            transform: scale(0.97);
+            transform: translateY(1px) scale(0.99);
+            box-shadow: 0 8px 18px rgba(148, 92, 16, 0.8);
+        }
+
+        .sidebar-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 18px;
+        }
+
+        .sidebar-avatar {
+            width: 56px;
+            height: 56px;
+            border-radius: 999px;
+            background: radial-gradient(circle at top left, #fb923c, #f97316, #b45309);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 26px;
+            font-weight: 700;
+            color: #fefce8;
+            border: 3px solid #fed7aa;
+        }
+
+        .sidebar-user-name {
+            font-size: 16px;
+            font-weight: 600;
+            color: #e5e7eb;
+        }
+
+        .sidebar-user-handle {
+            font-size: 12px;
+            color: #9ca3af;
+        }
+
+        .sidebar-balance-card {
+            margin-top: 6px;
+            margin-bottom: 18px;
+            padding: 10px 12px 12px;
+            border-radius: 14px;
+            background: linear-gradient(135deg, rgba(34, 197, 94, 0.14), rgba(15, 23, 42, 0.95));
+            border: 1px solid #22c55e33;
+        }
+
+        .sidebar-balance-label {
+            font-size: 12px;
+            color: #9ca3af;
+            margin-bottom: 2px;
+        }
+
+        .sidebar-balance-amount {
+            font-size: 22px;
+            font-weight: 700;
+            color: #4ade80;
+        }
+
+        .sidebar-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 18px;
+        }
+
+        .sidebar-btn {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            width: 100%;
+            height: 44px;
+            padding: 0 12px;
+            border-radius: 12px;
+            border: none;
+            background: #111827;
+            color: #e5e7eb;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .sidebar-btn-icon {
+            font-size: 18px;
+        }
+
+        .sidebar-btn-primary {
+            background: linear-gradient(135deg, #eab308, #facc15);
+            color: #111827;
+        }
+
+        .sidebar-stats {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            margin-top: 4px;
+        }
+
+        .sidebar-stat-item {
+            flex: 1;
+            text-align: center;
+        }
+
+        .sidebar-stat-value {
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .sidebar-stat-label {
+            font-size: 11px;
+            color: #9ca3af;
         }
         
         .loading {
@@ -166,39 +302,90 @@
 
     <div id="app" class="hidden">
         <div class="container">
-            <div class="header">
-                <h1>🎰 Poker House</h1>
-                <p id="username">Welcome!</p>
-            </div>
-            
-            <div class="balance-card">
-                <div class="balance-label">Balance</div>
-                <div class="balance-amount">$1,000</div>
-            </div>
-            
-            <div class="menu-grid">
-                <div class="menu-card" onclick="openMode('tournament')">
-                    <div class="menu-icon">🏆</div>
-                    <div class="menu-title">Tournament</div>
-                    <div class="menu-description">Compete in multi-table tournaments for big prizes</div>
+            <div class="app-layout">
+                <!-- LEFT COLUMN: main content -->
+                <div class="left-column">
+                    <div class="header">
+                        <h1>🎰 Poker House</h1>
+                        <p id="username">Welcome!</p>
+                    </div>
+                    
+                    <div class="balance-card">
+                        <div class="balance-label">Balance</div>
+                        <div class="balance-amount">$1,000</div>
+                    </div>
+                    
+                    <div class="menu-grid">
+                        <div class="menu-card" onclick="openMode('tournament')">
+                            <div class="menu-icon">🏆</div>
+                            <div class="menu-title">Tournament</div>
+                            <div class="menu-description">Compete in multi-table tournaments for big prizes</div>
+                        </div>
+                        
+                        <div class="menu-card" onclick="openMode('bounty')">
+                            <div class="menu-icon">🎯</div>
+                            <div class="menu-title">Bounty Hunter</div>
+                            <div class="menu-description">Knockout poker with rewards for eliminations</div>
+                        </div>
+                        
+                        <div class="menu-card" onclick="openMode('sitgo')">
+                            <div class="menu-icon">⚡</div>
+                            <div class="menu-title">Sit & Go</div>
+                            <div class="menu-description">Fast-paced single table tournaments</div>
+                        </div>
+                    </div>
+                    
+                    <button class="private-btn" onclick="createPrivate()">
+                        🎰 Create Private Game
+                    </button>
                 </div>
-                
-                <div class="menu-card" onclick="openMode('bounty')">
-                    <div class="menu-icon">🎯</div>
-                    <div class="menu-title">Bounty Hunter</div>
-                    <div class="menu-description">Knockout poker with rewards for eliminations</div>
-                </div>
-                
-                <div class="menu-card" onclick="openMode('sitgo')">
-                    <div class="menu-icon">⚡</div>
-                    <div class="menu-title">Sit & Go</div>
-                    <div class="menu-description">Fast-paced single table tournaments</div>
+
+                <!-- RIGHT COLUMN: player sidebar -->
+                <div class="right-sidebar">
+                    <div class="sidebar-header">
+                        <div class="sidebar-avatar" id="sidebarAvatar">P</div>
+                        <div>
+                            <div class="sidebar-user-name" id="sidebarUserName">Player</div>
+                            <div class="sidebar-user-handle" id="sidebarUserHandle"></div>
+                        </div>
+                    </div>
+
+                    <div class="sidebar-balance-card">
+                        <div class="sidebar-balance-label">Balance</div>
+                        <div class="sidebar-balance-amount" id="sidebarBalance">$1,000</div>
+                    </div>
+
+                    <div class="sidebar-buttons">
+                        <button class="sidebar-btn sidebar-btn-primary" id="depositBtn">
+                            <span class="sidebar-btn-icon">💳</span>
+                            <span>Deposit</span>
+                        </button>
+                        <button class="sidebar-btn" id="withdrawBtn">
+                            <span class="sidebar-btn-icon">💰</span>
+                            <span>Withdraw</span>
+                        </button>
+                        <button class="sidebar-btn" id="historyBtn">
+                            <span class="sidebar-btn-icon">📋</span>
+                            <span>History</span>
+                        </button>
+                        <button class="sidebar-btn" id="settingsBtn">
+                            <span class="sidebar-btn-icon">⚙️</span>
+                            <span>Settings</span>
+                        </button>
+                    </div>
+
+                    <div class="sidebar-stats">
+                        <div class="sidebar-stat-item">
+                            <div class="sidebar-stat-value">24</div>
+                            <div class="sidebar-stat-label">Games</div>
+                        </div>
+                        <div class="sidebar-stat-item">
+                            <div class="sidebar-stat-value" style="color:#22c55e;">58%</div>
+                            <div class="sidebar-stat-label">Win Rate</div>
+                        </div>
+                    </div>
                 </div>
             </div>
-            
-            <button class="private-btn" onclick="createPrivate()">
-                🎰 Create Private Game
-            </button>
         </div>
     </div>
 
@@ -235,6 +422,19 @@
             document.getElementById('loading').classList.add('hidden');
             document.getElementById('app').classList.remove('hidden');
             document.getElementById('username').textContent = 'Hello, ' + userName + '! 👋';
+
+            // Fill sidebar user info
+            var sidebarNameEl = document.getElementById('sidebarUserName');
+            var sidebarHandleEl = document.getElementById('sidebarUserHandle');
+            var avatarEl = document.getElementById('sidebarAvatar');
+            if (sidebarNameEl) sidebarNameEl.textContent = userName || 'Player';
+            if (sidebarHandleEl && user && user.username) {
+                sidebarHandleEl.textContent = '@' + user.username;
+            }
+            if (avatarEl && userName) {
+                avatarEl.textContent = (userName.charAt(0) || 'P').toUpperCase();
+            }
+
             addDebug('App shown');
         }, 300);
         
@@ -263,7 +463,42 @@
                 alert('🎰 Private games coming soon!');
             }
         }
-        
+
+        // Sidebar button handlers (placeholders)
+        var depositBtn = document.getElementById('depositBtn');
+        var withdrawBtn = document.getElementById('withdrawBtn');
+        var historyBtn = document.getElementById('historyBtn');
+        var settingsBtn = document.getElementById('settingsBtn');
+
+        if (depositBtn) {
+            depositBtn.onclick = function () {
+                addDebug('Deposit click');
+                if (tg && tg.showAlert) tg.showAlert('💳 Deposit feature coming soon');
+                else alert('💳 Deposit feature coming soon');
+            };
+        }
+        if (withdrawBtn) {
+            withdrawBtn.onclick = function () {
+                addDebug('Withdraw click');
+                if (tg && tg.showAlert) tg.showAlert('💰 Withdraw feature coming soon');
+                else alert('💰 Withdraw feature coming soon');
+            };
+        }
+        if (historyBtn) {
+            historyBtn.onclick = function () {
+                addDebug('History click');
+                if (tg && tg.showAlert) tg.showAlert('📋 History feature coming soon');
+                else alert('📋 History feature coming soon');
+            };
+        }
+        if (settingsBtn) {
+            settingsBtn.onclick = function () {
+                addDebug('Settings click');
+                if (tg && tg.showAlert) tg.showAlert('⚙️ Settings feature coming soon');
+                else alert('⚙️ Settings feature coming soon');
+            };
+        }
+
         addDebug('Ready');
     </script>
 </body>
