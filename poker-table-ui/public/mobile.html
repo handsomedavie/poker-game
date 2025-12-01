@@ -549,16 +549,16 @@
             overflow: hidden;
         }
 
-        /* ═══════ TOP HEADER BAR ═══════ */
+        /* ═══════ TOP HEADER BAR - GRID LAYOUT ═══════ */
         .poker-header {
             position: fixed;
             top: 0; left: 0; right: 0;
-            height: 56px;
-            background: rgba(0, 0, 0, 0.9);
-            display: flex;
+            height: 50px;
+            background: rgba(0, 0, 0, 0.95);
+            display: grid;
+            grid-template-columns: auto 1fr auto;
             align-items: center;
-            justify-content: space-between;
-            padding: 0 16px;
+            padding: 0 12px;
             z-index: 100;
             border-bottom: 1px solid rgba(212, 175, 55, 0.3);
         }
@@ -567,40 +567,56 @@
             background: rgba(255,255,255,0.1);
             border: 1px solid rgba(255,255,255,0.2);
             color: #fff;
-            font-size: 14px;
-            padding: 8px 16px;
+            font-size: 13px;
+            padding: 6px 12px;
             border-radius: 8px;
             cursor: pointer;
+            white-space: nowrap;
         }
 
         .table-info {
-            flex: 1;
             text-align: center;
+            padding: 0 10px;
         }
 
         .table-info-name {
-            font-size: 16px;
+            font-size: 15px;
             font-weight: 700;
             color: #fff;
+            white-space: nowrap;
         }
 
         .table-info-blinds {
-            font-size: 12px;
+            font-size: 11px;
             color: #22c55e;
-            letter-spacing: 1px;
+            letter-spacing: 0.5px;
         }
 
         .header-spacer {
-            width: 80px;
+            width: 70px;
+        }
+
+        /* ═══════ FULLSCREEN MODE ═══════ */
+        html:-webkit-full-screen,
+        html:-moz-full-screen,
+        html:fullscreen {
+            width: 100%;
+            height: 100%;
+        }
+        body:-webkit-full-screen,
+        body:-moz-full-screen,
+        body:fullscreen {
+            margin: 0;
+            padding: 0;
         }
 
         /* ═══════ POKER TABLE - VERTICAL OVAL ═══════ */
         .poker-table-container {
             position: absolute;
-            top: 56px;
+            top: 50px;
             left: 0;
             right: 0;
-            bottom: 200px;
+            bottom: 190px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -628,18 +644,18 @@
             border-radius: 45% / 48%;
         }
 
-        /* ═══════ POT DISPLAY - ABOVE CENTER ═══════ */
+        /* ═══════ POT DISPLAY - MOVED UP ═══════ */
         .pot-center {
             position: absolute;
-            top: 22%;
+            top: 12%;
             left: 50%;
             transform: translateX(-50%);
-            background: rgba(0,0,0,0.75);
-            padding: 8px 20px;
-            border-radius: 20px;
+            background: rgba(0,0,0,0.8);
+            padding: 6px 18px;
+            border-radius: 25px;
             border: 2px solid #fbbf24;
-            box-shadow: 0 4px 20px rgba(251,191,36,0.3);
-            z-index: 15;
+            box-shadow: 0 4px 16px rgba(251,191,36,0.4);
+            z-index: 25;
             text-align: center;
         }
 
@@ -651,9 +667,10 @@
         }
 
         .pot-amount {
-            font-size: 18px;
+            font-size: 20px;
             font-weight: 700;
             color: #fbbf24;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
         }
 
         /* ═══════ COMMUNITY CARDS - CENTER ═══════ */
@@ -710,30 +727,32 @@
             z-index: 10;
         }
 
-        /* Seat positions for VERTICAL table */
-        .seat-top { top: -65px; left: 50%; transform: translateX(-50%); }
-        .seat-left-upper { top: 18%; left: -70px; }
-        .seat-left-lower { top: 58%; left: -70px; }
-        .seat-bottom { bottom: -70px; left: 50%; transform: translateX(-50%); }
-        .seat-right-lower { top: 58%; right: -70px; }
-        .seat-right-upper { top: 18%; right: -70px; }
+        /* Seat positions for VERTICAL table - MOVED FURTHER OUT */
+        .seat-top { top: -75px; left: 50%; transform: translateX(-50%); }
+        .seat-left-upper { top: 12%; left: -85px; }
+        .seat-left-lower { top: 55%; left: -85px; }
+        .seat-bottom { bottom: -80px; left: 50%; transform: translateX(-50%); }
+        .seat-right-lower { top: 55%; right: -85px; }
+        .seat-right-upper { top: 12%; right: -85px; }
 
         /* Legacy seat classes (for JS compatibility) */
-        .seat-0 { bottom: -70px; left: 50%; transform: translateX(-50%); }
-        .seat-1 { top: 58%; left: -70px; }
-        .seat-2 { top: 18%; left: -70px; }
-        .seat-3 { top: -65px; left: 50%; transform: translateX(-50%); }
-        .seat-4 { top: 18%; right: -70px; }
-        .seat-5 { top: 58%; right: -70px; }
+        .seat-0 { bottom: -80px; left: 50%; transform: translateX(-50%); }
+        .seat-1 { top: 55%; left: -85px; }
+        .seat-2 { top: 12%; left: -85px; }
+        .seat-3 { top: -75px; left: 50%; transform: translateX(-50%); }
+        .seat-4 { top: 12%; right: -85px; }
+        .seat-5 { top: 55%; right: -85px; }
 
         .player-card-container {
             background: rgba(30, 41, 59, 0.95);
             border: 2px solid #334155;
-            border-radius: 12px;
-            padding: 10px;
-            min-width: 90px;
-            backdrop-filter: blur(8px);
+            border-radius: 10px;
+            padding: 8px 10px;
+            min-width: 85px;
+            max-width: 95px;
+            backdrop-filter: blur(10px);
             text-align: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.4);
         }
 
         .player-avatar {
@@ -796,26 +815,32 @@
             box-shadow: 0 2px 6px rgba(0,0,0,0.4);
         }
 
-        /* ═══════ BOTTOM CONTROLS ═══════ */
+        /* ═══════ BOTTOM CONTROLS - PROPER SPACING ═══════ */
         .poker-controls-bottom {
             position: fixed;
             bottom: 0; left: 0; right: 0;
             background: rgba(0, 0, 0, 0.95);
-            padding: 12px 16px 24px;
+            padding: 10px 12px 20px;
             z-index: 100;
             border-top: 1px solid rgba(212, 175, 55, 0.3);
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
         }
 
         /* Hero cards row */
         .hero-cards {
             display: flex;
             justify-content: center;
-            gap: 10px;
-            margin-bottom: 12px;
+            gap: 12px;
+            padding: 8px;
+            background: rgba(0,0,0,0.3);
+            border-radius: 12px;
+            margin: 0 auto;
         }
 
         .hero-card {
-            width: 54px; height: 76px;
+            width: 58px; height: 82px;
             background: #ffffff !important;
             border-radius: 8px;
             display: flex;
@@ -823,24 +848,22 @@
             align-items: center;
             justify-content: center;
             font-weight: 700;
-            box-shadow: 0 6px 20px rgba(0,0,0,0.5), 0 0 0 3px rgba(59,130,246,0.4);
+            box-shadow: 0 6px 16px rgba(59,130,246,0.5);
             border: 3px solid #3b82f6;
         }
 
         .hero-card.red { color: #dc2626 !important; }
         .hero-card.black { color: #000000 !important; }
 
-        .hero-card .card-rank { font-size: 24px; line-height: 1; }
-        .hero-card .card-suit { font-size: 26px; line-height: 1; }
+        .hero-card .card-rank { font-size: 26px; line-height: 1; }
+        .hero-card .card-suit { font-size: 28px; line-height: 1; }
 
-        /* Action buttons grid */
+        /* Action buttons grid - PROPER SPACING */
         .action-buttons-row {
             display: grid;
-            grid-template-columns: 1fr 1fr 1fr 1fr;
-            padding: 12px 16px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+            padding: 0 4px;
         }
 
         .betting-controls.disabled {
@@ -875,15 +898,13 @@
         }
 
         .action-btn {
-            flex: 1;
-            min-width: 70px;
-            height: 44px;
-            border-radius: 10px;
+            height: 46px;
+            border-radius: 8px;
             border: none;
-            font-size: 13px;
+            font-size: 12px;
             font-weight: 700;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
+            letter-spacing: 0.3px;
             cursor: pointer;
             color: white;
             transition: all 0.15s ease;
@@ -891,36 +912,66 @@
             align-items: center;
             justify-content: center;
             text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+            padding: 0 4px;
+            white-space: nowrap;
         }
 
         .action-btn:active {
-            transform: scale(0.96);
+            transform: scale(0.95);
         }
 
         .action-btn.fold {
-            background: linear-gradient(135deg, #e53935, #c62828);
-            border: 1px solid #ff5252;
+            background: linear-gradient(135deg, #dc2626, #b91c1c);
         }
 
         .action-btn.call, .action-btn.check {
-            background: linear-gradient(135deg, #4caf50, #2e7d32);
-            border: 1px solid #81c784;
+            background: linear-gradient(135deg, #22c55e, #16a34a);
         }
 
         .action-btn.raise {
-            background: linear-gradient(135deg, #ff9800, #f57c00);
-            border: 1px solid #ffb74d;
+            background: linear-gradient(135deg, #f59e0b, #d97706);
         }
 
         .action-btn.allin {
-            background: linear-gradient(135deg, #9c27b0, #7b1fa2);
-            border: 1px solid #ce93d8;
+            background: linear-gradient(135deg, #a855f7, #9333ea);
         }
 
         .action-btn:disabled {
             opacity: 0.5;
             cursor: not-allowed;
             transform: none !important;
+        }
+
+        /* ═══════ GAME PHASE INDICATOR - RIGHT SIDE ═══════ */
+        .game-phase-indicator {
+            position: fixed;
+            bottom: 200px;
+            right: 12px;
+            background: linear-gradient(135deg, rgba(34, 197, 94, 0.95), rgba(22, 163, 74, 0.95));
+            padding: 8px 14px;
+            border-radius: 10px;
+            font-size: 12px;
+            font-weight: 700;
+            color: white;
+            letter-spacing: 1px;
+            box-shadow: 0 4px 12px rgba(34, 197, 94, 0.5);
+            z-index: 50;
+            animation: pulse-phase 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse-phase {
+            0%, 100% { box-shadow: 0 4px 12px rgba(34, 197, 94, 0.5); }
+            50% { box-shadow: 0 4px 20px rgba(34, 197, 94, 0.8); }
+        }
+
+        .game-phase-indicator.flop {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.95), rgba(37, 99, 235, 0.95));
+        }
+        .game-phase-indicator.turn {
+            background: linear-gradient(135deg, rgba(251, 191, 36, 0.95), rgba(245, 158, 11, 0.95));
+        }
+        .game-phase-indicator.river {
+            background: linear-gradient(135deg, rgba(239, 68, 68, 0.95), rgba(220, 38, 38, 0.95));
         }
 
         /* Bet Slider Row */
@@ -1040,50 +1091,49 @@
             transform: translateY(-5px);
         }
 
-        /* ═══════ HAND STRENGTH HUD ═══════ */
+        /* ═══════ HAND STRENGTH HUD - LEFT SIDE (no overlap) ═══════ */
         .hand-hud {
             position: fixed;
-            bottom: 140px;
-            left: 16px;
-            background: linear-gradient(135deg, rgba(0,0,0,0.95), rgba(20,20,20,0.92));
+            bottom: 200px;
+            left: 12px;
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.95), rgba(37, 99, 235, 0.95));
             border-radius: 12px;
-            padding: 10px 16px;
+            padding: 10px 14px;
             display: flex;
-            align-items: center;
-            gap: 12px;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.6);
+            flex-direction: column;
+            gap: 4px;
+            box-shadow: 0 4px 20px rgba(59, 130, 246, 0.6);
             backdrop-filter: blur(12px);
-            z-index: 100;
-            animation: slideInLeft 0.4s ease-out;
-            border: 2px solid #4ade80;
+            z-index: 50;
+            animation: slideInLeft 0.5s ease-out;
+            max-width: 120px;
         }
 
         .hand-hud.hidden { display: none; }
 
         @keyframes slideInLeft {
-            from { transform: translateX(-100%); opacity: 0; }
+            from { transform: translateX(-150px); opacity: 0; }
             to { transform: translateX(0); opacity: 1; }
         }
 
-        .hand-hud-icon { font-size: 28px; }
+        .hand-hud-icon { font-size: 20px; text-align: center; }
         .hand-hud-rank {
-            font-size: 14px;
+            font-size: 13px;
             font-weight: 700;
-            color: #4ade80;
+            color: white;
             text-transform: uppercase;
+            text-align: center;
         }
         .hand-hud-desc {
-            font-size: 11px;
+            font-size: 10px;
             color: rgba(255,255,255,0.8);
+            text-align: center;
         }
 
         /* Rarity colors */
-        .hand-hud.legendary { border-color: #ff8c00; }
-        .hand-hud.legendary .hand-hud-rank { color: #ffa500; }
-        .hand-hud.epic { border-color: #a855f7; }
-        .hand-hud.epic .hand-hud-rank { color: #c084fc; }
-        .hand-hud.rare { border-color: #3b82f6; }
-        .hand-hud.rare .hand-hud-rank { color: #60a5fa; }
+        .hand-hud.legendary { background: linear-gradient(135deg, rgba(255,140,0,0.95), rgba(245,158,11,0.95)); }
+        .hand-hud.epic { background: linear-gradient(135deg, rgba(168,85,247,0.95), rgba(147,51,234,0.95)); }
+        .hand-hud.rare { background: linear-gradient(135deg, rgba(59,130,246,0.95), rgba(37,99,235,0.95)); }
 
         /* ═══════ SHOW/MUCK MODAL ═══════ */
         .showmuck-modal {
@@ -1462,6 +1512,16 @@
             </div>
         </div>
 
+        <!-- Game Phase Indicator (right side) -->
+        <div class="game-phase-indicator" id="gamePhaseIndicator">PRE-FLOP</div>
+        
+        <!-- Hand Strength HUD (left side) -->
+        <div class="hand-hud hidden" id="handHud">
+            <div class="hand-hud-icon" id="handIcon">🃏</div>
+            <div class="hand-hud-rank" id="handRank">High Card</div>
+            <div class="hand-hud-desc" id="handDesc">Ace high</div>
+        </div>
+
         <!-- Bottom Controls Panel -->
         <div class="poker-controls-bottom">
             <!-- Hero Cards -->
@@ -1493,15 +1553,6 @@
                     <button class="quick-bet-btn" onclick="quickBet(3)">3x</button>
                     <button class="quick-bet-btn" onclick="quickBet(0)">MAX</button>
                 </div>
-            </div>
-        </div>
-        
-        <!-- Hand Strength HUD -->
-        <div class="hand-hud hidden" id="handHud">
-            <div class="hand-hud-icon" id="handIcon">🃏</div>
-            <div>
-                <div class="hand-hud-rank" id="handRank">High Card</div>
-                <div class="hand-hud-desc" id="handDesc">Ace high</div>
             </div>
         </div>
         
@@ -1543,12 +1594,34 @@
 
         addDebug('Init');
 
+        // ═══════════════════════════════════════════════════
+        // AUTO-FULLSCREEN FUNCTION
+        // ═══════════════════════════════════════════════════
+        function requestFullscreen() {
+            var elem = document.documentElement;
+            try {
+                if (elem.requestFullscreen) {
+                    elem.requestFullscreen().catch(function(err) {
+                        console.log('Fullscreen request failed:', err);
+                    });
+                } else if (elem.webkitRequestFullscreen) {
+                    elem.webkitRequestFullscreen();
+                } else if (elem.msRequestFullscreen) {
+                    elem.msRequestFullscreen();
+                }
+            } catch(e) {
+                console.log('Fullscreen not supported:', e);
+            }
+        }
+
         // Telegram WebApp
         var tg = window.Telegram && window.Telegram.WebApp;
         if (tg) {
             tg.ready();
             tg.expand();
             addDebug('TG OK');
+            // Auto-fullscreen after short delay
+            setTimeout(requestFullscreen, 500);
         }
 
         // User info
@@ -1970,11 +2043,44 @@
             document.getElementById('lobbyScreen').classList.add('hidden');
             document.getElementById('pokerTableScreen').classList.remove('hidden');
             
+            // Request fullscreen when entering game
+            if (tg) tg.expand();
+            requestFullscreen();
+            
             // Initialize players for portrait layout
             initPortraitPlayerPositions();
             
+            // Update game phase indicator
+            updateGamePhaseIndicator('preflop');
+            
             // Start first hand after delay
             setTimeout(startNewHand, 1500);
+        }
+
+        // ═══════════════════════════════════════════════════
+        // GAME PHASE INDICATOR UPDATE
+        // ═══════════════════════════════════════════════════
+        function updateGamePhaseIndicator(phase) {
+            var indicator = document.getElementById('gamePhaseIndicator');
+            if (!indicator) return;
+            
+            // Remove all phase classes
+            indicator.classList.remove('flop', 'turn', 'river');
+            
+            var phaseNames = {
+                'preflop': 'PRE-FLOP',
+                'flop': 'FLOP',
+                'turn': 'TURN',
+                'river': 'RIVER',
+                'showdown': 'SHOWDOWN'
+            };
+            
+            indicator.textContent = phaseNames[phase] || phase.toUpperCase();
+            
+            // Add phase-specific class for coloring
+            if (phase === 'flop') indicator.classList.add('flop');
+            else if (phase === 'turn') indicator.classList.add('turn');
+            else if (phase === 'river') indicator.classList.add('river');
         }
 
         // ═══════════════════════════════════════════════════
@@ -2475,16 +2581,13 @@
                 'showdown': 'SHOWDOWN'
             };
             
-            // Update phase indicator
-            var phaseIndicator = document.getElementById('phaseIndicator');
-            if (phaseIndicator) {
-                phaseIndicator.textContent = phaseNames[gameState.phase] || gameState.phase;
-            }
+            // Update game phase indicator (new floating indicator)
+            updateGamePhaseIndicator(gameState.phase);
             
-            // Also update header
+            // Also update header blinds
             var phaseEl = document.getElementById('tableInfoBlinds');
             if (phaseEl) {
-                phaseEl.textContent = phaseNames[gameState.phase] || gameState.phase;
+                phaseEl.textContent = 'Blinds: ' + gameState.smallBlind + '/' + gameState.bigBlind;
             }
         }
 
