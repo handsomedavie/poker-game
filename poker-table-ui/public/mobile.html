@@ -538,108 +538,146 @@
         }
 
         /* ═══════════════════════════════════════════════════
-           POKER TABLE SCREEN STYLES
+           POKER TABLE - PORTRAIT LAYOUT (VERTICAL)
            ═══════════════════════════════════════════════════ */
         #pokerTableScreen {
             position: fixed;
             top: 0; left: 0; right: 0; bottom: 0;
-            background: radial-gradient(ellipse at center, #0d4a2a 0%, #052e19 50%, #021a0e 100%);
-            z-index: 100;
+            width: 100vw;
+            height: 100vh;
+            background: linear-gradient(180deg, #0a0e1a 0%, #1a1f35 50%, #0f1729 100%);
+            overflow: hidden;
         }
 
-        .table-header {
-            position: absolute;
+        /* ═══════ TOP HEADER BAR ═══════ */
+        .poker-header {
+            position: fixed;
             top: 0; left: 0; right: 0;
+            height: 56px;
+            background: rgba(0, 0, 0, 0.9);
             display: flex;
-            justify-content: space-between;
             align-items: center;
-            padding: 12px 16px;
-            background: linear-gradient(to bottom, rgba(0,0,0,0.6), transparent);
-            z-index: 10;
+            justify-content: space-between;
+            padding: 0 16px;
+            z-index: 100;
+            border-bottom: 1px solid rgba(212, 175, 55, 0.3);
         }
 
         .table-back-btn {
-            width: 40px; height: 40px;
-            border-radius: 50%;
-            border: none;
-            background: rgba(0,0,0,0.5);
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
             color: #fff;
-            font-size: 20px;
+            font-size: 14px;
+            padding: 8px 16px;
+            border-radius: 8px;
             cursor: pointer;
+        }
+
+        .table-info {
+            flex: 1;
+            text-align: center;
+        }
+
+        .table-info-name {
+            font-size: 16px;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        .table-info-blinds {
+            font-size: 12px;
+            color: #22c55e;
+            letter-spacing: 1px;
+        }
+
+        .header-spacer {
+            width: 80px;
+        }
+
+        /* ═══════ POKER TABLE - VERTICAL OVAL ═══════ */
+        .poker-table-container {
+            position: absolute;
+            top: 56px;
+            left: 0;
+            right: 0;
+            bottom: 200px;
             display: flex;
             align-items: center;
             justify-content: center;
         }
 
-        .table-info {
-            text-align: center;
-        }
-
-        .table-info-name {
-            font-size: 14px;
-            font-weight: 600;
-            color: #fff;
-        }
-
-        .table-info-blinds {
-            font-size: 11px;
-            color: #a3e635;
-        }
-
-        .table-pot {
-            background: rgba(0,0,0,0.5);
-            padding: 6px 14px;
-            border-radius: 20px;
-            font-size: 14px;
-            font-weight: 600;
-            color: #fbbf24;
-        }
-
-        /* Poker Table */
         .poker-table {
-            position: absolute;
-            top: 50%; left: 50%;
-            transform: translate(-50%, -50%);
-            width: 85%;
-            max-width: 400px;
-            aspect-ratio: 1.6;
-            background: linear-gradient(145deg, #166534 0%, #14532d 50%, #052e19 100%);
-            border-radius: 50%;
-            border: 8px solid #854d0e;
-            box-shadow: 
-                0 0 0 4px #a16207,
-                0 0 40px rgba(0,0,0,0.5),
-                inset 0 0 60px rgba(0,0,0,0.3);
+            position: relative;
+            width: 88vw;
+            height: 52vh;
+            max-width: 380px;
+            max-height: 420px;
+            background: radial-gradient(ellipse at center, #2d5a2d 0%, #1a3a1a 60%, #0f2810 100%);
+            border: 6px solid #d4af37;
+            border-radius: 45% / 48%;
+            box-shadow:
+                0 0 40px rgba(212, 175, 55, 0.4),
+                0 0 80px rgba(0, 0, 0, 0.5),
+                inset 0 0 60px rgba(0, 0, 0, 0.4);
         }
 
         .table-felt {
             position: absolute;
-            top: 12px; left: 12px; right: 12px; bottom: 12px;
-            border: 2px solid rgba(255,255,255,0.1);
-            border-radius: 50%;
+            top: 10px; left: 10px; right: 10px; bottom: 10px;
+            border: 2px solid rgba(255,255,255,0.08);
+            border-radius: 45% / 48%;
         }
 
-        /* Community Cards */
+        /* ═══════ POT DISPLAY - ABOVE CENTER ═══════ */
+        .pot-center {
+            position: absolute;
+            top: 22%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.75);
+            padding: 8px 20px;
+            border-radius: 20px;
+            border: 2px solid #fbbf24;
+            box-shadow: 0 4px 20px rgba(251,191,36,0.3);
+            z-index: 15;
+            text-align: center;
+        }
+
+        .pot-label {
+            font-size: 9px;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+        }
+
+        .pot-amount {
+            font-size: 18px;
+            font-weight: 700;
+            color: #fbbf24;
+        }
+
+        /* ═══════ COMMUNITY CARDS - CENTER ═══════ */
         .community-cards {
             position: absolute;
-            top: 45%; left: 50%;
+            top: 45%;
+            left: 50%;
             transform: translate(-50%, -50%);
             display: flex;
-            gap: 8px;
+            gap: 6px;
             z-index: 20;
         }
 
-        /* CARDS - FULLY VISIBLE, NO TRANSPARENCY */
+        /* CARDS - FULLY VISIBLE */
         .card {
-            width: 52px; height: 74px;
+            width: 44px; height: 62px;
             background: #ffffff !important;
-            border-radius: 8px;
+            border-radius: 6px;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             font-weight: 700;
-            box-shadow: 0 4px 16px rgba(0,0,0,0.5);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
             border: 2px solid #1f2937;
             opacity: 1 !important;
             filter: none !important;
@@ -648,126 +686,54 @@
         .card.red { color: #dc2626 !important; }
         .card.black { color: #000000 !important; }
 
-        .card-rank { font-size: 20px; line-height: 1; }
-        .card-suit { font-size: 22px; line-height: 1; }
+        .card-rank { font-size: 18px; line-height: 1; }
+        .card-suit { font-size: 20px; line-height: 1; }
 
-        /* Hidden cards (back side) */
         .card.hidden {
             background: linear-gradient(135deg, #1e40af, #1e3a8a) !important;
             color: transparent !important;
-            opacity: 1 !important;
             border: 2px solid #3b82f6;
         }
 
         .card.hidden::after {
             content: '🂠';
-            font-size: 32px;
+            font-size: 26px;
             color: #fff;
         }
 
-        /* ═══════ MOBILE LANDSCAPE OPTIMIZATION ═══════ */
-        @media (max-width: 926px) and (orientation: landscape) {
-            .poker-table {
-                width: 92vw !important;
-                height: 58vh !important;
-                max-width: none;
-                margin: 1vh auto;
-            }
-
-            .community-cards {
-                gap: 10px;
-            }
-
-            .community-cards .card {
-                width: 60px !important;
-                height: 84px !important;
-            }
-
-            .community-cards .card .card-rank {
-                font-size: 24px !important;
-            }
-
-            .community-cards .card .card-suit {
-                font-size: 26px !important;
-            }
-
-            .hero-card {
-                width: 58px !important;
-                height: 82px !important;
-            }
-
-            .hero-card .card-rank {
-                font-size: 26px !important;
-            }
-
-            .hero-card .card-suit {
-                font-size: 28px !important;
-            }
-
-            .betting-controls {
-                padding: 10px 12px;
-            }
-
-            .action-btn {
-                min-height: 48px;
-                font-size: 12px;
-                padding: 0 14px;
-            }
-
-            .bet-slider {
-                min-width: 100px;
-            }
-
-            .quick-bets {
-                gap: 4px;
-            }
-
-            .quick-bet-btn {
-                padding: 4px 8px;
-                font-size: 10px;
-            }
-
-            .player-seat {
-                transform: translate(-50%, -50%) scale(0.9);
-            }
-
-            .pot-center {
-                padding: 6px 14px;
-            }
-
-            .pot-amount {
-                font-size: 16px;
-            }
-        }
-
-        /* LARGER SCREENS LANDSCAPE */
-        @media (min-width: 927px) and (orientation: landscape) {
-            .poker-table {
-                width: 85vw;
-                height: 60vh;
-            }
-
-            .community-cards .card {
-                width: 70px;
-                height: 98px;
-            }
-
-            .community-cards .card .card-rank {
-                font-size: 28px;
-            }
-
-            .community-cards .card .card-suit {
-                font-size: 30px;
-            }
-        }
-
-        /* Player Seats */
+        /* ═══════ PLAYER SEATS - 6 POSITIONS (PORTRAIT) ═══════ */
         .player-seat {
             position: absolute;
             display: flex;
             flex-direction: column;
             align-items: center;
-            transform: translate(-50%, -50%);
+            z-index: 10;
+        }
+
+        /* Seat positions for VERTICAL table */
+        .seat-top { top: -65px; left: 50%; transform: translateX(-50%); }
+        .seat-left-upper { top: 18%; left: -70px; }
+        .seat-left-lower { top: 58%; left: -70px; }
+        .seat-bottom { bottom: -70px; left: 50%; transform: translateX(-50%); }
+        .seat-right-lower { top: 58%; right: -70px; }
+        .seat-right-upper { top: 18%; right: -70px; }
+
+        /* Legacy seat classes (for JS compatibility) */
+        .seat-0 { bottom: -70px; left: 50%; transform: translateX(-50%); }
+        .seat-1 { top: 58%; left: -70px; }
+        .seat-2 { top: 18%; left: -70px; }
+        .seat-3 { top: -65px; left: 50%; transform: translateX(-50%); }
+        .seat-4 { top: 18%; right: -70px; }
+        .seat-5 { top: 58%; right: -70px; }
+
+        .player-card-container {
+            background: rgba(30, 41, 59, 0.95);
+            border: 2px solid #334155;
+            border-radius: 12px;
+            padding: 10px;
+            min-width: 90px;
+            backdrop-filter: blur(8px);
+            text-align: center;
         }
 
         .player-avatar {
@@ -781,12 +747,20 @@
             font-size: 18px;
             font-weight: 700;
             color: #fff;
+            margin: 0 auto 6px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+            position: relative;
         }
 
         .player-avatar.active {
             border-color: #fbbf24;
-            box-shadow: 0 0 20px rgba(251,191,36,0.5);
+            box-shadow: 0 0 20px rgba(251,191,36,0.6);
+            animation: activePulse 1.5s infinite;
+        }
+
+        @keyframes activePulse {
+            0%, 100% { box-shadow: 0 0 20px rgba(251,191,36,0.6); }
+            50% { box-shadow: 0 0 30px rgba(251,191,36,0.9); }
         }
 
         .player-avatar.folded {
@@ -794,64 +768,45 @@
             filter: grayscale(1);
         }
 
-        .player-avatar.dealer::after {
-            content: 'D';
-            position: absolute;
-            top: -6px; right: -6px;
-            width: 18px; height: 18px;
-            background: #fbbf24;
-            border-radius: 50%;
-            font-size: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #000;
-            font-weight: 700;
-        }
-
         .player-name {
-            font-size: 11px;
+            font-size: 12px;
+            font-weight: 600;
             color: #fff;
-            margin-top: 4px;
-            text-shadow: 0 1px 3px rgba(0,0,0,0.8);
+            margin-bottom: 2px;
+            white-space: nowrap;
         }
 
         .player-chips {
-            font-size: 10px;
-            color: #a3e635;
-            font-weight: 600;
+            font-size: 13px;
+            font-weight: 700;
+            color: #fbbf24;
         }
 
         .player-cards {
             display: flex;
-            gap: 2px;
-            margin-top: 4px;
+            gap: 4px;
+            margin-top: 6px;
+            justify-content: center;
         }
 
         .player-card {
-            width: 26px; height: 38px;
+            width: 28px; height: 40px;
             background: linear-gradient(135deg, #1e40af, #1e3a8a);
             border-radius: 4px;
             box-shadow: 0 2px 6px rgba(0,0,0,0.4);
         }
 
-        /* Player positions */
-        .seat-0 { top: 85%; left: 50%; } /* Bottom (hero) */
-        .seat-1 { top: 70%; left: 15%; }
-        .seat-2 { top: 35%; left: 8%; }
-        .seat-3 { top: 10%; left: 30%; }
-        .seat-4 { top: 10%; left: 70%; }
-        .seat-5 { top: 35%; left: 92%; }
-        .seat-6 { top: 70%; left: 85%; }
-
-        /* Hero Section (bottom) */
-        .hero-section {
-            position: absolute;
+        /* ═══════ BOTTOM CONTROLS ═══════ */
+        .poker-controls-bottom {
+            position: fixed;
             bottom: 0; left: 0; right: 0;
-            padding: 16px;
-            background: linear-gradient(to top, rgba(0,0,0,0.9), transparent);
+            background: rgba(0, 0, 0, 0.95);
+            padding: 12px 16px 24px;
+            z-index: 100;
+            border-top: 1px solid rgba(212, 175, 55, 0.3);
         }
 
+        /* Hero cards row */
         .hero-cards {
             display: flex;
             justify-content: center;
@@ -859,32 +814,29 @@
             margin-bottom: 12px;
         }
 
-        /* HERO CARDS - FULLY VISIBLE, HIGH CONTRAST */
         .hero-card {
-            width: 58px; height: 82px;
+            width: 54px; height: 76px;
             background: #ffffff !important;
-            border-radius: 10px;
+            border-radius: 8px;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             font-weight: 700;
-            box-shadow: 0 6px 24px rgba(0,0,0,0.6), 0 0 0 3px rgba(59,130,246,0.4);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.5), 0 0 0 3px rgba(59,130,246,0.4);
             border: 3px solid #3b82f6;
-            opacity: 1 !important;
-            filter: none !important;
         }
 
         .hero-card.red { color: #dc2626 !important; }
         .hero-card.black { color: #000000 !important; }
 
-        .hero-card .card-rank { font-size: 26px; line-height: 1; }
-        .hero-card .card-suit { font-size: 28px; line-height: 1; }
+        .hero-card .card-rank { font-size: 24px; line-height: 1; }
+        .hero-card .card-suit { font-size: 26px; line-height: 1; }
 
-        /* ═══════ BETTING CONTROLS (ported from React) ═══════ */
-        .betting-controls {
-            background: rgba(0, 0, 0, 0.85);
-            border-radius: 16px;
+        /* Action buttons grid */
+        .action-buttons-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr 1fr;
             padding: 12px 16px;
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
             backdrop-filter: blur(12px);
@@ -1239,40 +1191,6 @@
             text-align: center;
         }
 
-        /* Rotation hint overlay */
-        .rotation-hint {
-            position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0,0,0,0.95);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            z-index: 200;
-        }
-
-        .rotation-icon {
-            font-size: 60px;
-            animation: rotateHint 2s ease-in-out infinite;
-        }
-
-        @keyframes rotateHint {
-            0%, 100% { transform: rotate(0deg); }
-            25% { transform: rotate(-20deg); }
-            75% { transform: rotate(20deg); }
-        }
-
-        .rotation-text {
-            font-size: 18px;
-            color: #fff;
-            margin-top: 16px;
-            text-align: center;
-        }
-
-        @media (orientation: landscape) {
-            .rotation-hint { display: none; }
-        }
-
         /* Winner Popup */
         .winner-popup {
             position: fixed;
@@ -1508,47 +1426,45 @@
     </div>
 
     <!-- ═══════════════════════════════════════════════════
-         SCREEN 4: POKER TABLE
+         SCREEN 4: POKER TABLE (PORTRAIT LAYOUT)
          ═══════════════════════════════════════════════════ -->
     <div id="pokerTableScreen" class="hidden">
-        <!-- Rotation hint for portrait mode -->
-        <div class="rotation-hint" id="rotationHint">
-            <div class="rotation-icon">📱🔄</div>
-            <div class="rotation-text">Rotate your device<br>for the best experience</div>
-        </div>
-
-        <!-- Table Header -->
-        <div class="table-header">
-            <button class="table-back-btn" onclick="leaveTable()">←</button>
+        <!-- Top Header Bar -->
+        <div class="poker-header">
+            <button class="table-back-btn" onclick="leaveTable()">← Menu</button>
             <div class="table-info">
                 <div class="table-info-name" id="tableInfoName">Daily Freeroll</div>
-                <div class="table-info-blinds" id="tableInfoBlinds">Blinds: 50/100</div>
+                <div class="table-info-blinds" id="tableInfoBlinds">PRE-FLOP</div>
+            </div>
+            <div class="header-spacer"></div>
+        </div>
+
+        <!-- Table Container (centers the vertical oval) -->
+        <div class="poker-table-container">
+            <div class="poker-table">
+                <div class="table-felt"></div>
+                
+                <!-- POT Display -->
+                <div class="pot-center">
+                    <div class="pot-label">POT</div>
+                    <div class="pot-amount" id="potAmount">$0</div>
+                </div>
+                
+                <!-- Community Cards -->
+                <div class="community-cards" id="communityCards">
+                    <!-- Cards rendered here -->
+                </div>
+
+                <!-- Player Seats (6-max portrait layout) -->
+                <div id="playerSeats">
+                    <!-- Players rendered dynamically -->
+                </div>
             </div>
         </div>
 
-        <!-- Poker Table -->
-        <div class="poker-table">
-            <div class="table-felt"></div>
-            
-            <!-- POT in CENTER -->
-            <div class="pot-center">
-                <div class="pot-label">POT</div>
-                <div class="pot-amount" id="potAmount">$0</div>
-            </div>
-            
-            <!-- Community Cards -->
-            <div class="community-cards" id="communityCards">
-                <!-- Cards will be rendered here -->
-            </div>
-
-            <!-- Player Seats -->
-            <div id="playerSeats">
-                <!-- Players will be rendered here -->
-            </div>
-        </div>
-
-        <!-- Hero Section with Betting Controls -->
-        <div class="hero-section">
+        <!-- Bottom Controls Panel -->
+        <div class="poker-controls-bottom">
+            <!-- Hero Cards -->
             <div class="hero-cards" id="heroCards">
                 <div class="hero-card red">
                     <span class="card-rank">A</span>
@@ -1560,26 +1476,22 @@
                 </div>
             </div>
             
-            <!-- Betting Controls (ported from React) -->
-            <div class="betting-controls" id="bettingControls">
-                <div class="controls-row">
-                    <div class="phase-indicator" id="phaseIndicator">PRE-FLOP</div>
-                    <div class="action-buttons" id="actionButtons">
-                        <button class="action-btn fold" onclick="playerAction('fold')">Fold</button>
-                        <button class="action-btn call" onclick="playerAction('call')" id="callBtn">Check</button>
-                        <button class="action-btn raise" onclick="playerAction('raise')" id="raiseBtn">Bet $20</button>
-                        <button class="action-btn allin" onclick="playerAction('allin')">All In</button>
-                    </div>
-                </div>
-                <div class="slider-row">
-                    <div class="bet-amount-display" id="betDisplay">$20</div>
-                    <input type="range" class="bet-slider" id="betSlider" min="20" max="1000" value="20" oninput="updateBetSlider(this.value)">
-                    <div class="quick-bets">
-                        <button class="quick-bet-btn" onclick="quickBet(1)">1x</button>
-                        <button class="quick-bet-btn" onclick="quickBet(1.5)">1.5x</button>
-                        <button class="quick-bet-btn" onclick="quickBet(2)">2x</button>
-                        <button class="quick-bet-btn" onclick="quickBet(3)">3x</button>
-                    </div>
+            <!-- Action Buttons Row -->
+            <div class="action-buttons-row" id="actionButtons">
+                <button class="action-btn fold" onclick="playerAction('fold')">Fold</button>
+                <button class="action-btn call" onclick="playerAction('call')" id="callBtn">Check</button>
+                <button class="action-btn raise" onclick="playerAction('raise')" id="raiseBtn">Bet</button>
+                <button class="action-btn allin" onclick="playerAction('allin')">All In</button>
+            </div>
+            
+            <!-- Bet Slider Row -->
+            <div class="slider-row">
+                <div class="bet-amount-display" id="betDisplay">$20</div>
+                <input type="range" class="bet-slider" id="betSlider" min="20" max="1000" value="20" oninput="updateBetSlider(this.value)">
+                <div class="quick-bets">
+                    <button class="quick-bet-btn" onclick="quickBet(2)">2x</button>
+                    <button class="quick-bet-btn" onclick="quickBet(3)">3x</button>
+                    <button class="quick-bet-btn" onclick="quickBet(0)">MAX</button>
                 </div>
             </div>
         </div>
@@ -1829,18 +1741,8 @@
 
         function joinTable(tableName) {
             addDebug('Join: ' + tableName);
-            
-            // Check orientation - suggest landscape for better experience
-            if (window.innerHeight > window.innerWidth) {
-                // Portrait mode - show rotation hint
-                showAlert('🔄 Rotate your device to landscape for the best poker experience!\n\n🎮 Joining "' + tableName + '"...');
-                setTimeout(function() {
-                    loadPokerTable(tableName);
-                }, 2000);
-            } else {
-                // Already landscape - load directly
-                loadPokerTable(tableName);
-            }
+            // Portrait mode is now default - load directly
+            loadPokerTable(tableName);
         }
 
         // ═══════════════════════════════════════════════════
@@ -2068,28 +1970,31 @@
             document.getElementById('lobbyScreen').classList.add('hidden');
             document.getElementById('pokerTableScreen').classList.remove('hidden');
             
-            // ═══════ MOBILE OPTIMIZATIONS ═══════
-            // Try fullscreen for better experience
-            try {
-                if (document.documentElement.requestFullscreen) {
-                    document.documentElement.requestFullscreen().catch(function() {});
-                } else if (document.documentElement.webkitRequestFullscreen) {
-                    document.documentElement.webkitRequestFullscreen();
-                }
-            } catch(e) {}
-            
-            // Try to lock orientation to landscape
-            try {
-                if (screen.orientation && screen.orientation.lock) {
-                    screen.orientation.lock('landscape').catch(function() {});
-                }
-            } catch(e) {}
-            
-            // Hide address bar on mobile
-            setTimeout(function() { window.scrollTo(0, 1); }, 100);
+            // Initialize players for portrait layout
+            initPortraitPlayerPositions();
             
             // Start first hand after delay
             setTimeout(startNewHand, 1500);
+        }
+
+        // ═══════════════════════════════════════════════════
+        // PORTRAIT PLAYER POSITIONING
+        // ═══════════════════════════════════════════════════
+        function initPortraitPlayerPositions() {
+            // For 6-max table, user is always seat 0 (bottom center)
+            // Other players arranged clockwise
+            var positions = [
+                'seat-0',  // Bottom (USER)
+                'seat-1',  // Left lower
+                'seat-2',  // Left upper
+                'seat-3',  // Top
+                'seat-4',  // Right upper
+                'seat-5'   // Right lower
+            ];
+            
+            gameState.players.forEach(function(player, index) {
+                player.position = positions[index % 6];
+            });
         }
 
         function startNewHand() {
@@ -2670,8 +2575,12 @@
             var container = document.getElementById('playerSeats');
             var html = '';
             
+            // Portrait positions for 6-max
+            var positions = ['seat-0', 'seat-1', 'seat-2', 'seat-3', 'seat-4', 'seat-5'];
+            var playerIndex = 0;
+            
             gameState.players.forEach(function(player) {
-                if (player.isHero) return;
+                if (player.isHero) return; // Hero is in bottom controls
                 
                 var avatarClass = 'player-avatar';
                 if (player.status === 'folded') avatarClass += ' folded';
@@ -2683,13 +2592,18 @@
                     timerHtml = '<div class="player-timer">' + gameState.timeRemaining + 's</div>';
                 }
                 
-                html += '<div class="player-seat seat-' + player.seat + '">' +
-                    '<div class="' + avatarClass + '">' + player.name.charAt(0) + '</div>' +
-                    '<div class="player-name">' + player.name + '</div>' +
-                    '<div class="player-chips">$' + player.chips + '</div>' +
-                    (player.bet > 0 ? '<div class="player-bet">$' + player.bet + '</div>' : '') +
-                    timerHtml +
-                    '<div class="player-cards"><div class="player-card"></div><div class="player-card"></div></div>' +
+                // Use portrait position based on player index (skip 0 which is hero)
+                var positionClass = positions[(playerIndex % 5) + 1];
+                playerIndex++;
+                
+                html += '<div class="player-seat ' + positionClass + '">' +
+                    '<div class="player-card-container">' +
+                        '<div class="' + avatarClass + '">' + player.name.charAt(0) + timerHtml + '</div>' +
+                        '<div class="player-name">' + player.name + '</div>' +
+                        '<div class="player-chips">$' + player.chips + '</div>' +
+                        (player.bet > 0 ? '<div class="player-bet">$' + player.bet + '</div>' : '') +
+                        '<div class="player-cards"><div class="player-card"></div><div class="player-card"></div></div>' +
+                    '</div>' +
                 '</div>';
             });
             
