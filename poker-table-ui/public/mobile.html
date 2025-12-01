@@ -729,43 +729,43 @@
             border-radius: 48% / 42%;
         }
 
-        /* ═══════ POT DISPLAY - HIGHER (ABOVE CARDS) ═══════ */
+        /* ═══════ POT DISPLAY - VERY TOP (NO OVERLAP) ═══════ */
         .pot-center {
             position: absolute;
-            top: 12%;
+            top: 6%;
             left: 50%;
-            transform: translateX(-50%) rotateX(-3deg);
-            background: rgba(0,0,0,0.75);
-            padding: 5px 14px;
-            border-radius: 20px;
-            border: 2px solid #fbbf24;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
-            z-index: 25;
+            transform: translateX(-50%) scale(0.9);
+            background: rgba(0,0,0,0.8);
+            padding: 3px 10px;
+            border-radius: 14px;
+            border: 1.5px solid #fbbf24;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.5);
+            z-index: 30;
             text-align: center;
         }
 
         .pot-label {
-            font-size: 8px;
+            font-size: 6px;
             color: #94a3b8;
             text-transform: uppercase;
-            letter-spacing: 1px;
+            letter-spacing: 0.5px;
         }
 
         .pot-amount {
-            font-size: 17px;
+            font-size: 13px;
             font-weight: 700;
             color: #fbbf24;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+            text-shadow: 0 1px 3px rgba(0,0,0,0.5);
         }
 
-        /* ═══════ COMMUNITY CARDS - CENTER (BELOW POT) ═══════ */
+        /* ═══════ COMMUNITY CARDS - CENTER ═══════ */
         .community-cards {
             position: absolute;
-            top: 48%;
+            top: 45%;
             left: 50%;
-            transform: translate(-50%, -50%) rotateX(-3deg);
+            transform: translate(-50%, -50%) rotateX(-2deg);
             display: flex;
-            gap: 5px;
+            gap: 4px;
             z-index: 15;
         }
 
@@ -803,7 +803,7 @@
             color: #fff;
         }
 
-        /* ═══════ PLAYER SEATS - MORE OVERLAY ON TABLE ═══════ */
+        /* ═══════ PLAYER SEATS - CLOSER TO CENTER ═══════ */
         .player-seat {
             position: absolute;
             display: flex;
@@ -813,21 +813,21 @@
             transform-style: preserve-3d;
         }
 
-        /* Seat positions - CLOSER to center (more overlay) */
-        .seat-top { top: -28px; left: 50%; transform: translateX(-50%) scale(0.88); }
-        .seat-left-upper { top: 18%; left: -32px; transform: scale(0.9); }
-        .seat-left-lower { top: 58%; left: -32px; transform: scale(0.92); }
-        .seat-bottom { bottom: -32px; left: 50%; transform: translateX(-50%) scale(1); }
-        .seat-right-lower { top: 58%; right: -32px; transform: scale(0.92); }
-        .seat-right-upper { top: 18%; right: -32px; transform: scale(0.9); }
+        /* Seat positions - EVEN CLOSER to center (-22px) */
+        .seat-top { top: -26px; left: 50%; transform: translateX(-50%) scale(0.88); }
+        .seat-left-upper { top: 20%; left: -22px; transform: scale(0.88); }
+        .seat-left-lower { top: 60%; left: -22px; transform: scale(0.9); }
+        .seat-bottom { bottom: -30px; left: 50%; transform: translateX(-50%) scale(1); }
+        .seat-right-lower { top: 60%; right: -22px; transform: scale(0.9); }
+        .seat-right-upper { top: 20%; right: -22px; transform: scale(0.88); }
 
         /* Legacy seat classes (for JS compatibility) */
-        .seat-0 { bottom: -32px; left: 50%; transform: translateX(-50%) scale(1); }
-        .seat-1 { top: 58%; left: -32px; transform: scale(0.92); }
-        .seat-2 { top: 18%; left: -32px; transform: scale(0.9); }
-        .seat-3 { top: -28px; left: 50%; transform: translateX(-50%) scale(0.88); }
-        .seat-4 { top: 18%; right: -32px; transform: scale(0.9); }
-        .seat-5 { top: 58%; right: -32px; transform: scale(0.92); }
+        .seat-0 { bottom: -30px; left: 50%; transform: translateX(-50%) scale(1); }
+        .seat-1 { top: 60%; left: -22px; transform: scale(0.9); }
+        .seat-2 { top: 20%; left: -22px; transform: scale(0.88); }
+        .seat-3 { top: -26px; left: 50%; transform: translateX(-50%) scale(0.88); }
+        .seat-4 { top: 20%; right: -22px; transform: scale(0.88); }
+        .seat-5 { top: 60%; right: -22px; transform: scale(0.9); }
 
         .player-card-container {
             background: rgba(30, 41, 59, 0.9);
@@ -904,23 +904,22 @@
             box-shadow: 0 2px 4px rgba(0,0,0,0.4);
         }
 
-        /* ═══════ BOTTOM CONTROLS - RAISED + DARK BACKGROUND ═══════ */
+        /* ═══════ BOTTOM CONTROLS - TRANSPARENT GRADIENT ═══════ */
         .poker-controls-bottom {
             position: fixed;
-            bottom: 35px; left: 0; right: 0;
-            background: rgba(0, 0, 0, 0.8) !important;
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            padding: 10px 12px 16px;
+            bottom: 30px; left: 0; right: 0;
+            background: linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.4) 60%, transparent 100%) !important;
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
+            padding: 12px 12px 16px;
             z-index: 100;
-            border-top: 1px solid rgba(212, 175, 55, 0.3);
-            box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.6);
+            border-top: none;
             display: flex;
             flex-direction: column;
             gap: 8px;
         }
 
-        /* Hero cards row - LARGER */
+        /* Hero cards row */
         .hero-cards {
             display: flex;
             justify-content: center;
@@ -931,7 +930,7 @@
         }
 
         .hero-card {
-            width: 52px; height: 72px;
+            width: 50px; height: 70px;
             background: #ffffff !important;
             border-radius: 6px;
             display: flex;
@@ -939,7 +938,7 @@
             align-items: center;
             justify-content: center;
             font-weight: 700;
-            box-shadow: 0 4px 16px rgba(59,130,246,0.7), 0 0 0 1px rgba(255,255,255,0.3);
+            box-shadow: 0 4px 18px rgba(59,130,246,0.8), 0 0 0 2px rgba(255,255,255,0.3);
             border: 2.5px solid #3b82f6;
         }
 
@@ -1041,7 +1040,7 @@
         /* ═══════ GAME PHASE INDICATOR - RIGHT SIDE ═══════ */
         .game-phase-indicator {
             position: fixed;
-            bottom: 175px;
+            bottom: 165px;
             right: 6px;
             background: linear-gradient(135deg, rgba(34, 197, 94, 0.95), rgba(22, 163, 74, 0.95));
             padding: 4px 8px;
@@ -1050,7 +1049,7 @@
             font-weight: 700;
             color: white;
             letter-spacing: 0.5px;
-            box-shadow: 0 3px 8px rgba(34, 197, 94, 0.5);
+            box-shadow: 0 3px 10px rgba(34, 197, 94, 0.6);
             z-index: 50;
         }
 
@@ -1064,7 +1063,7 @@
             background: linear-gradient(135deg, rgba(239, 68, 68, 0.95), rgba(220, 38, 38, 0.95));
         }
 
-        /* Bet Slider Row - COMPACT */
+        /* Bet Slider Row */
         .slider-row {
             display: flex;
             align-items: center;
@@ -1074,10 +1073,10 @@
         .bet-amount-display {
             min-width: 50px;
             text-align: center;
-            font-size: 12px;
+            font-size: 13px;
             font-weight: 700;
             color: #fbbf24;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+            text-shadow: 0 2px 6px rgba(0,0,0,0.7), 0 0 8px rgba(251,191,36,0.3);
         }
 
         .bet-slider {
@@ -1186,7 +1185,7 @@
         /* ═══════ HAND STRENGTH HUD - LEFT SIDE ═══════ */
         .hand-hud {
             position: fixed;
-            bottom: 175px;
+            bottom: 165px;
             left: 6px;
             background: linear-gradient(135deg, rgba(59, 130, 246, 0.95), rgba(37, 99, 235, 0.95));
             border-radius: 6px;
@@ -1194,7 +1193,7 @@
             display: flex;
             flex-direction: column;
             gap: 2px;
-            box-shadow: 0 3px 10px rgba(59, 130, 246, 0.5);
+            box-shadow: 0 3px 12px rgba(59, 130, 246, 0.6);
             backdrop-filter: blur(8px);
             z-index: 50;
             animation: slideInLeft 0.3s ease-out;
