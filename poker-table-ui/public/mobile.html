@@ -4016,7 +4016,8 @@
                     smallBlind: parseInt(smallBlind),
                     bigBlind: parseInt(bigBlind),
                     players: [{ name: userName, isHost: true }],
-                    serverData: data.lobby
+                    serverData: data.lobby,
+                    isHost: true  // Creator is the host
                 };
                 
                 // Update UI with server code
@@ -4040,7 +4041,7 @@
             }
         }
 
-        function joinPrivateLobby() {
+        async function joinPrivateLobby() {
             var code = document.getElementById('lobbyCodeInput').value.toUpperCase().trim();
             
             if (code.length !== 6) {
@@ -4048,24 +4049,77 @@
                 return;
             }
             
-            addDebug('Joining lobby: ' + code);
+            addDebug('Joining lobby via API: ' + code);
             
-            // Simulate joining (in real app, this would be a server call)
-            currentPrivateLobby = {
-                code: code,
-                buyIn: 1000,
-                maxPlayers: 6,
-                smallBlind: 10,
-                bigBlind: 20,
-                players: [
-                    { name: 'Host', isHost: true },
-                    { name: userName, isHost: false }
-                ]
-            };
-            
-            // Close modal and start game
-            closePrivateGameModal();
-            startPrivateGame();
+            try {
+                // First get lobby info from server
+                var lobbyResponse = await fetch(API_BASE + '/api/lobby/' + code);
+                
+                if (!lobbyResponse.ok) {
+                    var errData = await lobbyResponse.json().catch(function() { return {}; });
+                    throw new Error(errData.detail || 'Lobby not found');
+                }
+                
+                var lobbyData = await lobbyResponse.json();
+                addDebug('Found lobby on server');
+                
+                // Join the lobby
+                var joinResponse = await fetch(API_BASE + '/api/lobby/' + code + '/join', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        initData: tg ? tg.initData : ''
+                    })
+                });
+                
+                if (!joinResponse.ok) {
+                    var joinErr = await joinResponse.json().catch(function() { return {}; });
+                    throw new Error(joinErr.detail || 'Failed to join lobby');
+                }
+                
+                var joinData = await joinResponse.json();
+                var serverLobby = joinData.lobby;
+                
+                addDebug('Joined lobby successfully');
+                
+                // Convert server players to our format
+                var players = [];
+                if (serverLobby.players) {
+                    for (var playerId in serverLobby.players) {
+                        var p = serverLobby.players[playerId];
+                        players.push({
+                            name: p.first_name || p.username || 'Player',
+                            isHost: p.is_host
+                        });
+                    }
+                }
+                
+                currentPrivateLobby = {
+                    code: code,
+                    buyIn: serverLobby.buy_in || 1000,
+                    maxPlayers: serverLobby.max_players || 6,
+                    smallBlind: 10,
+                    bigBlind: 20,
+                    players: players,
+                    serverData: serverLobby,
+                    isHost: false  // Guest joining
+                };
+                
+                // Close modal and go to waiting room (NOT start game!)
+                closePrivateGameModal();
+                document.getElementById('mainMenu').classList.add('hidden');
+                
+                // Connect to WebSocket for real-time updates
+                connectToLobbyWebSocket(code);
+                
+                // Show waiting room
+                updateWaitingRoomUI();
+                document.getElementById('waitingRoomScreen').classList.remove('hidden');
+                
+            } catch (err) {
+                addDebug('Join lobby error: ' + err.message);
+                showAlert('⚠️ ' + err.message);
+            }
         }
 
         function inviteViaTelegram() {
@@ -4212,18 +4266,28 @@
             
             grid.innerHTML = html;
             
-            // Update start button state
+            // Update start button state based on host status
             var startBtn = document.getElementById('waitingStartBtn');
             var statusEl = document.getElementById('waitingStatus');
+            var isHost = currentPrivateLobby.isHost === true;
             
-            if (players.length >= 2) {
-                startBtn.disabled = false;
-                statusEl.className = 'waiting-status ready';
-                statusEl.innerHTML = '✅ Ready to start!';
+            // Only host can see and use Start button
+            if (isHost) {
+                startBtn.style.display = 'flex';
+                if (players.length >= 2) {
+                    startBtn.disabled = false;
+                    statusEl.className = 'waiting-status ready';
+                    statusEl.innerHTML = '✅ Ready to start!';
+                } else {
+                    startBtn.disabled = true;
+                    statusEl.className = 'waiting-status';
+                    statusEl.innerHTML = '<span class="waiting-dot">⏳</span> Waiting for players to join...';
+                }
             } else {
-                startBtn.disabled = true;
+                // Guest - hide start button, show waiting message
+                startBtn.style.display = 'none';
                 statusEl.className = 'waiting-status';
-                statusEl.innerHTML = '<span class="waiting-dot">⏳</span> Waiting for players to join...';
+                statusEl.innerHTML = '<span class="waiting-dot">⏳</span> Waiting for host to start the game...';
             }
         }
 
@@ -4233,9 +4297,57 @@
             currentPrivateLobby = null;
         }
 
-        function startGameFromWaitingRoom() {
+        async function startGameFromWaitingRoom() {
             if (!currentPrivateLobby) return;
-            startPrivateGame();
+            
+            addDebug('Starting game from waiting room...');
+            
+            try {
+                // Call server API to start game
+                var response = await fetch(API_BASE + '/api/lobby/' + currentPrivateLobby.code + '/start', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        initData: tg ? tg.initData : ''
+                    })
+                });
+                
+                if (!response.ok) {
+                    var errData = await response.json().catch(function() { return {}; });
+                    throw new Error(errData.detail || 'Failed to start game');
+                }
+                
+                var data = await response.json();
+                addDebug('Game started on server: ' + data.gameSessionId);
+                
+                // Server will broadcast 'gameStarted' via WebSocket
+                // which will trigger startPrivateGame() for all players
+                // But host can also start immediately
+                startMultiplayerGame(data.gameSessionId);
+                
+            } catch (err) {
+                addDebug('Start game error: ' + err.message);
+                showAlert('⚠️ ' + err.message);
+            }
+        }
+        
+        function startMultiplayerGame(gameSessionId) {
+            addDebug('Starting multiplayer game: ' + gameSessionId);
+            
+            // Hide waiting room
+            document.getElementById('waitingRoomScreen').classList.add('hidden');
+            
+            // Show poker table
+            document.getElementById('pokerTableScreen').classList.remove('hidden');
+            
+            // TODO: Connect to game WebSocket for real multiplayer
+            // For now, show a placeholder message
+            var tableNameEl = document.getElementById('tableName');
+            if (tableNameEl) {
+                tableNameEl.textContent = 'Multiplayer Game - ' + currentPrivateLobby.code;
+            }
+            
+            addDebug('Multiplayer game screen shown');
         }
 
         // ═══════════════════════════════════════════════════
@@ -4410,8 +4522,8 @@
                     break;
                     
                 case 'gameStarted':
-                    addDebug('Game started by host!');
-                    startPrivateGame();
+                    addDebug('Game started by host! Session: ' + data.gameSessionId);
+                    startMultiplayerGame(data.gameSessionId);
                     break;
                     
                 case 'lobbyState':
