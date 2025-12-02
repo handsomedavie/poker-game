@@ -3976,38 +3976,65 @@
             return code;
         }
 
-        function createPrivateLobby() {
+        async function createPrivateLobby() {
             var buyIn = document.getElementById('buyInSelect').value;
             var maxPlayers = document.getElementById('maxPlayersSelect').value;
             var smallBlind = document.getElementById('smallBlindSelect').value;
             var bigBlind = document.getElementById('bigBlindSelect').value;
-            var lobbyCode = generateLobbyCode();
             
-            currentPrivateLobby = {
-                code: lobbyCode,
-                buyIn: parseInt(buyIn),
-                maxPlayers: parseInt(maxPlayers),
-                smallBlind: parseInt(smallBlind),
-                bigBlind: parseInt(bigBlind),
-                players: [{ name: userName, isHost: true }]
-            };
+            addDebug('Creating lobby on server...');
             
-            addDebug('Created lobby: ' + lobbyCode);
-            
-            // Update UI
-            document.getElementById('createdLobbyCode').textContent = lobbyCode;
-            document.getElementById('summaryBuyIn').textContent = '$' + parseInt(buyIn).toLocaleString();
-            document.getElementById('summaryBlinds').textContent = '$' + smallBlind + '/$' + bigBlind;
-            document.getElementById('summaryPlayers').textContent = maxPlayers;
-            document.getElementById('maxPlayersCount').textContent = maxPlayers;
-            document.getElementById('hostChip').textContent = '👑 ' + userName + ' (Host)';
-            
-            // Show created view
-            document.getElementById('createLobbyView').classList.add('hidden');
-            document.getElementById('lobbyCreatedView').classList.remove('hidden');
-            
-            // Hide tabs when lobby is created
-            document.querySelector('.private-game-tabs').style.display = 'none';
+            try {
+                // Call server API to create lobby
+                var response = await fetch(API_BASE + '/api/lobby/create', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        buyIn: parseInt(buyIn),
+                        maxPlayers: parseInt(maxPlayers),
+                        initData: tg ? tg.initData : ''
+                    })
+                });
+                
+                if (!response.ok) {
+                    var errData = await response.json().catch(function() { return {}; });
+                    throw new Error(errData.detail || 'Failed to create lobby');
+                }
+                
+                var data = await response.json();
+                var lobbyCode = data.lobbyCode;
+                
+                addDebug('Server created lobby: ' + lobbyCode);
+                
+                currentPrivateLobby = {
+                    code: lobbyCode,
+                    buyIn: parseInt(buyIn),
+                    maxPlayers: parseInt(maxPlayers),
+                    smallBlind: parseInt(smallBlind),
+                    bigBlind: parseInt(bigBlind),
+                    players: [{ name: userName, isHost: true }],
+                    serverData: data.lobby
+                };
+                
+                // Update UI with server code
+                document.getElementById('createdLobbyCode').textContent = lobbyCode;
+                document.getElementById('summaryBuyIn').textContent = '$' + parseInt(buyIn).toLocaleString();
+                document.getElementById('summaryBlinds').textContent = '$' + smallBlind + '/$' + bigBlind;
+                document.getElementById('summaryPlayers').textContent = maxPlayers;
+                document.getElementById('maxPlayersCount').textContent = maxPlayers;
+                document.getElementById('hostChip').textContent = '👑 ' + userName + ' (Host)';
+                
+                // Show created view
+                document.getElementById('createLobbyView').classList.add('hidden');
+                document.getElementById('lobbyCreatedView').classList.remove('hidden');
+                
+                // Hide tabs when lobby is created
+                document.querySelector('.private-game-tabs').style.display = 'none';
+                
+            } catch (err) {
+                addDebug('Create lobby error: ' + err.message);
+                showAlert('⚠️ Failed to create lobby: ' + err.message);
+            }
         }
 
         function joinPrivateLobby() {
@@ -4126,6 +4153,9 @@
             closePrivateGameModal();
             document.getElementById('mainMenu').classList.add('hidden');
             
+            // Connect to WebSocket for real-time updates
+            connectToLobbyWebSocket(currentPrivateLobby.code);
+            
             // Update waiting room UI
             updateWaitingRoomUI();
             
@@ -4134,9 +4164,20 @@
         }
 
         function updateWaitingRoomUI() {
-            if (!currentPrivateLobby) return;
+            if (!currentPrivateLobby) {
+                addDebug('updateWaitingRoomUI: no lobby!');
+                return;
+            }
             
-            document.getElementById('waitingLobbyCode').textContent = currentPrivateLobby.code;
+            addDebug('Updating UI with code: ' + currentPrivateLobby.code);
+            
+            var codeEl = document.getElementById('waitingLobbyCode');
+            if (codeEl) {
+                codeEl.textContent = currentPrivateLobby.code;
+                addDebug('Set code element to: ' + currentPrivateLobby.code);
+            } else {
+                addDebug('ERROR: waitingLobbyCode element not found!');
+            }
             document.getElementById('waitingBuyIn').textContent = '$' + currentPrivateLobby.buyIn.toLocaleString();
             document.getElementById('waitingBlinds').textContent = '$' + currentPrivateLobby.smallBlind + '/$' + currentPrivateLobby.bigBlind;
             document.getElementById('waitingMaxPlayers').textContent = currentPrivateLobby.maxPlayers;
@@ -4223,31 +4264,169 @@
             }
         }
 
-        function joinLobbyByCode(code) {
+        async function joinLobbyByCode(code) {
             code = code.toUpperCase().trim();
             addDebug('Joining lobby by code: ' + code);
             
-            // Create lobby object for joining
-            currentPrivateLobby = {
-                code: code,
-                buyIn: 1000,
-                maxPlayers: 6,
-                smallBlind: 10,
-                bigBlind: 20,
-                players: [
-                    { name: 'Host', isHost: true },
-                    { name: userName, isHost: false }
-                ]
-            };
+            try {
+                // First get lobby info from server
+                var lobbyResponse = await fetch(API_BASE + '/api/lobby/' + code);
+                
+                if (!lobbyResponse.ok) {
+                    var errData = await lobbyResponse.json().catch(function() { return {}; });
+                    throw new Error(errData.detail || 'Lobby not found');
+                }
+                
+                var lobbyData = await lobbyResponse.json();
+                addDebug('Found lobby: ' + JSON.stringify(lobbyData.lobby));
+                
+                // Join the lobby
+                var joinResponse = await fetch(API_BASE + '/api/lobby/' + code + '/join', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        initData: tg ? tg.initData : ''
+                    })
+                });
+                
+                if (!joinResponse.ok) {
+                    var joinErr = await joinResponse.json().catch(function() { return {}; });
+                    throw new Error(joinErr.detail || 'Failed to join lobby');
+                }
+                
+                var joinData = await joinResponse.json();
+                var serverLobby = joinData.lobby;
+                
+                addDebug('Joined lobby successfully');
+                
+                // Convert server players to our format
+                var players = [];
+                if (serverLobby.players) {
+                    for (var odlplayerId in serverLobby.players) {
+                        var p = serverLobby.players[odlplayerId];
+                        players.push({
+                            name: p.first_name || p.username || 'Player',
+                            isHost: p.is_host
+                        });
+                    }
+                }
+                
+                currentPrivateLobby = {
+                    code: code,
+                    buyIn: serverLobby.buy_in || 1000,
+                    maxPlayers: serverLobby.max_players || 6,
+                    smallBlind: 10,
+                    bigBlind: 20,
+                    players: players,
+                    serverData: serverLobby
+                };
+                
+                // Skip splash/main menu and go directly to waiting room
+                document.getElementById('splashScreen').style.display = 'none';
+                document.getElementById('mainMenu').classList.add('hidden');
+                document.getElementById('fullscreenRequestScreen').classList.add('hidden');
+                
+                // Connect to WebSocket for real-time updates
+                connectToLobbyWebSocket(code);
+                
+                // Show waiting room
+                updateWaitingRoomUI();
+                document.getElementById('waitingRoomScreen').classList.remove('hidden');
+                
+            } catch (err) {
+                addDebug('Join lobby error: ' + err.message);
+                showAlert('⚠️ ' + err.message);
+                
+                // Show main menu if join failed
+                document.getElementById('splashScreen').style.display = 'none';
+                document.getElementById('mainMenu').classList.remove('hidden');
+            }
+        }
+
+        // ═══════════════════════════════════════════════════
+        // WEBSOCKET FOR REAL-TIME LOBBY UPDATES
+        // ═══════════════════════════════════════════════════
+        var lobbyWebSocket = null;
+        
+        function connectToLobbyWebSocket(lobbyCode) {
+            if (lobbyWebSocket) {
+                lobbyWebSocket.close();
+            }
             
-            // Skip splash/main menu and go directly to waiting room
-            document.getElementById('splashScreen').style.display = 'none';
-            document.getElementById('mainMenu').classList.add('hidden');
-            document.getElementById('fullscreenRequestScreen').classList.add('hidden');
+            var wsUrl = API_BASE.replace('https://', 'wss://').replace('http://', 'ws://') + '/ws/lobby/' + lobbyCode;
+            addDebug('Connecting to WebSocket: ' + wsUrl);
             
-            // Show waiting room
-            updateWaitingRoomUI();
-            document.getElementById('waitingRoomScreen').classList.remove('hidden');
+            try {
+                lobbyWebSocket = new WebSocket(wsUrl);
+                
+                lobbyWebSocket.onopen = function() {
+                    addDebug('WebSocket connected');
+                };
+                
+                lobbyWebSocket.onmessage = function(event) {
+                    try {
+                        var data = JSON.parse(event.data);
+                        addDebug('WS message: ' + data.type);
+                        handleLobbyEvent(data);
+                    } catch (e) {
+                        addDebug('WS parse error: ' + e.message);
+                    }
+                };
+                
+                lobbyWebSocket.onclose = function() {
+                    addDebug('WebSocket closed');
+                };
+                
+                lobbyWebSocket.onerror = function(err) {
+                    addDebug('WebSocket error');
+                };
+            } catch (e) {
+                addDebug('WebSocket connection failed: ' + e.message);
+            }
+        }
+        
+        function handleLobbyEvent(data) {
+            if (!currentPrivateLobby) return;
+            
+            switch (data.type) {
+                case 'playerJoined':
+                    // Add new player
+                    if (data.player) {
+                        currentPrivateLobby.players.push({
+                            name: data.player.first_name || data.player.username || 'Player',
+                            isHost: data.player.is_host
+                        });
+                        updateWaitingRoomUI();
+                        addDebug('Player joined: ' + (data.player.first_name || 'Player'));
+                    }
+                    break;
+                    
+                case 'playerLeft':
+                    // Remove player (simplified - just refresh)
+                    addDebug('Player left');
+                    break;
+                    
+                case 'gameStarted':
+                    addDebug('Game started by host!');
+                    startPrivateGame();
+                    break;
+                    
+                case 'lobbyState':
+                    // Full state update
+                    if (data.lobby) {
+                        var players = [];
+                        for (var pid in data.lobby.players) {
+                            var p = data.lobby.players[pid];
+                            players.push({
+                                name: p.first_name || p.username || 'Player',
+                                isHost: p.is_host
+                            });
+                        }
+                        currentPrivateLobby.players = players;
+                        updateWaitingRoomUI();
+                    }
+                    break;
+            }
         }
 
         // Check for lobby code on page load
