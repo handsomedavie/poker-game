@@ -7,7 +7,47 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>Poker House</title>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <!-- Critical: Show loading indicator immediately -->
+    <style>
+        .initial-loader {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: #0a0f18;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 99999;
+            color: #fb923c;
+            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+        .initial-loader.loaded { display: none; }
+        .loader-spinner {
+            width: 50px; height: 50px;
+            border: 4px solid #1a2332;
+            border-top-color: #fb923c;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .loader-text { margin-top: 20px; font-size: 18px; }
+    </style>
+    <script>
+        // Load Telegram SDK with timeout fallback
+        var tgScriptLoaded = false;
+        var tgScript = document.createElement('script');
+        tgScript.src = 'https://telegram.org/js/telegram-web-app.js';
+        tgScript.onload = function() { tgScriptLoaded = true; };
+        tgScript.onerror = function() { console.log('TG SDK failed to load'); };
+        document.head.appendChild(tgScript);
+        
+        // Fallback: continue without SDK after 3 seconds
+        setTimeout(function() {
+            if (!tgScriptLoaded) {
+                console.log('TG SDK timeout - continuing without it');
+            }
+        }, 3000);
+    </script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         
@@ -2135,6 +2175,11 @@
     </style>
 </head>
 <body>
+    <!-- CRITICAL: Initial loader - shows immediately while JS loads -->
+    <div id="initialLoader" class="initial-loader">
+        <div class="loader-spinner"></div>
+        <div class="loader-text">🎰 Loading Poker House...</div>
+    </div>
 
     <!-- ═══════════════════════════════════════════════════
          SCREEN 0: FULLSCREEN REQUEST (shows first on mobile)
@@ -2636,54 +2681,59 @@
             startSplashTimer();
         }
 
-        // Telegram WebApp
+        // Telegram WebApp - check existence, not initData value
         var tg = window.Telegram && window.Telegram.WebApp;
+        var isTelegramApp = !!(tg && typeof tg.initData !== 'undefined');
+        
         if (tg) {
-            tg.ready();
-            tg.expand();
+            try {
+                tg.ready();
+                tg.expand();
+            } catch(e) {}
             addDebug('TG OK');
         }
 
+        // Hide initial loader
+        function hideInitialLoader() {
+            var loader = document.getElementById('initialLoader');
+            if (loader) loader.classList.add('loaded');
+        }
+
         // ═══════════════════════════════════════════════════
-        // APP INITIALIZATION - Show fullscreen request first
+        // APP INITIALIZATION
         // ═══════════════════════════════════════════════════
         window.addEventListener('DOMContentLoaded', function() {
             addDebug('DOM loaded');
             
+            // Hide loader first
+            hideInitialLoader();
+            
             try {
-                // In Telegram: skip fullscreen request, go straight to splash
-                var isTelegram = window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initData;
-                
-                if (isTelegram) {
-                    addDebug('Telegram detected - fast load');
-                    // Expand Telegram WebApp
-                    try { tg.expand(); } catch(e) {}
-                    
-                    // Skip splash, go directly to main menu for faster loading
+                // In Telegram: skip all intermediate screens
+                if (isTelegramApp) {
+                    addDebug('Telegram app - fast load');
                     document.getElementById('splashScreen').style.display = 'none';
                     document.getElementById('fullscreenRequestScreen').classList.add('hidden');
                     document.getElementById('mainMenu').classList.remove('hidden');
-                    updateUserUI();
+                    try { updateUserUI(); } catch(e) {}
                     return;
                 }
                 
-                var hasSeenRequest = localStorage.getItem('hasSeenFullscreenRequest');
+                // In browser: check for fullscreen request
+                var hasSeenRequest = false;
+                try { hasSeenRequest = localStorage.getItem('hasSeenFullscreenRequest'); } catch(e) {}
                 
                 if (!hasSeenRequest) {
-                    // First time - show fullscreen request, hide splash
                     document.getElementById('splashScreen').style.display = 'none';
                     document.getElementById('fullscreenRequestScreen').classList.remove('hidden');
                 } else {
-                    // Already seen - go directly to splash and start timer
                     document.getElementById('fullscreenRequestScreen').classList.add('hidden');
                     document.getElementById('splashScreen').style.display = 'flex';
                     startSplashTimer();
                 }
             } catch (e) {
                 addDebug('Init error: ' + e.message);
-                // Fallback - show main menu immediately
-                document.getElementById('splashScreen').style.display = 'none';
-                document.getElementById('fullscreenRequestScreen').classList.add('hidden');
+                // Ultimate fallback
                 document.getElementById('mainMenu').classList.remove('hidden');
             }
         });
