@@ -4043,7 +4043,12 @@
             
             var lobbyCode = currentPrivateLobby.code;
             var botUsername = 'pokerhouse77bot';
-            var inviteLink = 'https://t.me/' + botUsername + '?start=lobby_' + lobbyCode;
+            
+            // Use direct Mini App link with startapp parameter
+            // Format: https://t.me/botusername/appname?startapp=param
+            // This opens the Mini App directly without requiring a second click
+            var inviteLink = 'https://t.me/' + botUsername + '/poker?startapp=lobby_' + lobbyCode;
+            
             var message = '🎰 Join my Private Poker Game!\n\n' +
                 '📍 Lobby Code: ' + lobbyCode + '\n' +
                 '💰 Buy-in: $' + currentPrivateLobby.buyIn.toLocaleString() + '\n' +
@@ -4064,7 +4069,9 @@
             
             var lobbyCode = currentPrivateLobby.code;
             var botUsername = 'pokerhouse77bot';
-            var inviteLink = 'https://t.me/' + botUsername + '?start=lobby_' + lobbyCode;
+            
+            // Use direct Mini App link - opens app directly without extra click
+            var inviteLink = 'https://t.me/' + botUsername + '/poker?startapp=lobby_' + lobbyCode;
             
             // Copy to clipboard
             if (navigator.clipboard) {
@@ -4191,11 +4198,27 @@
         // URL PARAMETER HANDLING FOR LOBBY INVITE
         // ═══════════════════════════════════════════════════
         function checkUrlForLobby() {
-            var urlParams = new URLSearchParams(window.location.search);
-            var lobbyCode = urlParams.get('lobby');
+            var lobbyCode = null;
+            
+            // Check Telegram WebApp startapp parameter first (highest priority)
+            // This is set when user clicks direct Mini App link: t.me/bot/app?startapp=lobby_XXXXX
+            if (tg && tg.initDataUnsafe && tg.initDataUnsafe.start_param) {
+                var startParam = tg.initDataUnsafe.start_param;
+                addDebug('TG start_param: ' + startParam);
+                
+                if (startParam.startsWith('lobby_')) {
+                    lobbyCode = startParam.replace('lobby_', '');
+                }
+            }
+            
+            // Fallback: check URL parameter
+            if (!lobbyCode) {
+                var urlParams = new URLSearchParams(window.location.search);
+                lobbyCode = urlParams.get('lobby');
+            }
             
             if (lobbyCode) {
-                addDebug('Lobby code from URL: ' + lobbyCode);
+                addDebug('Lobby code found: ' + lobbyCode);
                 joinLobbyByCode(lobbyCode);
             }
         }
