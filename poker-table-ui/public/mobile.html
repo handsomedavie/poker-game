@@ -1895,6 +1895,243 @@
             border-color: rgba(251, 191, 36, 0.4);
             color: #fbbf24;
         }
+
+        /* ═══════════════════════════════════════════════════
+           PRIVATE LOBBY WAITING ROOM
+           ═══════════════════════════════════════════════════ */
+        #waitingRoomScreen {
+            min-height: 100vh;
+            background: linear-gradient(180deg, #0f172a 0%, #1e293b 100%);
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+        }
+
+        .waiting-room-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .waiting-room-back {
+            background: rgba(239, 68, 68, 0.2);
+            border: none;
+            color: #ef4444;
+            font-size: 20px;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        .waiting-room-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: #fbbf24;
+        }
+
+        .waiting-room-code {
+            background: linear-gradient(135deg, rgba(251, 191, 36, 0.2), rgba(245, 158, 11, 0.1));
+            border: 2px solid #fbbf24;
+            border-radius: 16px;
+            padding: 16px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .waiting-code-label {
+            color: #94a3b8;
+            font-size: 12px;
+            margin-bottom: 6px;
+        }
+
+        .waiting-code-value {
+            font-size: 32px;
+            font-weight: 800;
+            color: #fbbf24;
+            letter-spacing: 8px;
+        }
+
+        .waiting-room-info {
+            background: rgba(15, 23, 42, 0.6);
+            border-radius: 12px;
+            padding: 14px;
+            margin-bottom: 20px;
+        }
+
+        .waiting-info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+        }
+
+        .waiting-info-row:last-child {
+            border-bottom: none;
+        }
+
+        .waiting-info-label {
+            color: #94a3b8;
+            font-size: 14px;
+        }
+
+        .waiting-info-value {
+            color: #fff;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .waiting-players-section {
+            flex: 1;
+            background: rgba(15, 23, 42, 0.4);
+            border-radius: 16px;
+            padding: 16px;
+            margin-bottom: 20px;
+        }
+
+        .waiting-players-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .waiting-players-title {
+            color: #fff;
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .waiting-players-count {
+            background: rgba(59, 130, 246, 0.2);
+            color: #60a5fa;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .waiting-players-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+        }
+
+        .waiting-player-slot {
+            background: rgba(30, 41, 59, 0.8);
+            border: 2px dashed rgba(148, 163, 184, 0.3);
+            border-radius: 12px;
+            padding: 16px;
+            text-align: center;
+            min-height: 80px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .waiting-player-slot.occupied {
+            border: 2px solid rgba(34, 197, 94, 0.5);
+            background: rgba(34, 197, 94, 0.1);
+        }
+
+        .waiting-player-slot.host {
+            border: 2px solid rgba(251, 191, 36, 0.5);
+            background: rgba(251, 191, 36, 0.1);
+        }
+
+        .waiting-player-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 6px;
+        }
+
+        .waiting-player-slot.host .waiting-player-avatar {
+            background: linear-gradient(135deg, #fbbf24, #f59e0b);
+            color: #000;
+        }
+
+        .waiting-player-name {
+            color: #fff;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .waiting-player-slot.empty .waiting-player-avatar {
+            background: rgba(148, 163, 184, 0.2);
+            color: #64748b;
+        }
+
+        .waiting-player-slot.empty .waiting-player-name {
+            color: #64748b;
+        }
+
+        .waiting-room-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .waiting-invite-btn {
+            background: linear-gradient(135deg, #0088cc, #0077b5);
+            border: none;
+            border-radius: 12px;
+            padding: 14px;
+            color: #fff;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .waiting-start-btn {
+            background: linear-gradient(135deg, #22c55e, #16a34a);
+            border: none;
+            border-radius: 12px;
+            padding: 14px;
+            color: #fff;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .waiting-start-btn:disabled {
+            background: rgba(148, 163, 184, 0.3);
+            color: #64748b;
+            cursor: not-allowed;
+        }
+
+        .waiting-status {
+            text-align: center;
+            color: #94a3b8;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+
+        .waiting-status.ready {
+            color: #22c55e;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .waiting-dot {
+            animation: pulse 1.5s infinite;
+        }
     </style>
 </head>
 <body>
@@ -2157,8 +2394,60 @@
                         </button>
                     </div>
 
-                    <button class="start-game-btn" onclick="startPrivateGame()">▶️ Start Game</button>
+                    <button class="start-game-btn" onclick="goToWaitingRoom()">▶️ Start Game</button>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════
+         SCREEN: WAITING ROOM FOR PRIVATE LOBBY
+         ═══════════════════════════════════════════════════ -->
+    <div id="waitingRoomScreen" class="hidden">
+        <div class="waiting-room-header">
+            <button class="waiting-room-back" onclick="leaveWaitingRoom()">←</button>
+            <div class="waiting-room-title">🎰 Private Lobby</div>
+        </div>
+
+        <div class="waiting-room-code">
+            <div class="waiting-code-label">Lobby Code</div>
+            <div class="waiting-code-value" id="waitingLobbyCode">XXXXXX</div>
+        </div>
+
+        <div class="waiting-room-info">
+            <div class="waiting-info-row">
+                <span class="waiting-info-label">Buy-in</span>
+                <span class="waiting-info-value" id="waitingBuyIn">$1,000</span>
+            </div>
+            <div class="waiting-info-row">
+                <span class="waiting-info-label">Blinds</span>
+                <span class="waiting-info-value" id="waitingBlinds">$10/$20</span>
+            </div>
+            <div class="waiting-info-row">
+                <span class="waiting-info-label">Max Players</span>
+                <span class="waiting-info-value" id="waitingMaxPlayers">6</span>
+            </div>
+        </div>
+
+        <div class="waiting-players-section">
+            <div class="waiting-players-header">
+                <span class="waiting-players-title">Players</span>
+                <span class="waiting-players-count" id="waitingPlayersCount">1/6</span>
+            </div>
+            <div class="waiting-players-grid" id="waitingPlayersGrid">
+                <!-- Players rendered dynamically -->
+            </div>
+        </div>
+
+        <div class="waiting-room-actions">
+            <button class="waiting-invite-btn" onclick="inviteViaTelegram()">
+                <span>📨</span> Invite Friends via Telegram
+            </button>
+            <button class="waiting-start-btn" id="waitingStartBtn" onclick="startGameFromWaitingRoom()">
+                ▶️ Start Game
+            </button>
+            <div class="waiting-status" id="waitingStatus">
+                <span class="waiting-dot">⏳</span> Waiting for players to join...
             </div>
         </div>
     </div>
@@ -3718,53 +4007,15 @@
                 '📍 Lobby Code: ' + lobbyCode + '\n' +
                 '💰 Buy-in: $' + currentPrivateLobby.buyIn.toLocaleString() + '\n' +
                 '🎯 Blinds: $' + currentPrivateLobby.smallBlind + '/$' + currentPrivateLobby.bigBlind + '\n\n' +
-                '👇 Click to join:\n' + inviteLink;
+                '👇 Click to join:';
             
             addDebug('Invite via Telegram: ' + lobbyCode);
             
-            // Use tg:// protocol to open Telegram app directly with share dialog
-            var tgShareUrl = 'tg://msg_url?url=' + encodeURIComponent(inviteLink) + '&text=' + encodeURIComponent(message);
+            // Build share URL - always open in new tab
+            var shareUrl = 'https://t.me/share/url?url=' + encodeURIComponent(inviteLink) + '&text=' + encodeURIComponent(message);
             
-            // Fallback URL for web (will try to open Telegram Web)
-            var webShareUrl = 'https://t.me/share?url=' + encodeURIComponent(inviteLink) + '&text=' + encodeURIComponent(message);
-            
-            // If running inside Telegram WebApp, use native method
-            if (tg && typeof tg.openTelegramLink === 'function') {
-                try {
-                    tg.openTelegramLink(webShareUrl);
-                    return;
-                } catch (e) {
-                    addDebug('TG openTelegramLink failed: ' + e.message);
-                }
-            }
-            
-            // Try tg:// protocol first (opens native Telegram app)
-            var opened = false;
-            try {
-                var iframe = document.createElement('iframe');
-                iframe.style.display = 'none';
-                iframe.src = tgShareUrl;
-                document.body.appendChild(iframe);
-                
-                // Check if it worked after a short delay
-                setTimeout(function() {
-                    document.body.removeChild(iframe);
-                }, 100);
-                
-                // Also try window.location as backup
-                setTimeout(function() {
-                    window.location.href = tgShareUrl;
-                }, 50);
-                
-                opened = true;
-            } catch (e) {
-                addDebug('tg:// protocol failed: ' + e.message);
-            }
-            
-            // If tg:// didn't work, show options to user
-            if (!opened) {
-                window.open(webShareUrl, '_blank');
-            }
+            // Always open in new tab/window
+            window.open(shareUrl, '_blank', 'noopener,noreferrer');
         }
 
         function copyLobbyLink() {
@@ -3799,10 +4050,10 @@
             gameState.smallBlind = currentPrivateLobby.smallBlind;
             gameState.bigBlind = currentPrivateLobby.bigBlind;
             
-            // Close modal
-            closePrivateGameModal();
+            // Hide all screens
             document.getElementById('mainMenu').classList.add('hidden');
             document.getElementById('lobbyScreen').classList.add('hidden');
+            document.getElementById('waitingRoomScreen').classList.add('hidden');
             
             // Join table with lobby settings
             joinTable({
@@ -3811,6 +4062,136 @@
                 blinds: currentPrivateLobby.smallBlind + '/' + currentPrivateLobby.bigBlind
             });
         }
+
+        // ═══════════════════════════════════════════════════
+        // WAITING ROOM FUNCTIONS
+        // ═══════════════════════════════════════════════════
+        function goToWaitingRoom() {
+            if (!currentPrivateLobby) {
+                showAlert('⚠️ No lobby created');
+                return;
+            }
+            
+            addDebug('Going to waiting room: ' + currentPrivateLobby.code);
+            
+            // Close modal
+            closePrivateGameModal();
+            document.getElementById('mainMenu').classList.add('hidden');
+            
+            // Update waiting room UI
+            updateWaitingRoomUI();
+            
+            // Show waiting room
+            document.getElementById('waitingRoomScreen').classList.remove('hidden');
+        }
+
+        function updateWaitingRoomUI() {
+            if (!currentPrivateLobby) return;
+            
+            document.getElementById('waitingLobbyCode').textContent = currentPrivateLobby.code;
+            document.getElementById('waitingBuyIn').textContent = '$' + currentPrivateLobby.buyIn.toLocaleString();
+            document.getElementById('waitingBlinds').textContent = '$' + currentPrivateLobby.smallBlind + '/$' + currentPrivateLobby.bigBlind;
+            document.getElementById('waitingMaxPlayers').textContent = currentPrivateLobby.maxPlayers;
+            
+            var players = currentPrivateLobby.players || [];
+            var maxPlayers = currentPrivateLobby.maxPlayers || 6;
+            
+            document.getElementById('waitingPlayersCount').textContent = players.length + '/' + maxPlayers;
+            
+            // Render player slots
+            var grid = document.getElementById('waitingPlayersGrid');
+            var html = '';
+            
+            for (var i = 0; i < maxPlayers; i++) {
+                var player = players[i];
+                if (player) {
+                    var slotClass = player.isHost ? 'waiting-player-slot host' : 'waiting-player-slot occupied';
+                    html += '<div class="' + slotClass + '">' +
+                        '<div class="waiting-player-avatar">' + (player.isHost ? '👑' : player.name.charAt(0)) + '</div>' +
+                        '<div class="waiting-player-name">' + player.name + (player.isHost ? ' (Host)' : '') + '</div>' +
+                    '</div>';
+                } else {
+                    html += '<div class="waiting-player-slot empty">' +
+                        '<div class="waiting-player-avatar">?</div>' +
+                        '<div class="waiting-player-name">Empty</div>' +
+                    '</div>';
+                }
+            }
+            
+            grid.innerHTML = html;
+            
+            // Update start button state
+            var startBtn = document.getElementById('waitingStartBtn');
+            var statusEl = document.getElementById('waitingStatus');
+            
+            if (players.length >= 2) {
+                startBtn.disabled = false;
+                statusEl.className = 'waiting-status ready';
+                statusEl.innerHTML = '✅ Ready to start!';
+            } else {
+                startBtn.disabled = true;
+                statusEl.className = 'waiting-status';
+                statusEl.innerHTML = '<span class="waiting-dot">⏳</span> Waiting for players to join...';
+            }
+        }
+
+        function leaveWaitingRoom() {
+            document.getElementById('waitingRoomScreen').classList.add('hidden');
+            document.getElementById('mainMenu').classList.remove('hidden');
+            currentPrivateLobby = null;
+        }
+
+        function startGameFromWaitingRoom() {
+            if (!currentPrivateLobby) return;
+            startPrivateGame();
+        }
+
+        // ═══════════════════════════════════════════════════
+        // URL PARAMETER HANDLING FOR LOBBY INVITE
+        // ═══════════════════════════════════════════════════
+        function checkUrlForLobby() {
+            var urlParams = new URLSearchParams(window.location.search);
+            var lobbyCode = urlParams.get('lobby');
+            
+            if (lobbyCode) {
+                addDebug('Lobby code from URL: ' + lobbyCode);
+                joinLobbyByCode(lobbyCode);
+            }
+        }
+
+        function joinLobbyByCode(code) {
+            code = code.toUpperCase().trim();
+            addDebug('Joining lobby by code: ' + code);
+            
+            // Create lobby object for joining
+            currentPrivateLobby = {
+                code: code,
+                buyIn: 1000,
+                maxPlayers: 6,
+                smallBlind: 10,
+                bigBlind: 20,
+                players: [
+                    { name: 'Host', isHost: true },
+                    { name: userName, isHost: false }
+                ]
+            };
+            
+            // Skip splash/main menu and go directly to waiting room
+            document.getElementById('splashScreen').style.display = 'none';
+            document.getElementById('mainMenu').classList.add('hidden');
+            document.getElementById('fullscreenRequestScreen').classList.add('hidden');
+            
+            // Show waiting room
+            updateWaitingRoomUI();
+            document.getElementById('waitingRoomScreen').classList.remove('hidden');
+        }
+
+        // Check for lobby code on page load
+        window.addEventListener('load', function() {
+            setTimeout(function() {
+                checkUrlForLobby();
+            }, 500);
+        });
 
         addDebug('Ready');
     </script>
