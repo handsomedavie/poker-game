@@ -787,58 +787,86 @@
             border: 2px solid #374151;
             opacity: 1 !important;
             filter: none !important;
-            /* Animation */
-            animation: cardDeal 0.4s ease-out;
-            transition: all 0.3s ease;
+            /* Animation - smooth card deal */
+            animation: cardDeal 0.7s cubic-bezier(0.34, 1.56, 0.64, 1);
+            transition: all 0.4s ease;
         }
 
-        /* Card deal animation */
+        /* Smooth card deal animation */
         @keyframes cardDeal {
             0% {
                 opacity: 0;
-                transform: translateY(-30px) scale(0.5) rotateY(90deg);
+                transform: translateY(-50px) scale(0.3) rotateX(90deg);
             }
-            50% {
-                opacity: 0.7;
-                transform: translateY(-10px) scale(0.9) rotateY(45deg);
+            40% {
+                opacity: 0.6;
+                transform: translateY(-15px) scale(0.85) rotateX(30deg);
+            }
+            70% {
+                opacity: 0.9;
+                transform: translateY(5px) scale(1.02) rotateX(-5deg);
             }
             100% {
                 opacity: 1;
-                transform: translateY(0) scale(1) rotateY(0deg);
+                transform: translateY(0) scale(1) rotateX(0deg);
             }
         }
 
-        /* Stagger animation for each card */
+        /* Stagger animation for each card - longer delays for smoother sequence */
         .card:nth-child(1) { animation-delay: 0s; }
-        .card:nth-child(2) { animation-delay: 0.15s; }
-        .card:nth-child(3) { animation-delay: 0.3s; }
-        .card:nth-child(4) { animation-delay: 0.45s; }
-        .card:nth-child(5) { animation-delay: 0.6s; }
+        .card:nth-child(2) { animation-delay: 0.2s; }
+        .card:nth-child(3) { animation-delay: 0.4s; }
+        .card:nth-child(4) { animation-delay: 0.6s; }
+        .card:nth-child(5) { animation-delay: 0.8s; }
 
-        /* GOLDEN HIGHLIGHT for winning combination cards */
+        /* GOLDEN SHIMMER HIGHLIGHT for winning combination cards */
         .card.highlighted,
         .card.winning-card,
         .card.combo-card {
             border: 2.5px solid #fbbf24 !important;
             box-shadow: 
-                0 0 15px rgba(251, 191, 36, 0.8),
-                0 0 30px rgba(251, 191, 36, 0.4),
-                0 4px 12px rgba(0,0,0,0.5) !important;
-            animation: goldenGlow 1.5s ease-in-out infinite;
+                0 0 12px rgba(251, 191, 36, 0.9),
+                0 0 25px rgba(251, 191, 36, 0.5),
+                0 4px 12px rgba(0,0,0,0.4) !important;
+            animation: goldenShimmer 2s ease-in-out infinite;
         }
 
-        @keyframes goldenGlow {
-            0%, 100% {
+        /* Smooth pulsing shimmer effect */
+        @keyframes goldenShimmer {
+            0% {
                 box-shadow: 
-                    0 0 15px rgba(251, 191, 36, 0.8),
-                    0 0 30px rgba(251, 191, 36, 0.4),
-                    0 4px 12px rgba(0,0,0,0.5);
+                    0 0 8px rgba(251, 191, 36, 0.7),
+                    0 0 18px rgba(251, 191, 36, 0.3),
+                    0 4px 12px rgba(0,0,0,0.4);
+                border-color: #f59e0b;
+            }
+            25% {
+                box-shadow: 
+                    0 0 15px rgba(251, 191, 36, 1),
+                    0 0 35px rgba(251, 191, 36, 0.6),
+                    0 4px 12px rgba(0,0,0,0.4);
+                border-color: #fbbf24;
             }
             50% {
                 box-shadow: 
-                    0 0 25px rgba(251, 191, 36, 1),
-                    0 0 45px rgba(251, 191, 36, 0.6),
-                    0 4px 12px rgba(0,0,0,0.5);
+                    0 0 20px rgba(255, 215, 0, 1),
+                    0 0 45px rgba(255, 215, 0, 0.7),
+                    0 4px 12px rgba(0,0,0,0.4);
+                border-color: #fcd34d;
+            }
+            75% {
+                box-shadow: 
+                    0 0 15px rgba(251, 191, 36, 1),
+                    0 0 35px rgba(251, 191, 36, 0.6),
+                    0 4px 12px rgba(0,0,0,0.4);
+                border-color: #fbbf24;
+            }
+            100% {
+                box-shadow: 
+                    0 0 8px rgba(251, 191, 36, 0.7),
+                    0 0 18px rgba(251, 191, 36, 0.3),
+                    0 4px 12px rgba(0,0,0,0.4);
+                border-color: #f59e0b;
             }
         }
 
@@ -1011,28 +1039,52 @@
         .hero-card .card-rank { font-size: 22px; line-height: 1; }
         .hero-card .card-suit { font-size: 24px; line-height: 1; }
 
-        /* GOLDEN HIGHLIGHT for hero combo cards */
+        /* GOLDEN SHIMMER for hero combo cards */
         .hero-card.combo-card {
             border: 3px solid #fbbf24 !important;
             box-shadow: 
-                0 0 20px rgba(251, 191, 36, 0.9),
-                0 0 40px rgba(251, 191, 36, 0.5),
+                0 0 15px rgba(251, 191, 36, 0.9),
+                0 0 30px rgba(251, 191, 36, 0.5),
                 0 6px 20px rgba(0,0,0,0.4) !important;
-            animation: heroGoldenGlow 1.5s ease-in-out infinite;
+            animation: heroGoldenShimmer 2s ease-in-out infinite;
         }
 
-        @keyframes heroGoldenGlow {
-            0%, 100% {
+        /* Smooth pulsing shimmer for hero cards */
+        @keyframes heroGoldenShimmer {
+            0% {
                 box-shadow: 
-                    0 0 20px rgba(251, 191, 36, 0.9),
-                    0 0 40px rgba(251, 191, 36, 0.5),
+                    0 0 10px rgba(251, 191, 36, 0.7),
+                    0 0 22px rgba(251, 191, 36, 0.4),
                     0 6px 20px rgba(0,0,0,0.4);
+                border-color: #f59e0b;
+            }
+            25% {
+                box-shadow: 
+                    0 0 18px rgba(251, 191, 36, 1),
+                    0 0 40px rgba(251, 191, 36, 0.6),
+                    0 6px 20px rgba(0,0,0,0.4);
+                border-color: #fbbf24;
             }
             50% {
                 box-shadow: 
-                    0 0 30px rgba(251, 191, 36, 1),
-                    0 0 55px rgba(251, 191, 36, 0.7),
+                    0 0 25px rgba(255, 215, 0, 1),
+                    0 0 55px rgba(255, 215, 0, 0.7),
                     0 6px 20px rgba(0,0,0,0.4);
+                border-color: #fcd34d;
+            }
+            75% {
+                box-shadow: 
+                    0 0 18px rgba(251, 191, 36, 1),
+                    0 0 40px rgba(251, 191, 36, 0.6),
+                    0 6px 20px rgba(0,0,0,0.4);
+                border-color: #fbbf24;
+            }
+            100% {
+                box-shadow: 
+                    0 0 10px rgba(251, 191, 36, 0.7),
+                    0 0 22px rgba(251, 191, 36, 0.4),
+                    0 6px 20px rgba(0,0,0,0.4);
+                border-color: #f59e0b;
             }
         }
 
@@ -2113,44 +2165,61 @@
             var groups = groupByValue(values);
             var counts = Object.values(groups).sort(function(a,b) { return b - a; });
             
-            // Royal Flush
+            // Helper: get cards by their value count
+            function getCardsByCount(count) {
+                var result = [];
+                var valueGroups = {};
+                sorted.forEach(function(c) {
+                    var v = getCardValue(c);
+                    if (!valueGroups[v]) valueGroups[v] = [];
+                    valueGroups[v].push(c);
+                });
+                for (var v in valueGroups) {
+                    if (valueGroups[v].length === count) {
+                        result = result.concat(valueGroups[v]);
+                    }
+                }
+                return result;
+            }
+            
+            // Royal Flush - all 5 cards form the combo
             if (isFlush && isStraight && values[0] === 14 && values[4] === 10) {
                 return { rank: 10, name: 'Royal Flush', cards: sorted };
             }
-            // Straight Flush
+            // Straight Flush - all 5 cards
             if (isFlush && isStraight) {
                 return { rank: 9, name: 'Straight Flush', cards: sorted };
             }
-            // Four of a Kind
+            // Four of a Kind - only the 4 matching cards
             if (counts[0] === 4) {
-                return { rank: 8, name: 'Four of a Kind', cards: sorted };
+                return { rank: 8, name: 'Four of a Kind', cards: getCardsByCount(4) };
             }
-            // Full House
+            // Full House - all 5 cards (3 + 2)
             if (counts[0] === 3 && counts[1] === 2) {
                 return { rank: 7, name: 'Full House', cards: sorted };
             }
-            // Flush
+            // Flush - all 5 cards
             if (isFlush) {
                 return { rank: 6, name: 'Flush', cards: sorted };
             }
-            // Straight
+            // Straight - all 5 cards
             if (isStraight) {
                 return { rank: 5, name: 'Straight', cards: sorted };
             }
-            // Three of a Kind
+            // Three of a Kind - only the 3 matching cards
             if (counts[0] === 3) {
-                return { rank: 4, name: 'Three of a Kind', cards: sorted };
+                return { rank: 4, name: 'Three of a Kind', cards: getCardsByCount(3) };
             }
-            // Two Pair
+            // Two Pair - only the 4 cards that form both pairs
             if (counts[0] === 2 && counts[1] === 2) {
-                return { rank: 3, name: 'Two Pair', cards: sorted };
+                return { rank: 3, name: 'Two Pair', cards: getCardsByCount(2) };
             }
-            // One Pair
+            // One Pair - only the 2 matching cards
             if (counts[0] === 2) {
-                return { rank: 2, name: 'One Pair', cards: sorted };
+                return { rank: 2, name: 'One Pair', cards: getCardsByCount(2) };
             }
-            // High Card
-            return { rank: 1, name: 'High Card', cards: sorted };
+            // High Card - no cards to highlight
+            return { rank: 1, name: 'High Card', cards: [] };
         }
 
         function checkStraight(values) {
