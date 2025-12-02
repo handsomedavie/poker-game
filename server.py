@@ -30,6 +30,10 @@ from lobby_db import (
     join_lobby, leave_lobby, start_game, finish_game,
     get_player_lobbies, cleanup_expired_lobbies, Lobby
 )
+from game_engine import (
+    create_game, start_hand, process_action, get_game,
+    end_game, GameState, get_active_players
+)
 import json
 
 START_BALANCE = 1000
@@ -1515,6 +1519,23 @@ async def api_start_game(lobby_code: str, request: JoinLobbyRequest):
     
     lobby = await get_lobby_by_code(lobby_code)
     
+    # Create actual game with players from lobby
+    if lobby:
+        players_data = [
+            {
+                "telegram_id": p.telegram_id,
+                "username": p.username,
+                "first_name": p.first_name,
+            }
+            for p in lobby.players.values()
+        ]
+        
+        # Create game and deal cards
+        game = create_game(game_session_id, lobby_code, players_data)
+        game = start_hand(game_session_id)
+        
+        print(f"🎮 API: Game created with {len(players_data)} players")
+    
     # Broadcast game started to all players
     await _broadcast_lobby_event(lobby_code, {
         "type": "gameStarted",
@@ -1706,6 +1727,171 @@ async def lobby_websocket(websocket: WebSocket, lobby_code: str):
     finally:
         if lobby_code in lobby_connections:
             lobby_connections[lobby_code].pop(user_id, None)
+
+
+# ═══════════════════════════════════════════════════
+# GAME API ENDPOINTS
+# ═══════════════════════════════════════════════════
+
+# Game WebSocket connections
+game_connections: Dict[str, Dict[int, WebSocket]] = {}  # session_id -> {telegram_id -> websocket}
+
+
+class GameActionRequest(BaseModel):
+    action: str  # fold, check, call, raise, all_in
+    amount: int = 0
+    initData: str = ""
+
+
+@app.get("/api/game/{session_id}")
+async def api_get_game(session_id: str, telegram_id: Optional[int] = None):
+    """Get current game state"""
+    game = get_game(session_id)
+    if not game:
+        raise HTTPException(status_code=404, detail="Game not found")
+    
+    return {
+        "success": True,
+        "game": game.to_dict(for_player_id=telegram_id),
+    }
+
+
+@app.post("/api/game/{session_id}/action")
+async def api_game_action(session_id: str, request: GameActionRequest):
+    """Process player action"""
+    print(f"🎮 API: Game action {request.action} in session {session_id}")
+    
+    user = _extract_telegram_user(request.initData)
+    if not user:
+        # For dev: get first player who can act
+        game = get_game(session_id)
+        if game and game.current_player_id:
+            telegram_id = game.current_player_id
+        else:
+            raise HTTPException(status_code=401, detail="Not authenticated")
+    else:
+        telegram_id = user.get("id")
+    
+    success, message, game = process_action(
+        session_id, 
+        telegram_id, 
+        request.action, 
+        request.amount
+    )
+    
+    if not success:
+        raise HTTPException(status_code=400, detail=message)
+    
+    # Broadcast updated game state to all connected players
+    if game:
+        await _broadcast_game_state(session_id, game)
+    
+    return {
+        "success": True,
+        "message": message,
+        "game": game.to_dict(for_player_id=telegram_id) if game else None,
+    }
+
+
+async def _broadcast_game_state(session_id: str, game: GameState):
+    """Broadcast game state to all connected players"""
+    connections = game_connections.get(session_id, {})
+    stale = []
+    
+    for player_id, ws in connections.items():
+        try:
+            await ws.send_json({
+                "type": "gameState",
+                "game": game.to_dict(for_player_id=player_id),
+            })
+        except Exception:
+            stale.append(player_id)
+    
+    for player_id in stale:
+        connections.pop(player_id, None)
+
+
+@app.websocket("/ws/game/{session_id}")
+async def game_websocket(websocket: WebSocket, session_id: str):
+    """WebSocket for real-time game updates"""
+    await websocket.accept()
+    
+    game = get_game(session_id)
+    if not game:
+        await websocket.send_json({"type": "error", "message": "Game not found"})
+        await websocket.close()
+        return
+    
+    # Get player ID from query params or assign one
+    player_id = None
+    try:
+        # Try to get from query
+        query_string = str(websocket.scope.get("query_string", b"").decode())
+        if "player_id=" in query_string:
+            player_id = int(query_string.split("player_id=")[1].split("&")[0])
+    except:
+        pass
+    
+    if not player_id:
+        # Assign first unconnected player
+        connected = game_connections.get(session_id, {})
+        for pid in game.players.keys():
+            if pid not in connected:
+                player_id = pid
+                break
+    
+    if not player_id:
+        await websocket.send_json({"type": "error", "message": "No available seat"})
+        await websocket.close()
+        return
+    
+    # Register connection
+    if session_id not in game_connections:
+        game_connections[session_id] = {}
+    game_connections[session_id][player_id] = websocket
+    
+    print(f"🎮 GAME WS: Player {player_id} connected to game {session_id}")
+    
+    try:
+        # Send initial game state
+        await websocket.send_json({
+            "type": "gameState",
+            "game": game.to_dict(for_player_id=player_id),
+            "yourPlayerId": player_id,
+        })
+        
+        while True:
+            data = await websocket.receive_json()
+            msg_type = data.get("type")
+            
+            if msg_type == "ping":
+                await websocket.send_json({"type": "pong"})
+                
+            elif msg_type == "action":
+                # Process game action
+                action = data.get("action", "")
+                amount = data.get("amount", 0)
+                
+                success, message, updated_game = process_action(
+                    session_id, player_id, action, amount
+                )
+                
+                if success and updated_game:
+                    # Broadcast to all players
+                    await _broadcast_game_state(session_id, updated_game)
+                else:
+                    await websocket.send_json({
+                        "type": "error",
+                        "message": message,
+                    })
+                    
+    except WebSocketDisconnect:
+        print(f"🎮 GAME WS: Player {player_id} disconnected from game {session_id}")
+    except Exception as e:
+        print(f"❌ GAME WS: Error for player {player_id}: {e}")
+    finally:
+        if session_id in game_connections:
+            game_connections[session_id].pop(player_id, None)
 
 
 # Run server

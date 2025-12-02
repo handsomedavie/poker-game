@@ -4331,8 +4331,13 @@
             }
         }
         
+        var gameWebSocket = null;
+        var currentGameSession = null;
+        var myPlayerId = null;
+        
         function startMultiplayerGame(gameSessionId) {
             addDebug('Starting multiplayer game: ' + gameSessionId);
+            currentGameSession = gameSessionId;
             
             // Hide waiting room
             document.getElementById('waitingRoomScreen').classList.add('hidden');
@@ -4340,14 +4345,209 @@
             // Show poker table
             document.getElementById('pokerTableScreen').classList.remove('hidden');
             
-            // TODO: Connect to game WebSocket for real multiplayer
-            // For now, show a placeholder message
             var tableNameEl = document.getElementById('tableName');
             if (tableNameEl) {
-                tableNameEl.textContent = 'Multiplayer Game - ' + currentPrivateLobby.code;
+                tableNameEl.textContent = 'Multiplayer: ' + (currentPrivateLobby ? currentPrivateLobby.code : '');
             }
             
+            // Connect to game WebSocket
+            connectToGameWebSocket(gameSessionId);
+            
             addDebug('Multiplayer game screen shown');
+        }
+        
+        function connectToGameWebSocket(sessionId) {
+            if (gameWebSocket) {
+                gameWebSocket.close();
+            }
+            
+            var wsUrl = API_BASE.replace('https://', 'wss://').replace('http://', 'ws://') + '/ws/game/' + sessionId;
+            addDebug('Connecting to game WS: ' + wsUrl);
+            
+            try {
+                gameWebSocket = new WebSocket(wsUrl);
+                
+                gameWebSocket.onopen = function() {
+                    addDebug('Game WebSocket connected');
+                };
+                
+                gameWebSocket.onmessage = function(event) {
+                    try {
+                        var data = JSON.parse(event.data);
+                        addDebug('Game WS: ' + data.type);
+                        handleGameEvent(data);
+                    } catch (e) {
+                        addDebug('Game WS parse error: ' + e.message);
+                    }
+                };
+                
+                gameWebSocket.onclose = function() {
+                    addDebug('Game WebSocket closed');
+                };
+                
+                gameWebSocket.onerror = function(err) {
+                    addDebug('Game WebSocket error');
+                };
+            } catch (e) {
+                addDebug('Game WS connection failed: ' + e.message);
+            }
+        }
+        
+        function handleGameEvent(data) {
+            if (data.type === 'gameState') {
+                if (data.yourPlayerId) {
+                    myPlayerId = data.yourPlayerId;
+                    addDebug('My player ID: ' + myPlayerId);
+                }
+                updateGameUI(data.game);
+            } else if (data.type === 'error') {
+                showAlert('⚠️ ' + data.message);
+            }
+        }
+        
+        function updateGameUI(gameState) {
+            if (!gameState) return;
+            
+            addDebug('Updating game UI, phase: ' + gameState.phase);
+            
+            // Update pot
+            var potEl = document.getElementById('potAmount');
+            if (potEl) {
+                potEl.textContent = '$' + gameState.pot;
+            }
+            
+            // Update phase indicator
+            var phaseEl = document.getElementById('gamePhase');
+            if (phaseEl) {
+                phaseEl.textContent = gameState.phase.toUpperCase();
+            }
+            
+            // Update community cards
+            var communityEl = document.getElementById('communityCards');
+            if (communityEl && gameState.communityCards) {
+                var html = '';
+                gameState.communityCards.forEach(function(card) {
+                    html += createCardHTML(card);
+                });
+                communityEl.innerHTML = html;
+            }
+            
+            // Update player cards
+            var myPlayer = gameState.players.find(function(p) {
+                return p.telegramId === myPlayerId;
+            });
+            
+            if (myPlayer && myPlayer.cards && myPlayer.cards.length > 0) {
+                var card1El = document.getElementById('playerCard1');
+                var card2El = document.getElementById('playerCard2');
+                
+                if (card1El && myPlayer.cards[0]) {
+                    card1El.innerHTML = '<div class="card-rank">' + myPlayer.cards[0].rank + '</div>' +
+                        '<div class="card-suit ' + myPlayer.cards[0].suit + '">' + getSuitSymbol(myPlayer.cards[0].suit) + '</div>';
+                }
+                if (card2El && myPlayer.cards[1]) {
+                    card2El.innerHTML = '<div class="card-rank">' + myPlayer.cards[1].rank + '</div>' +
+                        '<div class="card-suit ' + myPlayer.cards[1].suit + '">' + getSuitSymbol(myPlayer.cards[1].suit) + '</div>';
+                }
+            }
+            
+            // Update action buttons based on whose turn it is
+            var isMyTurn = gameState.currentPlayerId === myPlayerId;
+            var actionBtns = document.querySelectorAll('.action-btn');
+            actionBtns.forEach(function(btn) {
+                btn.disabled = !isMyTurn;
+                btn.style.opacity = isMyTurn ? '1' : '0.5';
+            });
+            
+            // Update players around table
+            updatePlayersDisplay(gameState.players, myPlayerId);
+        }
+        
+        function createCardHTML(card) {
+            var suitClass = card.suit;
+            var suitSymbol = getSuitSymbol(card.suit);
+            return '<div class="community-card"><div class="card-rank">' + card.rank + '</div>' +
+                '<div class="card-suit ' + suitClass + '">' + suitSymbol + '</div></div>';
+        }
+        
+        function getSuitSymbol(suit) {
+            var symbols = { hearts: '♥', diamonds: '♦', clubs: '♣', spades: '♠' };
+            return symbols[suit] || suit;
+        }
+        
+        function updatePlayersDisplay(players, myId) {
+            // Update player info display
+            players.forEach(function(player, index) {
+                var playerEl = document.getElementById('player' + index);
+                if (playerEl) {
+                    playerEl.querySelector('.player-name').textContent = player.name;
+                    playerEl.querySelector('.player-chips').textContent = '$' + player.chips;
+                    
+                    if (player.isFolded) {
+                        playerEl.classList.add('folded');
+                    } else {
+                        playerEl.classList.remove('folded');
+                    }
+                }
+            });
+        }
+        
+        // Game action functions for multiplayer
+        function sendGameAction(action, amount) {
+            if (!currentGameSession) {
+                addDebug('No game session for action');
+                return;
+            }
+            
+            addDebug('Sending action: ' + action + ', amount: ' + amount);
+            
+            if (gameWebSocket && gameWebSocket.readyState === WebSocket.OPEN) {
+                gameWebSocket.send(JSON.stringify({
+                    type: 'action',
+                    action: action,
+                    amount: amount || 0
+                }));
+            } else {
+                // Fallback to HTTP
+                fetch(API_BASE + '/api/game/' + currentGameSession + '/action', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action: action,
+                        amount: amount || 0,
+                        initData: tg ? tg.initData : ''
+                    })
+                }).then(function(resp) {
+                    return resp.json();
+                }).then(function(data) {
+                    if (data.game) {
+                        updateGameUI(data.game);
+                    }
+                }).catch(function(err) {
+                    addDebug('Action error: ' + err.message);
+                });
+            }
+        }
+        
+        // Override action button handlers for multiplayer
+        function handleMultiplayerFold() {
+            sendGameAction('fold', 0);
+        }
+        
+        function handleMultiplayerCheck() {
+            sendGameAction('check', 0);
+        }
+        
+        function handleMultiplayerCall() {
+            sendGameAction('call', 0);
+        }
+        
+        function handleMultiplayerRaise(amount) {
+            sendGameAction('raise', amount);
+        }
+        
+        function handleMultiplayerAllIn() {
+            sendGameAction('all_in', 0);
         }
 
         // ═══════════════════════════════════════════════════
