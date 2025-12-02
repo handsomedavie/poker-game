@@ -720,6 +720,7 @@
                 inset 0 0 35px rgba(0, 0, 0, 0.3);
             transform: rotateX(10deg);
             transform-style: preserve-3d;
+            z-index: 1 !important; /* BASE LAYER - lowest */
         }
 
         .table-felt {
@@ -759,28 +760,31 @@
             text-shadow: 0 2px 4px rgba(0,0,0,0.5);
         }
 
-        /* ═══════ COMMUNITY CARDS - CENTER ═══════ */
+        /* ═══════ COMMUNITY CARDS - CENTER (LARGER) ═══════ */
         .community-cards {
             position: absolute;
-            top: 45%;
-            left: 50%;
-            transform: translate(-50%, -50%) rotateX(-2deg);
+            top: 46% !important;
+            left: 50% !important;
+            transform: translate(-50%, -50%) rotateX(-3deg) !important;
             display: flex;
-            gap: 4px;
-            z-index: 15;
+            gap: 6px !important;
+            z-index: 20 !important;
+            padding: 4px;
         }
 
-        /* CARDS - LARGER FOR VISIBILITY */
+        /* CARDS - MUCH LARGER FOR VISIBILITY */
         .card {
-            width: 36px; height: 50px;
+            width: 44px !important;
+            height: 62px !important;
             background: #ffffff !important;
-            border-radius: 4px;
+            border-radius: 5px;
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
+            justify-content: space-between;
+            padding: 4px 2px !important;
             font-weight: 700;
-            box-shadow: 0 3px 10px rgba(0,0,0,0.5);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
             border: 2px solid #1f2937;
             opacity: 1 !important;
             filter: none !important;
@@ -789,8 +793,8 @@
         .card.red { color: #dc2626 !important; }
         .card.black { color: #000000 !important; }
 
-        .card-rank { font-size: 16px; line-height: 1; }
-        .card-suit { font-size: 18px; line-height: 1; }
+        .card-rank { font-size: 20px !important; line-height: 1; }
+        .card-suit { font-size: 18px !important; line-height: 1; margin-top: auto; }
 
         .card.hidden {
             background: linear-gradient(135deg, #1e40af, #1e3a8a) !important;
@@ -804,13 +808,13 @@
             color: #fff;
         }
 
-        /* ═══════ PLAYER SEATS - CLOSER TO CENTER ═══════ */
+        /* ═══════ PLAYER SEATS - ABOVE TABLE ═══════ */
         .player-seat {
             position: absolute;
             display: flex;
             flex-direction: column;
             align-items: center;
-            z-index: 15;
+            z-index: 10 !important; /* ABOVE table (z-index: 1) */
             transform-style: preserve-3d;
         }
 
@@ -905,7 +909,7 @@
             box-shadow: 0 2px 4px rgba(0,0,0,0.4);
         }
 
-        /* ═══════ BOTTOM CONTROLS - FULLY TRANSPARENT ═══════ */
+        /* ═══════ BOTTOM CONTROLS - NO BLUR (indicators visible) ═══════ */
         .poker-controls-bottom {
             position: fixed !important;
             bottom: 35px !important;
@@ -913,8 +917,8 @@
             right: 0 !important;
             width: 100vw !important;
             background: transparent !important;
-            backdrop-filter: blur(6px) !important;
-            -webkit-backdrop-filter: blur(6px) !important;
+            backdrop-filter: none !important;
+            -webkit-backdrop-filter: none !important;
             padding: 10px 10px 14px 10px !important;
             z-index: 100 !important;
             border-top: none !important;
@@ -923,26 +927,30 @@
             gap: 7px;
         }
 
-        /* Hero cards row */
+        /* Hero cards row - NO BACKGROUND */
         .hero-cards {
             display: flex;
             justify-content: center;
-            gap: 8px;
-            padding: 4px;
-            background: transparent;
+            gap: 10px;
+            padding: 0;
+            background: transparent !important;
+            backdrop-filter: none !important;
             margin: 0 auto;
         }
 
+        /* Hero cards - LARGER with strong shadows */
         .hero-card {
-            width: 50px; height: 70px;
+            width: 52px !important;
+            height: 72px !important;
             background: #ffffff !important;
             border-radius: 6px;
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
+            justify-content: space-between;
+            padding: 4px 2px;
             font-weight: 700;
-            box-shadow: 0 4px 18px rgba(59,130,246,0.8), 0 0 0 2px rgba(255,255,255,0.3);
+            box-shadow: 0 6px 20px rgba(59,130,246,0.8), 0 0 0 2px rgba(255,255,255,0.4);
             border: 2.5px solid #3b82f6;
         }
 
@@ -1041,30 +1049,33 @@
             transform: none !important;
         }
 
-        /* ═══════ GAME PHASE INDICATOR - RIGHT SIDE ═══════ */
+        /* ═══════ GAME PHASE INDICATOR - RIGHT SIDE (ABOVE USER CARDS) ═══════ */
         .game-phase-indicator {
-            position: fixed;
-            bottom: 165px;
-            right: 6px;
+            position: fixed !important;
+            bottom: 200px !important;
+            right: 10px !important;
             background: linear-gradient(135deg, rgba(34, 197, 94, 0.95), rgba(22, 163, 74, 0.95));
-            padding: 4px 8px;
-            border-radius: 5px;
-            font-size: 9px;
+            padding: 6px 12px !important;
+            border-radius: 8px !important;
+            font-size: 10px !important;
             font-weight: 700;
             color: white;
             letter-spacing: 0.5px;
-            box-shadow: 0 3px 10px rgba(34, 197, 94, 0.6);
-            z-index: 50;
+            box-shadow: 0 4px 14px rgba(34, 197, 94, 0.7) !important;
+            z-index: 90 !important;
         }
 
         .game-phase-indicator.flop {
             background: linear-gradient(135deg, rgba(59, 130, 246, 0.95), rgba(37, 99, 235, 0.95));
+            box-shadow: 0 4px 14px rgba(59, 130, 246, 0.7) !important;
         }
         .game-phase-indicator.turn {
             background: linear-gradient(135deg, rgba(251, 191, 36, 0.95), rgba(245, 158, 11, 0.95));
+            box-shadow: 0 4px 14px rgba(251, 191, 36, 0.7) !important;
         }
         .game-phase-indicator.river {
             background: linear-gradient(135deg, rgba(239, 68, 68, 0.95), rgba(220, 38, 38, 0.95));
+            box-shadow: 0 4px 14px rgba(239, 68, 68, 0.7) !important;
         }
 
         /* Bet Slider Row */
@@ -1186,22 +1197,22 @@
             transform: translateY(-5px);
         }
 
-        /* ═══════ HAND STRENGTH HUD - LEFT SIDE ═══════ */
+        /* ═══════ HAND STRENGTH HUD - LEFT SIDE (ABOVE USER CARDS) ═══════ */
         .hand-hud {
-            position: fixed;
-            bottom: 165px;
-            left: 6px;
+            position: fixed !important;
+            bottom: 200px !important;
+            left: 10px !important;
             background: linear-gradient(135deg, rgba(59, 130, 246, 0.95), rgba(37, 99, 235, 0.95));
-            border-radius: 6px;
-            padding: 6px 8px;
+            border-radius: 8px !important;
+            padding: 8px 10px !important;
             display: flex;
             flex-direction: column;
             gap: 2px;
-            box-shadow: 0 3px 12px rgba(59, 130, 246, 0.6);
-            backdrop-filter: blur(8px);
-            z-index: 50;
+            box-shadow: 0 4px 14px rgba(59, 130, 246, 0.7) !important;
+            backdrop-filter: none !important;
+            z-index: 90 !important;
             animation: slideInLeft 0.3s ease-out;
-            max-width: 85px;
+            max-width: 90px;
         }
 
         .hand-hud.hidden { display: none; }

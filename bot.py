@@ -27,7 +27,7 @@ BOT_TOKEN = os.environ.get("TELEGRAM_TOKEN", "")
 BOT_USERNAME = os.environ.get("BOT_USERNAME", "pokerhouse77bot")
 # Use mobile.html for better compatibility with mobile Telegram WebView
 # NOTE: bump ?v=3 -> v=4, v=5, ... after each deploy to force Telegram reload (cache busting)
-WEBAPP_URL = os.environ.get("WEBAPP_URL", "https://dapper-heliotrope-03aa40.netlify.app/mobile.html?v=20")
+WEBAPP_URL = os.environ.get("WEBAPP_URL", "https://dapper-heliotrope-03aa40.netlify.app/mobile.html?v=25")
 
 
 def get_main_keyboard() -> InlineKeyboardMarkup:
@@ -57,8 +57,8 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if args and args[0].startswith("lobby_"):
         lobby_code = args[0].replace("lobby_", "")
         # Use mobile.html with lobby parameter + cache busting
-        base_url = WEBAPP_URL.replace("/mobile.html?v=20", "").replace("/mobile.html", "")
-        lobby_url = f"{base_url}/mobile.html?lobby={lobby_code}&v=20"
+        base_url = WEBAPP_URL.replace("/mobile.html?v=25", "").replace("/mobile.html", "")
+        lobby_url = f"{base_url}/mobile.html?lobby={lobby_code}&v=25"
         
         keyboard = [[
             InlineKeyboardButton(
