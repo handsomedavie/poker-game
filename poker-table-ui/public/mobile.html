@@ -1555,6 +1555,346 @@
             padding: 14px 28px;
             font-size: 16px;
         }
+
+        /* ═══════════════════════════════════════════════════
+           PRIVATE GAME MODAL STYLES
+           ═══════════════════════════════════════════════════ */
+        .private-game-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .private-game-content {
+            background: linear-gradient(145deg, #1e293b, #0f172a);
+            border-radius: 20px;
+            padding: 24px;
+            width: 100%;
+            max-width: 380px;
+            border: 2px solid rgba(251, 191, 36, 0.3);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        }
+
+        .private-game-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .private-game-title {
+            font-size: 22px;
+            font-weight: 700;
+            color: #fbbf24;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .private-game-close {
+            background: rgba(239, 68, 68, 0.2);
+            border: none;
+            color: #ef4444;
+            font-size: 24px;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .private-game-close:hover {
+            background: rgba(239, 68, 68, 0.4);
+        }
+
+        .private-game-tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+
+        .pg-tab {
+            flex: 1;
+            padding: 12px;
+            background: rgba(30, 41, 59, 0.8);
+            border: 2px solid transparent;
+            border-radius: 12px;
+            color: #94a3b8;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .pg-tab.active {
+            background: rgba(251, 191, 36, 0.15);
+            border-color: #fbbf24;
+            color: #fbbf24;
+        }
+
+        .pg-tab:hover:not(.active) {
+            background: rgba(59, 130, 246, 0.2);
+        }
+
+        /* Create Lobby Form */
+        .create-lobby-form {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .form-label {
+            color: #94a3b8;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .form-select, .form-input {
+            background: rgba(15, 23, 42, 0.8);
+            border: 2px solid rgba(59, 130, 246, 0.3);
+            border-radius: 10px;
+            padding: 12px 14px;
+            color: #fff;
+            font-size: 15px;
+            outline: none;
+            transition: all 0.2s;
+        }
+
+        .form-select:focus, .form-input:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 15px rgba(59, 130, 246, 0.3);
+        }
+
+        .form-select option {
+            background: #1e293b;
+            color: #fff;
+        }
+
+        .blinds-row {
+            display: flex;
+            gap: 10px;
+        }
+
+        .blinds-row .form-group {
+            flex: 1;
+        }
+
+        .create-btn {
+            background: linear-gradient(135deg, #fbbf24, #f59e0b);
+            border: none;
+            border-radius: 12px;
+            padding: 14px;
+            color: #000;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: all 0.2s;
+        }
+
+        .create-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(251, 191, 36, 0.4);
+        }
+
+        /* Join Lobby Form */
+        .join-lobby-form {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .lobby-code-input {
+            background: rgba(15, 23, 42, 0.8);
+            border: 2px solid rgba(59, 130, 246, 0.3);
+            border-radius: 12px;
+            padding: 16px;
+            color: #fff;
+            font-size: 24px;
+            font-weight: 700;
+            text-align: center;
+            letter-spacing: 8px;
+            text-transform: uppercase;
+        }
+
+        .join-btn {
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            border: none;
+            border-radius: 12px;
+            padding: 14px;
+            color: #fff;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .join-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(59, 130, 246, 0.4);
+        }
+
+        /* Lobby Created Screen */
+        .lobby-created {
+            text-align: center;
+        }
+
+        .lobby-code-display {
+            background: linear-gradient(135deg, rgba(251, 191, 36, 0.2), rgba(245, 158, 11, 0.1));
+            border: 2px solid #fbbf24;
+            border-radius: 16px;
+            padding: 20px;
+            margin: 16px 0;
+        }
+
+        .lobby-code-label {
+            color: #94a3b8;
+            font-size: 13px;
+            margin-bottom: 8px;
+        }
+
+        .lobby-code-value {
+            font-size: 36px;
+            font-weight: 800;
+            color: #fbbf24;
+            letter-spacing: 10px;
+        }
+
+        .lobby-settings-summary {
+            background: rgba(15, 23, 42, 0.6);
+            border-radius: 12px;
+            padding: 14px;
+            margin: 16px 0;
+        }
+
+        .settings-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 6px 0;
+            border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+        }
+
+        .settings-row:last-child {
+            border-bottom: none;
+        }
+
+        .settings-label {
+            color: #94a3b8;
+            font-size: 13px;
+        }
+
+        .settings-value {
+            color: #fff;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .invite-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 16px;
+        }
+
+        .invite-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 14px;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s;
+        }
+
+        .invite-btn.telegram {
+            background: linear-gradient(135deg, #0088cc, #0077b5);
+            color: #fff;
+        }
+
+        .invite-btn.telegram:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 136, 204, 0.4);
+        }
+
+        .invite-btn.copy {
+            background: rgba(59, 130, 246, 0.2);
+            border: 2px solid #3b82f6;
+            color: #3b82f6;
+        }
+
+        .invite-btn.copy:hover {
+            background: rgba(59, 130, 246, 0.3);
+        }
+
+        .start-game-btn {
+            background: linear-gradient(135deg, #22c55e, #16a34a);
+            border: none;
+            border-radius: 12px;
+            padding: 14px;
+            color: #fff;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: all 0.2s;
+        }
+
+        .start-game-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(34, 197, 94, 0.4);
+        }
+
+        .waiting-players {
+            background: rgba(15, 23, 42, 0.6);
+            border-radius: 12px;
+            padding: 14px;
+            margin: 16px 0;
+        }
+
+        .waiting-title {
+            color: #94a3b8;
+            font-size: 13px;
+            margin-bottom: 10px;
+        }
+
+        .players-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .player-chip {
+            background: rgba(59, 130, 246, 0.2);
+            border: 1px solid rgba(59, 130, 246, 0.4);
+            border-radius: 20px;
+            padding: 6px 12px;
+            font-size: 13px;
+            color: #60a5fa;
+        }
+
+        .player-chip.host {
+            background: rgba(251, 191, 36, 0.2);
+            border-color: rgba(251, 191, 36, 0.4);
+            color: #fbbf24;
+        }
     </style>
 </head>
 <body>
@@ -1695,6 +2035,129 @@
                         <div class="stat-value green">58%</div>
                         <div class="stat-label">Win Rate</div>
                     </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════
+         PRIVATE GAME MODAL
+         ═══════════════════════════════════════════════════ -->
+    <div id="privateGameModal" class="private-game-modal hidden">
+        <div class="private-game-content">
+            <div class="private-game-header">
+                <div class="private-game-title">🎰 Private Game</div>
+                <button class="private-game-close" onclick="closePrivateGameModal()">×</button>
+            </div>
+
+            <!-- Tabs: Create / Join -->
+            <div class="private-game-tabs">
+                <button class="pg-tab active" onclick="switchPrivateTab('create', this)">Create Lobby</button>
+                <button class="pg-tab" onclick="switchPrivateTab('join', this)">Join Lobby</button>
+            </div>
+
+            <!-- Create Lobby Form -->
+            <div id="createLobbyView">
+                <div class="create-lobby-form">
+                    <div class="form-group">
+                        <label class="form-label">Buy-in Amount</label>
+                        <select class="form-select" id="buyInSelect">
+                            <option value="100">$100</option>
+                            <option value="500">$500</option>
+                            <option value="1000" selected>$1,000</option>
+                            <option value="5000">$5,000</option>
+                            <option value="10000">$10,000</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Max Players</label>
+                        <select class="form-select" id="maxPlayersSelect">
+                            <option value="2">2 Players (Heads-up)</option>
+                            <option value="4">4 Players</option>
+                            <option value="6" selected>6 Players</option>
+                            <option value="9">9 Players</option>
+                        </select>
+                    </div>
+
+                    <div class="blinds-row">
+                        <div class="form-group">
+                            <label class="form-label">Small Blind</label>
+                            <select class="form-select" id="smallBlindSelect">
+                                <option value="5">$5</option>
+                                <option value="10" selected>$10</option>
+                                <option value="25">$25</option>
+                                <option value="50">$50</option>
+                                <option value="100">$100</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Big Blind</label>
+                            <select class="form-select" id="bigBlindSelect">
+                                <option value="10">$10</option>
+                                <option value="20" selected>$20</option>
+                                <option value="50">$50</option>
+                                <option value="100">$100</option>
+                                <option value="200">$200</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <button class="create-btn" onclick="createPrivateLobby()">🎯 Create Lobby</button>
+                </div>
+            </div>
+
+            <!-- Join Lobby Form -->
+            <div id="joinLobbyView" class="hidden">
+                <div class="join-lobby-form">
+                    <div class="form-group">
+                        <label class="form-label">Enter Lobby Code</label>
+                        <input type="text" class="lobby-code-input" id="lobbyCodeInput" maxlength="6" placeholder="XXXXXX">
+                    </div>
+                    <button class="join-btn" onclick="joinPrivateLobby()">🚀 Join Lobby</button>
+                </div>
+            </div>
+
+            <!-- Lobby Created View -->
+            <div id="lobbyCreatedView" class="hidden">
+                <div class="lobby-created">
+                    <div class="lobby-code-display">
+                        <div class="lobby-code-label">Your Lobby Code</div>
+                        <div class="lobby-code-value" id="createdLobbyCode">ABC123</div>
+                    </div>
+
+                    <div class="lobby-settings-summary">
+                        <div class="settings-row">
+                            <span class="settings-label">Buy-in</span>
+                            <span class="settings-value" id="summaryBuyIn">$1,000</span>
+                        </div>
+                        <div class="settings-row">
+                            <span class="settings-label">Blinds</span>
+                            <span class="settings-value" id="summaryBlinds">$10/$20</span>
+                        </div>
+                        <div class="settings-row">
+                            <span class="settings-label">Max Players</span>
+                            <span class="settings-value" id="summaryPlayers">6</span>
+                        </div>
+                    </div>
+
+                    <div class="waiting-players">
+                        <div class="waiting-title">Players in Lobby (1/<span id="maxPlayersCount">6</span>)</div>
+                        <div class="players-list" id="lobbyPlayersList">
+                            <span class="player-chip host" id="hostChip">👑 You (Host)</span>
+                        </div>
+                    </div>
+
+                    <div class="invite-buttons">
+                        <button class="invite-btn telegram" onclick="inviteViaTelegram()">
+                            <span>📨</span> Invite via Telegram
+                        </button>
+                        <button class="invite-btn copy" onclick="copyLobbyLink()">
+                            <span>📋</span> Copy Invite Link
+                        </button>
+                    </div>
+
+                    <button class="start-game-btn" onclick="startPrivateGame()">▶️ Start Game</button>
                 </div>
             </div>
         </div>
@@ -1998,6 +2461,12 @@
         function openLobby(mode) {
             currentMode = mode;
             addDebug('Open: ' + mode);
+
+            // Private Game opens a special modal instead of lobby screen
+            if (mode === 'private') {
+                openPrivateGameModal();
+                return;
+            }
 
             var titles = {
                 tournament: '🏆 Tournament Lobby',
@@ -3115,6 +3584,201 @@
         function handleSettings() {
             addDebug('Settings');
             showAlert('⚙️ Settings coming soon!');
+        }
+
+        // ═══════════════════════════════════════════════════
+        // PRIVATE GAME MODAL FUNCTIONS
+        // ═══════════════════════════════════════════════════
+        var currentPrivateLobby = null;
+
+        function openPrivateGameModal() {
+            addDebug('Open Private Game Modal');
+            document.getElementById('privateGameModal').classList.remove('hidden');
+            resetPrivateGameModal();
+        }
+
+        function closePrivateGameModal() {
+            document.getElementById('privateGameModal').classList.add('hidden');
+            currentPrivateLobby = null;
+            // Reset tabs visibility
+            document.querySelector('.private-game-tabs').style.display = 'flex';
+        }
+
+        function resetPrivateGameModal() {
+            // Show create view, hide others
+            document.getElementById('createLobbyView').classList.remove('hidden');
+            document.getElementById('joinLobbyView').classList.add('hidden');
+            document.getElementById('lobbyCreatedView').classList.add('hidden');
+            
+            // Reset tabs
+            var tabs = document.querySelectorAll('.pg-tab');
+            tabs.forEach(function(t, i) {
+                if (i === 0) t.classList.add('active');
+                else t.classList.remove('active');
+            });
+            
+            // Reset form
+            document.getElementById('lobbyCodeInput').value = '';
+        }
+
+        function switchPrivateTab(tab, btn) {
+            var tabs = document.querySelectorAll('.pg-tab');
+            tabs.forEach(function(t) { t.classList.remove('active'); });
+            btn.classList.add('active');
+            
+            if (tab === 'create') {
+                document.getElementById('createLobbyView').classList.remove('hidden');
+                document.getElementById('joinLobbyView').classList.add('hidden');
+                document.getElementById('lobbyCreatedView').classList.add('hidden');
+            } else {
+                document.getElementById('createLobbyView').classList.add('hidden');
+                document.getElementById('joinLobbyView').classList.remove('hidden');
+                document.getElementById('lobbyCreatedView').classList.add('hidden');
+            }
+        }
+
+        function generateLobbyCode() {
+            var chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+            var code = '';
+            for (var i = 0; i < 6; i++) {
+                code += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            return code;
+        }
+
+        function createPrivateLobby() {
+            var buyIn = document.getElementById('buyInSelect').value;
+            var maxPlayers = document.getElementById('maxPlayersSelect').value;
+            var smallBlind = document.getElementById('smallBlindSelect').value;
+            var bigBlind = document.getElementById('bigBlindSelect').value;
+            var lobbyCode = generateLobbyCode();
+            
+            currentPrivateLobby = {
+                code: lobbyCode,
+                buyIn: parseInt(buyIn),
+                maxPlayers: parseInt(maxPlayers),
+                smallBlind: parseInt(smallBlind),
+                bigBlind: parseInt(bigBlind),
+                players: [{ name: userName, isHost: true }]
+            };
+            
+            addDebug('Created lobby: ' + lobbyCode);
+            
+            // Update UI
+            document.getElementById('createdLobbyCode').textContent = lobbyCode;
+            document.getElementById('summaryBuyIn').textContent = '$' + parseInt(buyIn).toLocaleString();
+            document.getElementById('summaryBlinds').textContent = '$' + smallBlind + '/$' + bigBlind;
+            document.getElementById('summaryPlayers').textContent = maxPlayers;
+            document.getElementById('maxPlayersCount').textContent = maxPlayers;
+            document.getElementById('hostChip').textContent = '👑 ' + userName + ' (Host)';
+            
+            // Show created view
+            document.getElementById('createLobbyView').classList.add('hidden');
+            document.getElementById('lobbyCreatedView').classList.remove('hidden');
+            
+            // Hide tabs when lobby is created
+            document.querySelector('.private-game-tabs').style.display = 'none';
+        }
+
+        function joinPrivateLobby() {
+            var code = document.getElementById('lobbyCodeInput').value.toUpperCase().trim();
+            
+            if (code.length !== 6) {
+                showAlert('⚠️ Please enter a valid 6-character lobby code');
+                return;
+            }
+            
+            addDebug('Joining lobby: ' + code);
+            
+            // Simulate joining (in real app, this would be a server call)
+            currentPrivateLobby = {
+                code: code,
+                buyIn: 1000,
+                maxPlayers: 6,
+                smallBlind: 10,
+                bigBlind: 20,
+                players: [
+                    { name: 'Host', isHost: true },
+                    { name: userName, isHost: false }
+                ]
+            };
+            
+            // Close modal and start game
+            closePrivateGameModal();
+            startPrivateGame();
+        }
+
+        function inviteViaTelegram() {
+            if (!currentPrivateLobby) return;
+            
+            var lobbyCode = currentPrivateLobby.code;
+            var botUsername = 'pokerhouse77bot';
+            var inviteLink = 'https://t.me/' + botUsername + '?start=lobby_' + lobbyCode;
+            var message = '🎰 Join my Private Poker Game!\n\n' +
+                '📍 Lobby Code: ' + lobbyCode + '\n' +
+                '💰 Buy-in: $' + currentPrivateLobby.buyIn.toLocaleString() + '\n' +
+                '🎯 Blinds: $' + currentPrivateLobby.smallBlind + '/$' + currentPrivateLobby.bigBlind + '\n\n' +
+                '👇 Click to join:';
+            
+            addDebug('Invite via Telegram: ' + lobbyCode);
+            
+            // Use Telegram's native share if available
+            if (tg && tg.switchInlineQuery) {
+                tg.switchInlineQuery(message + ' ' + inviteLink, ['users']);
+            } else if (tg && tg.openTelegramLink) {
+                // Open share dialog
+                var shareUrl = 'https://t.me/share/url?url=' + encodeURIComponent(inviteLink) + '&text=' + encodeURIComponent(message);
+                tg.openTelegramLink(shareUrl);
+            } else {
+                // Fallback: open in new window
+                var shareUrl = 'https://t.me/share/url?url=' + encodeURIComponent(inviteLink) + '&text=' + encodeURIComponent(message);
+                window.open(shareUrl, '_blank');
+            }
+        }
+
+        function copyLobbyLink() {
+            if (!currentPrivateLobby) return;
+            
+            var lobbyCode = currentPrivateLobby.code;
+            var botUsername = 'pokerhouse77bot';
+            var inviteLink = 'https://t.me/' + botUsername + '?start=lobby_' + lobbyCode;
+            
+            // Copy to clipboard
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(inviteLink).then(function() {
+                    showAlert('📋 Invite link copied!\n\n' + inviteLink);
+                }).catch(function() {
+                    showAlert('📋 Lobby Code: ' + lobbyCode + '\n\nShare this code with friends!');
+                });
+            } else {
+                // Fallback
+                showAlert('📋 Lobby Code: ' + lobbyCode + '\n\nShare this code with friends!');
+            }
+        }
+
+        function startPrivateGame() {
+            if (!currentPrivateLobby) {
+                showAlert('⚠️ No lobby to start');
+                return;
+            }
+            
+            addDebug('Starting private game: ' + currentPrivateLobby.code);
+            
+            // Set game state from lobby settings
+            gameState.smallBlind = currentPrivateLobby.smallBlind;
+            gameState.bigBlind = currentPrivateLobby.bigBlind;
+            
+            // Close modal
+            closePrivateGameModal();
+            document.getElementById('mainMenu').classList.add('hidden');
+            document.getElementById('lobbyScreen').classList.add('hidden');
+            
+            // Join table with lobby settings
+            joinTable({
+                name: 'Private: ' + currentPrivateLobby.code,
+                buyIn: '$' + currentPrivateLobby.buyIn.toLocaleString(),
+                blinds: currentPrivateLobby.smallBlind + '/' + currentPrivateLobby.bigBlind
+            });
         }
 
         addDebug('Ready');
