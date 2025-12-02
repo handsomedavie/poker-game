@@ -770,20 +770,20 @@
             padding: 0;
         }
 
-        /* CARDS - LARGER WITH VISIBLE SUITS + ANIMATION */
+        /* CARDS - BIGGER WITH VISIBLE SUITS + ANIMATION */
         .card {
-            width: 42px !important;
-            height: 60px !important;
+            width: 46px !important;
+            height: 66px !important;
             background: #ffffff !important;
             border-radius: 5px;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            gap: 2px;
-            padding: 4px !important;
+            gap: 3px;
+            padding: 5px !important;
             font-weight: 700;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+            box-shadow: 0 4px 14px rgba(0,0,0,0.5);
             border: 2px solid #374151;
             opacity: 1 !important;
             filter: none !important;
@@ -845,8 +845,8 @@
         .card.red { color: #dc2626 !important; }
         .card.black { color: #1f2937 !important; }
 
-        .card-rank { font-size: 18px !important; line-height: 1; font-weight: 800; }
-        .card-suit { font-size: 18px !important; line-height: 1; }
+        .card-rank { font-size: 20px !important; line-height: 1; font-weight: 800; }
+        .card-suit { font-size: 20px !important; line-height: 1; }
 
         .card.hidden {
             background: linear-gradient(135deg, #1e40af, #1e3a8a) !important;
@@ -898,18 +898,18 @@
         }
 
         .player-avatar {
-            width: 32px; height: 32px;
+            width: 38px; height: 38px;
             border-radius: 50%;
             background: linear-gradient(135deg, #3b82f6, #1d4ed8);
-            border: 2px solid rgba(212, 175, 55, 0.4);
+            border: 2.5px solid rgba(212, 175, 55, 0.5);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 13px;
+            font-size: 15px;
             font-weight: 700;
             color: #fff;
-            margin: 0 auto 3px;
-            box-shadow: 0 3px 8px rgba(0,0,0,0.4);
+            margin: 0 auto 4px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.4);
             position: relative;
         }
 
@@ -1010,6 +1010,31 @@
 
         .hero-card .card-rank { font-size: 22px; line-height: 1; }
         .hero-card .card-suit { font-size: 24px; line-height: 1; }
+
+        /* GOLDEN HIGHLIGHT for hero combo cards */
+        .hero-card.combo-card {
+            border: 3px solid #fbbf24 !important;
+            box-shadow: 
+                0 0 20px rgba(251, 191, 36, 0.9),
+                0 0 40px rgba(251, 191, 36, 0.5),
+                0 6px 20px rgba(0,0,0,0.4) !important;
+            animation: heroGoldenGlow 1.5s ease-in-out infinite;
+        }
+
+        @keyframes heroGoldenGlow {
+            0%, 100% {
+                box-shadow: 
+                    0 0 20px rgba(251, 191, 36, 0.9),
+                    0 0 40px rgba(251, 191, 36, 0.5),
+                    0 6px 20px rgba(0,0,0,0.4);
+            }
+            50% {
+                box-shadow: 
+                    0 0 30px rgba(251, 191, 36, 1),
+                    0 0 55px rgba(251, 191, 36, 0.7),
+                    0 6px 20px rgba(0,0,0,0.4);
+            }
+        }
 
         /* Action buttons grid */
         .action-buttons-row {
@@ -2354,12 +2379,18 @@
                 }
             });
             
-            // Update hero cards display
+            // Update hero cards display with combo highlighting
             var hero = getHero();
             if (hero && hero.cards.length === 2) {
                 var heroCardsEl = document.getElementById('heroCards');
+                var comboCardKeys = getComboCardKeys();
+                
                 heroCardsEl.innerHTML = hero.cards.map(function(card) {
-                    return '<div class="hero-card ' + (isRed(card.suit) ? 'red' : 'black') + '">' +
+                    var cardKey = card.rank + card.suit;
+                    var isComboCard = comboCardKeys.indexOf(cardKey) !== -1;
+                    var comboClass = isComboCard ? ' combo-card' : '';
+                    
+                    return '<div class="hero-card ' + (isRed(card.suit) ? 'red' : 'black') + comboClass + '">' +
                         '<span class="card-rank">' + card.rank + '</span>' +
                         '<span class="card-suit">' + card.suit + '</span>' +
                     '</div>';
@@ -2810,26 +2841,71 @@
             var container = document.getElementById('communityCards');
             var html = '';
             
+            // Get hero's winning combo cards (if any) for highlighting
+            var comboCardKeys = getComboCardKeys();
+            
             gameState.communityCards.forEach(function(card, index) {
+                // Check if this card is part of the winning combo
+                var cardKey = card.rank + card.suit;
+                var isComboCard = comboCardKeys.indexOf(cardKey) !== -1;
+                var comboClass = isComboCard ? ' combo-card' : '';
+                
                 // Add flip animation class for new cards
                 var animClass = 'card-container';
                 html += '<div class="' + animClass + '">' +
-                    '<div class="card ' + (isRed(card.suit) ? 'red' : 'black') + '">' +
+                    '<div class="card ' + (isRed(card.suit) ? 'red' : 'black') + comboClass + '">' +
                         '<span class="card-rank">' + card.rank + '</span>' +
                         '<span class="card-suit">' + card.suit + '</span>' +
                     '</div>' +
                 '</div>';
             });
             
-            // Hidden cards for remaining slots
-            for (var i = gameState.communityCards.length; i < 5; i++) {
-                html += '<div class="card-container"><div class="card hidden"></div></div>';
-            }
+            // NO hidden placeholders - only show actual dealt cards
+            // This fixes the PRE-FLOP bug where 5 cards were shown
             
             container.innerHTML = html;
             
             // Update hand HUD after community cards change
             updateHandHUD();
+            
+            // Update hero cards highlighting when community cards change
+            updateHeroCardsHighlight();
+        }
+        
+        // Update hero cards to show combo highlighting
+        function updateHeroCardsHighlight() {
+            var hero = getHero();
+            if (!hero || !hero.cards || hero.cards.length < 2) return;
+            
+            var heroCardsEl = document.getElementById('heroCards');
+            var comboCardKeys = getComboCardKeys();
+            
+            heroCardsEl.innerHTML = hero.cards.map(function(card) {
+                var cardKey = card.rank + card.suit;
+                var isComboCard = comboCardKeys.indexOf(cardKey) !== -1;
+                var comboClass = isComboCard ? ' combo-card' : '';
+                
+                return '<div class="hero-card ' + (isRed(card.suit) ? 'red' : 'black') + comboClass + '">' +
+                    '<span class="card-rank">' + card.rank + '</span>' +
+                    '<span class="card-suit">' + card.suit + '</span>' +
+                '</div>';
+            }).join('');
+        }
+        
+        // Get card keys that form the winning combination for hero
+        function getComboCardKeys() {
+            var hero = getHero();
+            if (!hero || !hero.cards || hero.cards.length < 2 || gameState.communityCards.length < 3) {
+                return [];
+            }
+            
+            var allCards = hero.cards.concat(gameState.communityCards);
+            var hand = evaluateHand(allCards);
+            
+            if (!hand || !hand.cards) return [];
+            
+            // Return keys of cards in the winning combo
+            return hand.cards.map(function(c) { return c.rank + c.suit; });
         }
 
         function updateActionButtons() {
