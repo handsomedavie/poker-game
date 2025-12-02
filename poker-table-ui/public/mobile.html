@@ -860,31 +860,31 @@
             opacity: 0.5;
         }
         
-        /* Player positions around the table */
+        /* Player positions around the table - FIXED for heads-up */
         .table-player.position-top {
-            top: 10%;
+            top: 60px;
             left: 50%;
             transform: translateX(-50%);
         }
         
         .table-player.position-top-right {
-            top: 20%;
-            right: 10%;
+            top: 80px;
+            right: 15px;
         }
         
         .table-player.position-bottom-right {
-            bottom: 30%;
-            right: 10%;
+            bottom: 200px;
+            right: 15px;
         }
         
         .table-player.position-top-left {
-            top: 20%;
-            left: 10%;
+            top: 80px;
+            left: 15px;
         }
         
         .table-player.position-bottom-left {
-            bottom: 30%;
-            left: 10%;
+            bottom: 200px;
+            left: 15px;
         }
 
         /* ═══════ COMMUNITY CARDS - CENTER (LARGER) ═══════ */
@@ -3628,13 +3628,27 @@
         // PLAYER ACTIONS
         // ═══════════════════════════════════════════════════
         function playerAction(action) {
+            addDebug('playerAction called: ' + action);
+            
+            // If in multiplayer game, use WebSocket
+            if (currentGameSession && gameWebSocket) {
+                addDebug('Sending multiplayer action: ' + action);
+                var amount = 0;
+                if (action === 'raise' || action === 'bet') {
+                    amount = currentBetAmount || 20;
+                }
+                sendGameAction(action === 'allin' ? 'all_in' : action, amount);
+                return;
+            }
+            
+            // Fallback to local game logic
             var hero = getHero();
             if (!hero || gameState.currentPlayerSeat !== hero.seat) {
                 addDebug('Not your turn!');
                 return;
             }
             
-            addDebug('Action: ' + action);
+            addDebug('Local action: ' + action);
             
             switch(action) {
                 case 'fold':
@@ -4551,14 +4565,21 @@
         }
         
         function handleGameEvent(data) {
+            addDebug('handleGameEvent: ' + data.type);
+            
             if (data.type === 'gameState') {
                 if (data.yourSeat) {
                     mySeat = data.yourSeat;
-                    addDebug('My seat: ' + mySeat);
+                    addDebug('My seat assigned: ' + mySeat);
                 }
                 updateGameUI(data.game);
             } else if (data.type === 'error') {
+                addDebug('Game error: ' + data.message);
                 showAlert('⚠️ ' + data.message);
+            } else if (data.type === 'pong') {
+                // Heartbeat response, ignore
+            } else {
+                addDebug('Unknown game event: ' + data.type);
             }
         }
         
@@ -4656,14 +4677,20 @@
             if (!seatsEl || !players) return;
             
             var html = '';
+            var opponentCount = 0;
+            
             players.forEach(function(player) {
                 var isMe = player.seat === mySeat;
-                var positionClass = getPositionClass(player.seat, players.length);
-                var foldedClass = player.isFolded ? ' folded' : '';
-                var activeClass = player.isActive ? ' active' : '';
                 
                 // Don't show "me" at the table seats - I'm shown at bottom
                 if (isMe) return;
+                
+                opponentCount++;
+                var foldedClass = player.isFolded ? ' folded' : '';
+                var activeClass = player.isActive ? ' active' : '';
+                
+                // For heads-up (2 players), opponent always goes to top
+                var positionClass = 'position-top';
                 
                 html += '<div class="table-player ' + positionClass + foldedClass + activeClass + '">' +
                     '<div class="player-avatar">' + (player.name ? player.name.charAt(0).toUpperCase() : '?') + '</div>' +
@@ -4676,35 +4703,28 @@
             });
             
             seatsEl.innerHTML = html;
-            addDebug('Rendered ' + (players.length - 1) + ' opponents');
-        }
-        
-        function getPositionClass(seat, totalPlayers) {
-            // Position players around the table
-            if (totalPlayers <= 2) {
-                return seat === 1 ? 'position-top' : 'position-bottom';
-            }
-            var positions = ['position-top', 'position-top-right', 'position-bottom-right', 
-                           'position-bottom', 'position-bottom-left', 'position-top-left'];
-            return positions[(seat - 1) % positions.length];
+            addDebug('Rendered ' + opponentCount + ' opponents');
         }
         
         // Game action functions for multiplayer
         function sendGameAction(action, amount) {
             if (!currentGameSession) {
-                addDebug('No game session for action');
+                addDebug('No game session for action!');
                 return;
             }
             
-            addDebug('Sending action: ' + action + ', amount: ' + amount);
+            addDebug('sendGameAction: ' + action + ', amount: ' + amount + ', WS state: ' + (gameWebSocket ? gameWebSocket.readyState : 'null'));
             
             if (gameWebSocket && gameWebSocket.readyState === WebSocket.OPEN) {
-                gameWebSocket.send(JSON.stringify({
+                var msg = {
                     type: 'action',
                     action: action,
                     amount: amount || 0
-                }));
+                };
+                addDebug('WS sending: ' + JSON.stringify(msg));
+                gameWebSocket.send(JSON.stringify(msg));
             } else {
+                addDebug('WS not open, using HTTP fallback');
                 // Fallback to HTTP
                 fetch(API_BASE + '/api/game/' + currentGameSession + '/action', {
                     method: 'POST',
@@ -4927,17 +4947,34 @@
                     break;
                     
                 case 'lobbyState':
-                    // Full state update
+                    // Full state update - sync ALL lobby data from server
                     if (data.lobby) {
+                        var serverLobby = data.lobby;
+                        
+                        // Update lobby settings from server
+                        currentPrivateLobby.buyIn = serverLobby.buyIn || serverLobby.buy_in || currentPrivateLobby.buyIn;
+                        currentPrivateLobby.maxPlayers = serverLobby.maxPlayers || serverLobby.max_players || currentPrivateLobby.maxPlayers;
+                        
+                        // Parse players (could be array or object)
                         var players = [];
-                        for (var pid in data.lobby.players) {
-                            var p = data.lobby.players[pid];
-                            players.push({
-                                name: p.first_name || p.username || 'Player',
-                                isHost: p.is_host
+                        if (Array.isArray(serverLobby.players)) {
+                            serverLobby.players.forEach(function(p) {
+                                players.push({
+                                    name: p.firstName || p.first_name || p.username || 'Player',
+                                    isHost: p.telegramId === serverLobby.hostTelegramId
+                                });
                             });
+                        } else if (serverLobby.players) {
+                            for (var pid in serverLobby.players) {
+                                var p = serverLobby.players[pid];
+                                players.push({
+                                    name: p.firstName || p.first_name || p.username || 'Player',
+                                    isHost: p.is_host
+                                });
+                            }
                         }
                         currentPrivateLobby.players = players;
+                        addDebug('Lobby synced: buyIn=' + currentPrivateLobby.buyIn + ', max=' + currentPrivateLobby.maxPlayers);
                         updateWaitingRoomUI();
                     }
                     break;
