@@ -2284,7 +2284,7 @@
         <div class="private-game-content">
             <div class="private-game-header">
                 <div class="private-game-title">🎰 Private Game</div>
-                <button class="private-game-close" onclick="closePrivateGameModal()">×</button>
+                <button class="private-game-close" onclick="closePrivateGameModal(true)">×</button>
             </div>
 
             <!-- Tabs: Create / Join -->
@@ -3927,9 +3927,12 @@
             resetPrivateGameModal();
         }
 
-        function closePrivateGameModal() {
+        function closePrivateGameModal(resetLobby) {
             document.getElementById('privateGameModal').classList.add('hidden');
-            currentPrivateLobby = null;
+            // Only reset lobby if explicitly requested (e.g., user clicked X button)
+            if (resetLobby === true) {
+                currentPrivateLobby = null;
+            }
             // Reset tabs visibility
             document.querySelector('.private-game-tabs').style.display = 'flex';
         }
