@@ -4428,14 +4428,18 @@
                 gameWebSocket.close();
             }
             
+            // IMPORTANT: Pass telegram_id so server knows who is connecting
             var wsUrl = API_BASE.replace('https://', 'wss://').replace('http://', 'ws://') + '/ws/game/' + sessionId;
+            if (telegramUserId) {
+                wsUrl += '?player_id=' + telegramUserId;
+            }
             addDebug('Connecting to game WS: ' + wsUrl);
             
             try {
                 gameWebSocket = new WebSocket(wsUrl);
                 
                 gameWebSocket.onopen = function() {
-                    addDebug('Game WebSocket connected');
+                    addDebug('Game WebSocket connected as player ' + telegramUserId);
                 };
                 
                 gameWebSocket.onmessage = function(event) {

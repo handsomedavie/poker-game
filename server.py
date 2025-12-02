@@ -1735,6 +1735,7 @@ async def lobby_websocket(websocket: WebSocket, lobby_code: str):
 
 # Game WebSocket connections
 game_connections: Dict[str, Dict[int, WebSocket]] = {}  # session_id -> {telegram_id -> websocket}
+game_connection_locks: Dict[str, asyncio.Lock] = {}  # session_id -> Lock
 
 
 class GameActionRequest(BaseModel):
@@ -1822,33 +1823,47 @@ async def game_websocket(websocket: WebSocket, session_id: str):
         await websocket.close()
         return
     
-    # Get player ID from query params or assign one
+    # Create lock for this session if not exists
+    if session_id not in game_connection_locks:
+        game_connection_locks[session_id] = asyncio.Lock()
+    
+    # Get player ID from query params
     player_id = None
+    requested_id = None
     try:
-        # Try to get from query
         query_string = str(websocket.scope.get("query_string", b"").decode())
+        print(f"🎮 GAME WS: Query string: {query_string}")
         if "player_id=" in query_string:
-            player_id = int(query_string.split("player_id=")[1].split("&")[0])
-    except:
-        pass
+            requested_id = int(query_string.split("player_id=")[1].split("&")[0])
+            print(f"🎮 GAME WS: Requested player_id: {requested_id}")
+    except Exception as e:
+        print(f"🎮 GAME WS: Parse error: {e}")
     
-    if not player_id:
-        # Assign first unconnected player
-        connected = game_connections.get(session_id, {})
-        for pid in game.players.keys():
-            if pid not in connected:
-                player_id = pid
-                break
-    
-    if not player_id:
-        await websocket.send_json({"type": "error", "message": "No available seat"})
-        await websocket.close()
-        return
-    
-    # Register connection
-    if session_id not in game_connections:
-        game_connections[session_id] = {}
-    game_connections[session_id][player_id] = websocket
+    # Use lock to prevent race conditions when assigning players
+    async with game_connection_locks[session_id]:
+        # Check if this player is in the game
+        if requested_id and requested_id in game.players:
+            player_id = requested_id
+            print(f"🎮 GAME WS: Player {player_id} found in game")
+        else:
+            # Try to find by matching - assign first unconnected player
+            connected = game_connections.get(session_id, {})
+            for pid in game.players.keys():
+                if pid not in connected:
+                    player_id = pid
+                    print(f"🎮 GAME WS: Assigning unconnected player {player_id} to client {requested_id}")
+                    break
+        
+        if not player_id:
+            print(f"🎮 GAME WS: No seat available for {requested_id}")
+            await websocket.send_json({"type": "error", "message": "No available seat"})
+            await websocket.close()
+            return
+        
+        # Register connection inside lock to prevent race condition
+        if session_id not in game_connections:
+            game_connections[session_id] = {}
+        game_connections[session_id][player_id] = websocket
     
     print(f"🎮 GAME WS: Player {player_id} connected to game {session_id}")
     
