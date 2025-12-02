@@ -728,13 +728,13 @@
             border-radius: 48% / 42%;
         }
 
-        /* ═══════ POT DISPLAY - UPPER THIRD OF TABLE ═══════ */
+        /* ═══════ POT DISPLAY - BETWEEN PLAYER AND CARDS ═══════ */
         .pot-center {
             position: absolute !important;
-            top: 20% !important;
+            top: 28% !important;
             left: 50% !important;
             transform: translateX(-50%) scale(0.9) !important;
-            background: rgba(0,0,0,0.8) !important;
+            background: rgba(0,0,0,0.85) !important;
             padding: 5px 14px !important;
             border-radius: 16px !important;
             border: 2px solid #fbbf24 !important;
@@ -758,42 +758,95 @@
             text-shadow: 0 2px 4px rgba(0,0,0,0.5);
         }
 
-        /* ═══════ COMMUNITY CARDS - CENTER (FULL SIZE) ═══════ */
+        /* ═══════ COMMUNITY CARDS - CENTER (LARGER) ═══════ */
         .community-cards {
             position: absolute;
-            top: 50% !important;
+            top: 52% !important;
             left: 50% !important;
             transform: translate(-50%, -50%) !important;
             display: flex;
-            gap: 5px !important;
+            gap: 6px !important;
             z-index: 20 !important;
             padding: 0;
         }
 
-        /* CARDS - FULL SIZE WITH VISIBLE SUITS */
+        /* CARDS - LARGER WITH VISIBLE SUITS + ANIMATION */
         .card {
-            width: 38px !important;
-            height: 54px !important;
+            width: 42px !important;
+            height: 60px !important;
             background: #ffffff !important;
-            border-radius: 4px;
+            border-radius: 5px;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             gap: 2px;
-            padding: 3px !important;
+            padding: 4px !important;
             font-weight: 700;
-            box-shadow: 0 3px 10px rgba(0,0,0,0.5);
-            border: 1.5px solid #374151;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+            border: 2px solid #374151;
             opacity: 1 !important;
             filter: none !important;
+            /* Animation */
+            animation: cardDeal 0.4s ease-out;
+            transition: all 0.3s ease;
+        }
+
+        /* Card deal animation */
+        @keyframes cardDeal {
+            0% {
+                opacity: 0;
+                transform: translateY(-30px) scale(0.5) rotateY(90deg);
+            }
+            50% {
+                opacity: 0.7;
+                transform: translateY(-10px) scale(0.9) rotateY(45deg);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0) scale(1) rotateY(0deg);
+            }
+        }
+
+        /* Stagger animation for each card */
+        .card:nth-child(1) { animation-delay: 0s; }
+        .card:nth-child(2) { animation-delay: 0.15s; }
+        .card:nth-child(3) { animation-delay: 0.3s; }
+        .card:nth-child(4) { animation-delay: 0.45s; }
+        .card:nth-child(5) { animation-delay: 0.6s; }
+
+        /* GOLDEN HIGHLIGHT for winning combination cards */
+        .card.highlighted,
+        .card.winning-card,
+        .card.combo-card {
+            border: 2.5px solid #fbbf24 !important;
+            box-shadow: 
+                0 0 15px rgba(251, 191, 36, 0.8),
+                0 0 30px rgba(251, 191, 36, 0.4),
+                0 4px 12px rgba(0,0,0,0.5) !important;
+            animation: goldenGlow 1.5s ease-in-out infinite;
+        }
+
+        @keyframes goldenGlow {
+            0%, 100% {
+                box-shadow: 
+                    0 0 15px rgba(251, 191, 36, 0.8),
+                    0 0 30px rgba(251, 191, 36, 0.4),
+                    0 4px 12px rgba(0,0,0,0.5);
+            }
+            50% {
+                box-shadow: 
+                    0 0 25px rgba(251, 191, 36, 1),
+                    0 0 45px rgba(251, 191, 36, 0.6),
+                    0 4px 12px rgba(0,0,0,0.5);
+            }
         }
 
         .card.red { color: #dc2626 !important; }
         .card.black { color: #1f2937 !important; }
 
-        .card-rank { font-size: 16px !important; line-height: 1; font-weight: 800; }
-        .card-suit { font-size: 16px !important; line-height: 1; }
+        .card-rank { font-size: 18px !important; line-height: 1; font-weight: 800; }
+        .card-suit { font-size: 18px !important; line-height: 1; }
 
         .card.hidden {
             background: linear-gradient(135deg, #1e40af, #1e3a8a) !important;
