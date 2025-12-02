@@ -2327,6 +2327,9 @@
             gameState.communityCards = [];
             gameState.deck = createDeck();
             
+            // IMPORTANT: Clear community cards display immediately!
+            updateCommunityCards();
+            
             // Reset players
             gameState.players.forEach(function(p) {
                 p.cards = [];
@@ -2893,6 +2896,7 @@
         }
         
         // Get card keys that form the winning combination for hero
+        // ONLY highlights cards for REAL combinations (not HIGH CARD)
         function getComboCardKeys() {
             var hero = getHero();
             if (!hero || !hero.cards || hero.cards.length < 2 || gameState.communityCards.length < 3) {
@@ -2903,6 +2907,12 @@
             var hand = evaluateHand(allCards);
             
             if (!hand || !hand.cards) return [];
+            
+            // DON'T highlight for HIGH CARD (rank 1) - only real combinations
+            // Rank 1 = High Card, Rank 2 = One Pair, Rank 3 = Two Pair, etc.
+            if (hand.rank <= 1) {
+                return []; // No highlighting for High Card
+            }
             
             // Return keys of cards in the winning combo
             return hand.cards.map(function(c) { return c.rank + c.suit; });
