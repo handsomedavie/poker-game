@@ -3718,12 +3718,12 @@
                 '📍 Lobby Code: ' + lobbyCode + '\n' +
                 '💰 Buy-in: $' + currentPrivateLobby.buyIn.toLocaleString() + '\n' +
                 '🎯 Blinds: $' + currentPrivateLobby.smallBlind + '/$' + currentPrivateLobby.bigBlind + '\n\n' +
-                '👇 Click to join:';
+                '👇 Click to join:\n' + inviteLink;
             
             addDebug('Invite via Telegram: ' + lobbyCode);
             
-            // Build Telegram share URL
-            var shareUrl = 'https://t.me/share/url?url=' + encodeURIComponent(inviteLink) + '&text=' + encodeURIComponent(message);
+            // Build Telegram share URL - text only, link is inside the message
+            var shareUrl = 'https://t.me/share/url?text=' + encodeURIComponent(message);
             
             // Try Telegram WebApp methods first, then fallback
             try {
