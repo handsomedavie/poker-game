@@ -798,6 +798,95 @@
             text-shadow: 0 2px 4px rgba(0,0,0,0.5);
         }
 
+        /* ═══════ PLAYER SEATS - DYNAMIC ═══════ */
+        #playerSeats {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 30;
+            pointer-events: none;
+        }
+        
+        .table-player {
+            position: absolute;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: 10px;
+            padding: 8px;
+            min-width: 80px;
+            pointer-events: auto;
+        }
+        
+        .table-player .player-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #4ade80, #22c55e);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            font-weight: bold;
+            color: white;
+            margin-bottom: 5px;
+        }
+        
+        .table-player .player-name {
+            font-size: 11px;
+            color: white;
+            font-weight: 600;
+            max-width: 70px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        
+        .table-player .player-chips {
+            font-size: 10px;
+            color: #fbbf24;
+            font-weight: 500;
+        }
+        
+        .table-player .player-cards-back {
+            font-size: 14px;
+            margin-top: 5px;
+        }
+        
+        .table-player.folded {
+            opacity: 0.5;
+        }
+        
+        /* Player positions around the table */
+        .table-player.position-top {
+            top: 10%;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        
+        .table-player.position-top-right {
+            top: 20%;
+            right: 10%;
+        }
+        
+        .table-player.position-bottom-right {
+            bottom: 30%;
+            right: 10%;
+        }
+        
+        .table-player.position-top-left {
+            top: 20%;
+            left: 10%;
+        }
+        
+        .table-player.position-bottom-left {
+            bottom: 30%;
+            left: 10%;
+        }
+
         /* ═══════ COMMUNITY CARDS - CENTER (LARGER) ═══════ */
         .community-cards {
             position: absolute;
@@ -4500,26 +4589,33 @@
                 communityEl.innerHTML = html;
             }
             
-            // Find my player by seat (index in array = seat - 1)
+            // Find my player by seat
             var myPlayer = null;
             if (mySeat && gameState.players) {
                 myPlayer = gameState.players.find(function(p) {
                     return p.seat === mySeat;
                 });
+                addDebug('My player: ' + (myPlayer ? myPlayer.name : 'not found') + ', cards: ' + (myPlayer && myPlayer.cards ? myPlayer.cards.length : 0));
             }
             
-            if (myPlayer && myPlayer.cards && myPlayer.cards.length > 0) {
-                var card1El = document.getElementById('playerCard1');
-                var card2El = document.getElementById('playerCard2');
+            // Update hero cards at bottom
+            var heroCardsEl = document.getElementById('heroCards');
+            if (heroCardsEl && myPlayer && myPlayer.cards && myPlayer.cards.length >= 2) {
+                var card1 = myPlayer.cards[0];
+                var card2 = myPlayer.cards[1];
                 
-                if (card1El && myPlayer.cards[0]) {
-                    card1El.innerHTML = '<div class="card-rank">' + myPlayer.cards[0].rank + '</div>' +
-                        '<div class="card-suit ' + myPlayer.cards[0].suit + '">' + getSuitSymbol(myPlayer.cards[0].suit) + '</div>';
-                }
-                if (card2El && myPlayer.cards[1]) {
-                    card2El.innerHTML = '<div class="card-rank">' + myPlayer.cards[1].rank + '</div>' +
-                        '<div class="card-suit ' + myPlayer.cards[1].suit + '">' + getSuitSymbol(myPlayer.cards[1].suit) + '</div>';
-                }
+                var color1 = (card1.suit === 'hearts' || card1.suit === 'diamonds') ? 'red' : 'black';
+                var color2 = (card2.suit === 'hearts' || card2.suit === 'diamonds') ? 'red' : 'black';
+                
+                heroCardsEl.innerHTML = 
+                    '<div class="hero-card ' + color1 + '">' +
+                        '<span class="card-rank">' + formatRank(card1.rank) + '</span>' +
+                        '<span class="card-suit">' + getSuitSymbol(card1.suit) + '</span>' +
+                    '</div>' +
+                    '<div class="hero-card ' + color2 + '">' +
+                        '<span class="card-rank">' + formatRank(card2.rank) + '</span>' +
+                        '<span class="card-suit">' + getSuitSymbol(card2.suit) + '</span>' +
+                    '</div>';
             }
             
             // Update action buttons based on whose turn it is (using seat)
@@ -4548,21 +4644,49 @@
             return symbols[suit] || suit;
         }
         
-        function updatePlayersDisplay(players, myId) {
-            // Update player info display
-            players.forEach(function(player, index) {
-                var playerEl = document.getElementById('player' + index);
-                if (playerEl) {
-                    playerEl.querySelector('.player-name').textContent = player.name;
-                    playerEl.querySelector('.player-chips').textContent = '$' + player.chips;
-                    
-                    if (player.isFolded) {
-                        playerEl.classList.add('folded');
-                    } else {
-                        playerEl.classList.remove('folded');
-                    }
-                }
+        function formatRank(rank) {
+            // Convert numeric rank to display value
+            var rankMap = { 14: 'A', 13: 'K', 12: 'Q', 11: 'J', 10: '10' };
+            return rankMap[rank] || rank;
+        }
+        
+        function updatePlayersDisplay(players, mySeat) {
+            // Render all players around the table
+            var seatsEl = document.getElementById('playerSeats');
+            if (!seatsEl || !players) return;
+            
+            var html = '';
+            players.forEach(function(player) {
+                var isMe = player.seat === mySeat;
+                var positionClass = getPositionClass(player.seat, players.length);
+                var foldedClass = player.isFolded ? ' folded' : '';
+                var activeClass = player.isActive ? ' active' : '';
+                
+                // Don't show "me" at the table seats - I'm shown at bottom
+                if (isMe) return;
+                
+                html += '<div class="table-player ' + positionClass + foldedClass + activeClass + '">' +
+                    '<div class="player-avatar">' + (player.name ? player.name.charAt(0).toUpperCase() : '?') + '</div>' +
+                    '<div class="player-info">' +
+                        '<div class="player-name">' + (player.name || 'Player') + '</div>' +
+                        '<div class="player-chips">$' + (player.chips || 0) + '</div>' +
+                    '</div>' +
+                    (player.hasCards ? '<div class="player-cards-back">🂠🂠</div>' : '') +
+                '</div>';
             });
+            
+            seatsEl.innerHTML = html;
+            addDebug('Rendered ' + (players.length - 1) + ' opponents');
+        }
+        
+        function getPositionClass(seat, totalPlayers) {
+            // Position players around the table
+            if (totalPlayers <= 2) {
+                return seat === 1 ? 'position-top' : 'position-bottom';
+            }
+            var positions = ['position-top', 'position-top-right', 'position-bottom-right', 
+                           'position-bottom', 'position-bottom-left', 'position-top-left'];
+            return positions[(seat - 1) % positions.length];
         }
         
         // Game action functions for multiplayer
@@ -4688,25 +4812,28 @@
                 addDebug('Joined lobby successfully');
                 
                 // Convert server players to our format
+                // Server returns array of players, not object
                 var players = [];
-                if (serverLobby.players) {
-                    for (var odlplayerId in serverLobby.players) {
-                        var p = serverLobby.players[odlplayerId];
+                if (serverLobby.players && Array.isArray(serverLobby.players)) {
+                    serverLobby.players.forEach(function(p) {
+                        var isPlayerHost = (p.telegramId === serverLobby.hostTelegramId);
                         players.push({
-                            name: p.first_name || p.username || 'Player',
-                            isHost: p.is_host
+                            name: p.firstName || p.username || 'Player',
+                            isHost: isPlayerHost
                         });
-                    }
+                    });
                 }
+                addDebug('Parsed players: ' + JSON.stringify(players));
                 
                 currentPrivateLobby = {
                     code: code,
-                    buyIn: serverLobby.buy_in || 1000,
-                    maxPlayers: serverLobby.max_players || 6,
-                    smallBlind: 10,
-                    bigBlind: 20,
+                    buyIn: serverLobby.buyIn || serverLobby.buy_in || 100,
+                    maxPlayers: serverLobby.maxPlayers || serverLobby.max_players || 2,
+                    smallBlind: serverLobby.smallBlind || 10,
+                    bigBlind: serverLobby.bigBlind || 20,
                     players: players,
-                    serverData: serverLobby
+                    serverData: serverLobby,
+                    isHost: false  // Joining player is NOT the host
                 };
                 
                 // Skip splash/main menu and go directly to waiting room
