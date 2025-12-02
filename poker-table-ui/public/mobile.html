@@ -3722,27 +3722,48 @@
             
             addDebug('Invite via Telegram: ' + lobbyCode);
             
-            // Build Telegram share URL - text only, link is inside the message
-            var shareUrl = 'https://t.me/share/url?text=' + encodeURIComponent(message);
+            // Use tg:// protocol to open Telegram app directly with share dialog
+            var tgShareUrl = 'tg://msg_url?url=' + encodeURIComponent(inviteLink) + '&text=' + encodeURIComponent(message);
             
-            // Try Telegram WebApp methods first, then fallback
-            try {
-                if (tg && typeof tg.openTelegramLink === 'function') {
-                    tg.openTelegramLink(shareUrl);
-                } else {
-                    // Create a temporary link and click it (most reliable method)
-                    var tempLink = document.createElement('a');
-                    tempLink.href = shareUrl;
-                    tempLink.target = '_blank';
-                    tempLink.rel = 'noopener noreferrer';
-                    document.body.appendChild(tempLink);
-                    tempLink.click();
-                    document.body.removeChild(tempLink);
+            // Fallback URL for web (will try to open Telegram Web)
+            var webShareUrl = 'https://t.me/share?url=' + encodeURIComponent(inviteLink) + '&text=' + encodeURIComponent(message);
+            
+            // If running inside Telegram WebApp, use native method
+            if (tg && typeof tg.openTelegramLink === 'function') {
+                try {
+                    tg.openTelegramLink(webShareUrl);
+                    return;
+                } catch (e) {
+                    addDebug('TG openTelegramLink failed: ' + e.message);
                 }
+            }
+            
+            // Try tg:// protocol first (opens native Telegram app)
+            var opened = false;
+            try {
+                var iframe = document.createElement('iframe');
+                iframe.style.display = 'none';
+                iframe.src = tgShareUrl;
+                document.body.appendChild(iframe);
+                
+                // Check if it worked after a short delay
+                setTimeout(function() {
+                    document.body.removeChild(iframe);
+                }, 100);
+                
+                // Also try window.location as backup
+                setTimeout(function() {
+                    window.location.href = tgShareUrl;
+                }, 50);
+                
+                opened = true;
             } catch (e) {
-                addDebug('Telegram share error: ' + e.message);
-                // Final fallback - direct navigation
-                window.location.href = shareUrl;
+                addDebug('tg:// protocol failed: ' + e.message);
+            }
+            
+            // If tg:// didn't work, show options to user
+            if (!opened) {
+                window.open(webShareUrl, '_blank');
             }
         }
 
