@@ -72,7 +72,7 @@ class Player:
 class GameState:
     session_id: str
     lobby_code: str
-    players: Dict[int, Player]  # telegram_id -> Player
+    players: Dict[int, Player]  # seat_number -> Player (NOT telegram_id!)
     deck: List[Card] = field(default_factory=list)
     community_cards: List[Card] = field(default_factory=list)
     pot: int = 0
@@ -80,18 +80,20 @@ class GameState:
     small_blind: int = 10
     big_blind: int = 20
     dealer_seat: int = 0
-    current_player_id: Optional[int] = None
+    current_player_seat: Optional[int] = None  # Current player's SEAT number
     phase: GamePhase = GamePhase.WAITING
     min_raise: int = 0
-    last_raiser_id: Optional[int] = None
+    last_raiser_seat: Optional[int] = None
     created_at: float = field(default_factory=time.time)
+    max_players: int = 2  # How many players expected
+    connected_count: int = 0  # How many have connected
     
-    def to_dict(self, for_player_id: Optional[int] = None) -> Dict[str, Any]:
-        """Convert to dict. If for_player_id is set, show only that player's cards."""
+    def to_dict(self, for_seat: Optional[int] = None) -> Dict[str, Any]:
+        """Convert to dict. If for_seat is set, show only that player's cards."""
         players_list = []
-        for p in sorted(self.players.values(), key=lambda x: x.seat):
+        for seat, p in sorted(self.players.items()):
             # Only show cards if it's the requesting player or showdown
-            hide = for_player_id != p.telegram_id and self.phase != GamePhase.SHOWDOWN
+            hide = for_seat != seat and self.phase != GamePhase.SHOWDOWN
             players_list.append(p.to_dict(hide_cards=hide))
         
         return {
@@ -104,9 +106,11 @@ class GameState:
             "smallBlind": self.small_blind,
             "bigBlind": self.big_blind,
             "dealerSeat": self.dealer_seat,
-            "currentPlayerId": self.current_player_id,
+            "currentPlayerSeat": self.current_player_seat,
             "phase": self.phase.value,
             "minRaise": self.min_raise,
+            "maxPlayers": self.max_players,
+            "connectedCount": self.connected_count,
         }
 
 
@@ -128,16 +132,20 @@ def create_game(session_id: str, lobby_code: str, players_data: List[Dict],
                 small_blind: int = 10, big_blind: int = 20) -> GameState:
     """Create a new game from lobby players"""
     
+    num_players = len(players_data)
+    
+    # Create empty player slots by SEAT number
     players = {}
     for i, p in enumerate(players_data):
+        seat = i + 1
         player = Player(
-            telegram_id=p["telegram_id"],
-            name=p.get("first_name", p.get("username", f"Player{i+1}")),
-            seat=i + 1,
+            telegram_id=0,  # Will be set when player connects
+            name=p.get("first_name", p.get("username", f"Player{seat}")),
+            seat=seat,
             chips=1000,  # Starting chips
             cards=[],
         )
-        players[player.telegram_id] = player
+        players[seat] = player  # Key is SEAT, not telegram_id!
     
     game = GameState(
         session_id=session_id,
@@ -146,10 +154,12 @@ def create_game(session_id: str, lobby_code: str, players_data: List[Dict],
         small_blind=small_blind,
         big_blind=big_blind,
         dealer_seat=1,
+        max_players=num_players,
+        connected_count=0,
     )
     
     active_games[session_id] = game
-    print(f"🎮 GAME: Created game {session_id} with {len(players)} players")
+    print(f"🎮 GAME: Created game {session_id} with {num_players} seats")
     
     return game
 
@@ -165,7 +175,7 @@ def start_hand(session_id: str) -> Optional[GameState]:
     game.community_cards = []
     game.pot = 0
     game.current_bet = 0
-    game.last_raiser_id = None
+    game.last_raiser_seat = None
     
     # Reset players
     active_players = []
@@ -214,12 +224,13 @@ def start_hand(session_id: str) -> Optional[GameState]:
     game.phase = GamePhase.PRE_FLOP
     
     # First to act is after big blind (or small blind in heads-up)
+    # Use SEAT number, not telegram_id!
     if len(active_players) > 2:
-        game.current_player_id = active_players[2].telegram_id
+        game.current_player_seat = active_players[2].seat
     else:
-        game.current_player_id = sb_player.telegram_id
+        game.current_player_seat = sb_player.seat
     
-    print(f"🎮 GAME: Hand started, {len(active_players)} players, pot=${game.pot}")
+    print(f"🎮 GAME: Hand started, {len(active_players)} players, pot=${game.pot}, first to act: seat {game.current_player_seat}")
     return game
 
 
@@ -228,8 +239,8 @@ def get_active_players(game: GameState) -> List[Player]:
     return [p for p in game.players.values() if p.is_active and not p.is_folded and p.chips >= 0]
 
 
-def get_next_player(game: GameState) -> Optional[int]:
-    """Get next player to act"""
+def get_next_player_seat(game: GameState) -> Optional[int]:
+    """Get next player's SEAT to act"""
     active = get_active_players(game)
     if len(active) <= 1:
         return None
@@ -239,37 +250,34 @@ def get_next_player(game: GameState) -> Optional[int]:
     if not can_act:
         return None
     
-    current_seat = 0
-    if game.current_player_id:
-        current = game.players.get(game.current_player_id)
-        if current:
-            current_seat = current.seat
+    current_seat = game.current_player_seat or 0
     
     # Find next player by seat order
     can_act.sort(key=lambda x: x.seat)
     for p in can_act:
         if p.seat > current_seat:
-            return p.telegram_id
+            return p.seat
     
     # Wrap around
-    return can_act[0].telegram_id if can_act else None
+    return can_act[0].seat if can_act else None
 
 
-def process_action(session_id: str, player_id: int, action: str, amount: int = 0) -> Tuple[bool, str, Optional[GameState]]:
+def process_action(session_id: str, player_seat: int, action: str, amount: int = 0) -> Tuple[bool, str, Optional[GameState]]:
     """
     Process player action: fold, check, call, raise, all_in
+    player_seat is the SEAT NUMBER, not telegram_id!
     Returns: (success, message, updated_game_state)
     """
     game = active_games.get(session_id)
     if not game:
         return False, "Game not found", None
     
-    player = game.players.get(player_id)
+    player = game.players.get(player_seat)
     if not player:
-        return False, "Player not in game", None
+        return False, f"No player at seat {player_seat}", None
     
-    if game.current_player_id != player_id:
-        return False, "Not your turn", None
+    if game.current_player_seat != player_seat:
+        return False, f"Not your turn (current: seat {game.current_player_seat}, you: seat {player_seat})", None
     
     if player.is_folded or player.is_all_in:
         return False, "Cannot act", None
@@ -278,12 +286,12 @@ def process_action(session_id: str, player_id: int, action: str, amount: int = 0
     
     if action == "fold":
         player.is_folded = True
-        print(f"🎮 GAME: {player.name} folds")
+        print(f"🎮 GAME: Seat {player_seat} ({player.name}) folds")
         
     elif action == "check":
         if game.current_bet > player.current_bet:
             return False, "Cannot check, must call or fold", None
-        print(f"🎮 GAME: {player.name} checks")
+        print(f"🎮 GAME: Seat {player_seat} ({player.name}) checks")
         
     elif action == "call":
         call_amount = game.current_bet - player.current_bet
@@ -298,7 +306,7 @@ def process_action(session_id: str, player_id: int, action: str, amount: int = 0
         if player.chips == 0:
             player.is_all_in = True
         
-        print(f"🎮 GAME: {player.name} calls ${actual_call}")
+        print(f"🎮 GAME: Seat {player_seat} ({player.name}) calls ${actual_call}")
         
     elif action == "raise":
         if amount < game.min_raise:
@@ -315,12 +323,12 @@ def process_action(session_id: str, player_id: int, action: str, amount: int = 0
         game.pot += total_needed
         game.current_bet = player.current_bet
         game.min_raise = amount
-        game.last_raiser_id = player_id
+        game.last_raiser_seat = player_seat
         
         if player.chips == 0:
             player.is_all_in = True
         
-        print(f"🎮 GAME: {player.name} raises to ${player.current_bet}")
+        print(f"🎮 GAME: Seat {player_seat} ({player.name}) raises to ${player.current_bet}")
         
     elif action == "all_in":
         all_in_amount = player.chips
@@ -331,9 +339,9 @@ def process_action(session_id: str, player_id: int, action: str, amount: int = 0
         
         if player.current_bet > game.current_bet:
             game.current_bet = player.current_bet
-            game.last_raiser_id = player_id
+            game.last_raiser_seat = player_seat
         
-        print(f"🎮 GAME: {player.name} goes ALL IN for ${all_in_amount}")
+        print(f"🎮 GAME: Seat {player_seat} ({player.name}) goes ALL IN for ${all_in_amount}")
     
     else:
         return False, "Unknown action", None
@@ -366,14 +374,14 @@ def _check_round_complete(game: GameState):
     all_matched = all(p.current_bet == game.current_bet or p.is_all_in for p in active)
     
     # If we went around and everyone matched
-    next_player = get_next_player(game)
+    next_seat = get_next_player_seat(game)
     
-    if all_matched and (next_player == game.last_raiser_id or game.last_raiser_id is None):
+    if all_matched and (next_seat == game.last_raiser_seat or game.last_raiser_seat is None):
         # Move to next phase
         _advance_phase(game)
     else:
         # Next player's turn
-        game.current_player_id = next_player
+        game.current_player_seat = next_seat
 
 
 def _advance_phase(game: GameState):
@@ -382,11 +390,11 @@ def _advance_phase(game: GameState):
     for p in game.players.values():
         p.current_bet = 0
     game.current_bet = 0
-    game.last_raiser_id = None
+    game.last_raiser_seat = None
     
     active = get_active_players(game)
     if active:
-        game.current_player_id = active[0].telegram_id
+        game.current_player_seat = active[0].seat  # Use seat, not telegram_id!
     
     if game.phase == GamePhase.PRE_FLOP:
         # Deal flop (3 cards)

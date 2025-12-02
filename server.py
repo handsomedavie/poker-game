@@ -1795,21 +1795,21 @@ async def api_game_action(session_id: str, request: GameActionRequest):
 
 
 async def _broadcast_game_state(session_id: str, game: GameState):
-    """Broadcast game state to all connected players"""
+    """Broadcast game state to all connected players by seat"""
     connections = game_connections.get(session_id, {})
     stale = []
     
-    for player_id, ws in connections.items():
+    for seat, ws in connections.items():
         try:
             await ws.send_json({
                 "type": "gameState",
-                "game": game.to_dict(for_player_id=player_id),
+                "game": game.to_dict(for_seat=seat),
             })
         except Exception:
-            stale.append(player_id)
+            stale.append(seat)
     
-    for player_id in stale:
-        connections.pop(player_id, None)
+    for seat in stale:
+        connections.pop(seat, None)
 
 
 @app.websocket("/ws/game/{session_id}")
@@ -1827,52 +1827,39 @@ async def game_websocket(websocket: WebSocket, session_id: str):
     if session_id not in game_connection_locks:
         game_connection_locks[session_id] = asyncio.Lock()
     
-    # Get player ID from query params
-    player_id = None
-    requested_id = None
-    try:
-        query_string = str(websocket.scope.get("query_string", b"").decode())
-        print(f"🎮 GAME WS: Query string: {query_string}")
-        if "player_id=" in query_string:
-            requested_id = int(query_string.split("player_id=")[1].split("&")[0])
-            print(f"🎮 GAME WS: Requested player_id: {requested_id}")
-    except Exception as e:
-        print(f"🎮 GAME WS: Parse error: {e}")
-    
-    # Use lock to prevent race conditions when assigning players
+    # Use lock to prevent race conditions when assigning seats
+    player_seat = None
     async with game_connection_locks[session_id]:
-        # Check if this player is in the game
-        if requested_id and requested_id in game.players:
-            player_id = requested_id
-            print(f"🎮 GAME WS: Player {player_id} found in game")
-        else:
-            # Try to find by matching - assign first unconnected player
-            connected = game_connections.get(session_id, {})
-            for pid in game.players.keys():
-                if pid not in connected:
-                    player_id = pid
-                    print(f"🎮 GAME WS: Assigning unconnected player {player_id} to client {requested_id}")
-                    break
+        # Find first unconnected seat
+        connected_seats = set(game_connections.get(session_id, {}).keys())
+        for seat in sorted(game.players.keys()):
+            if seat not in connected_seats:
+                player_seat = seat
+                print(f"🎮 GAME WS: Assigning seat {seat} to new connection")
+                break
         
-        if not player_id:
-            print(f"🎮 GAME WS: No seat available for {requested_id}")
+        if not player_seat:
+            print(f"🎮 GAME WS: No seats available, all connected: {connected_seats}")
             await websocket.send_json({"type": "error", "message": "No available seat"})
             await websocket.close()
             return
         
-        # Register connection inside lock to prevent race condition
+        # Register connection by SEAT number
         if session_id not in game_connections:
             game_connections[session_id] = {}
-        game_connections[session_id][player_id] = websocket
+        game_connections[session_id][player_seat] = websocket
+        
+        # Update game connection count
+        game.connected_count = len(game_connections[session_id])
     
-    print(f"🎮 GAME WS: Player {player_id} connected to game {session_id}")
+    print(f"🎮 GAME WS: Seat {player_seat} connected to game {session_id} ({game.connected_count}/{game.max_players} connected)")
     
     try:
-        # Send initial game state
+        # Send initial game state with seat number
         await websocket.send_json({
             "type": "gameState",
-            "game": game.to_dict(for_player_id=player_id),
-            "yourPlayerId": player_id,
+            "game": game.to_dict(for_seat=player_seat),
+            "yourSeat": player_seat,
         })
         
         while True:
@@ -1883,12 +1870,12 @@ async def game_websocket(websocket: WebSocket, session_id: str):
                 await websocket.send_json({"type": "pong"})
                 
             elif msg_type == "action":
-                # Process game action
+                # Process game action using SEAT number
                 action = data.get("action", "")
                 amount = data.get("amount", 0)
                 
                 success, message, updated_game = process_action(
-                    session_id, player_id, action, amount
+                    session_id, player_seat, action, amount  # Use seat!
                 )
                 
                 if success and updated_game:
@@ -1901,12 +1888,16 @@ async def game_websocket(websocket: WebSocket, session_id: str):
                     })
                     
     except WebSocketDisconnect:
-        print(f"🎮 GAME WS: Player {player_id} disconnected from game {session_id}")
+        print(f"🎮 GAME WS: Seat {player_seat} disconnected from game {session_id}")
     except Exception as e:
-        print(f"❌ GAME WS: Error for player {player_id}: {e}")
+        print(f"❌ GAME WS: Error for seat {player_seat}: {e}")
     finally:
         if session_id in game_connections:
-            game_connections[session_id].pop(player_id, None)
+            game_connections[session_id].pop(player_seat, None)
+            # Update connection count
+            game = get_game(session_id)
+            if game:
+                game.connected_count = len(game_connections.get(session_id, {}))
 
 
 # Run server

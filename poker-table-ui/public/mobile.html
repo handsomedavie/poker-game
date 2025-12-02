@@ -4400,7 +4400,7 @@
         
         var gameWebSocket = null;
         var currentGameSession = null;
-        var myPlayerId = null;
+        var mySeat = null;  // My seat number (1-based)
         
         function startMultiplayerGame(gameSessionId) {
             addDebug('Starting multiplayer game: ' + gameSessionId);
@@ -4428,18 +4428,15 @@
                 gameWebSocket.close();
             }
             
-            // IMPORTANT: Pass telegram_id so server knows who is connecting
+            // Server will assign seat automatically based on connection order
             var wsUrl = API_BASE.replace('https://', 'wss://').replace('http://', 'ws://') + '/ws/game/' + sessionId;
-            if (telegramUserId) {
-                wsUrl += '?player_id=' + telegramUserId;
-            }
             addDebug('Connecting to game WS: ' + wsUrl);
             
             try {
                 gameWebSocket = new WebSocket(wsUrl);
                 
                 gameWebSocket.onopen = function() {
-                    addDebug('Game WebSocket connected as player ' + telegramUserId);
+                    addDebug('Game WebSocket connected, waiting for seat assignment');
                 };
                 
                 gameWebSocket.onmessage = function(event) {
@@ -4466,9 +4463,9 @@
         
         function handleGameEvent(data) {
             if (data.type === 'gameState') {
-                if (data.yourPlayerId) {
-                    myPlayerId = data.yourPlayerId;
-                    addDebug('My player ID: ' + myPlayerId);
+                if (data.yourSeat) {
+                    mySeat = data.yourSeat;
+                    addDebug('My seat: ' + mySeat);
                 }
                 updateGameUI(data.game);
             } else if (data.type === 'error') {
@@ -4479,7 +4476,7 @@
         function updateGameUI(gameState) {
             if (!gameState) return;
             
-            addDebug('Updating game UI, phase: ' + gameState.phase);
+            addDebug('Updating game UI, phase: ' + gameState.phase + ', my seat: ' + mySeat);
             
             // Update pot
             var potEl = document.getElementById('potAmount');
@@ -4503,10 +4500,13 @@
                 communityEl.innerHTML = html;
             }
             
-            // Update player cards
-            var myPlayer = gameState.players.find(function(p) {
-                return p.telegramId === myPlayerId;
-            });
+            // Find my player by seat (index in array = seat - 1)
+            var myPlayer = null;
+            if (mySeat && gameState.players) {
+                myPlayer = gameState.players.find(function(p) {
+                    return p.seat === mySeat;
+                });
+            }
             
             if (myPlayer && myPlayer.cards && myPlayer.cards.length > 0) {
                 var card1El = document.getElementById('playerCard1');
@@ -4522,8 +4522,10 @@
                 }
             }
             
-            // Update action buttons based on whose turn it is
-            var isMyTurn = gameState.currentPlayerId === myPlayerId;
+            // Update action buttons based on whose turn it is (using seat)
+            var isMyTurn = gameState.currentPlayerSeat === mySeat;
+            addDebug('Current seat: ' + gameState.currentPlayerSeat + ', my seat: ' + mySeat + ', my turn: ' + isMyTurn);
+            
             var actionBtns = document.querySelectorAll('.action-btn');
             actionBtns.forEach(function(btn) {
                 btn.disabled = !isMyTurn;
@@ -4531,7 +4533,7 @@
             });
             
             // Update players around table
-            updatePlayersDisplay(gameState.players, myPlayerId);
+            updatePlayersDisplay(gameState.players, mySeat);
         }
         
         function createCardHTML(card) {
