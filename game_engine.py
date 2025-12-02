@@ -295,18 +295,20 @@ def process_action(session_id: str, player_seat: int, action: str, amount: int =
         
     elif action == "call":
         call_amount = game.current_bet - player.current_bet
+        
+        # If nothing to call, treat as check
         if call_amount <= 0:
-            return False, "Nothing to call", None
-        
-        actual_call = min(call_amount, player.chips)
-        player.chips -= actual_call
-        player.current_bet += actual_call
-        game.pot += actual_call
-        
-        if player.chips == 0:
-            player.is_all_in = True
-        
-        print(f"🎮 GAME: Seat {player_seat} ({player.name}) calls ${actual_call}")
+            print(f"🎮 GAME: Seat {player_seat} ({player.name}) checks (call with 0 amount)")
+        else:
+            actual_call = min(call_amount, player.chips)
+            player.chips -= actual_call
+            player.current_bet += actual_call
+            game.pot += actual_call
+            
+            if player.chips == 0:
+                player.is_all_in = True
+            
+            print(f"🎮 GAME: Seat {player_seat} ({player.name}) calls ${actual_call}")
         
     elif action == "raise":
         if amount < game.min_raise:

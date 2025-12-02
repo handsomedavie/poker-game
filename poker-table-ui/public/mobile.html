@@ -132,6 +132,47 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
+        /* ═══════ SCREEN TRANSITION ANIMATIONS ═══════ */
+        .screen-transition {
+            transition: opacity 0.3s ease-out, transform 0.3s ease-out;
+        }
+        
+        .screen-fade-in {
+            animation: screenFadeIn 0.4s ease-out forwards;
+        }
+        
+        .screen-fade-out {
+            animation: screenFadeOut 0.3s ease-out forwards;
+        }
+        
+        .screen-slide-in {
+            animation: screenSlideIn 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+        }
+        
+        .screen-slide-out {
+            animation: screenSlideOut 0.3s ease-in forwards;
+        }
+        
+        @keyframes screenFadeIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        
+        @keyframes screenFadeOut {
+            from { opacity: 1; transform: scale(1); }
+            to { opacity: 0; transform: scale(0.95); }
+        }
+        
+        @keyframes screenSlideIn {
+            from { opacity: 0; transform: translateX(30px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        
+        @keyframes screenSlideOut {
+            from { opacity: 1; transform: translateX(0); }
+            to { opacity: 0; transform: translateX(-30px); }
+        }
+
         .splash-phrase {
             font-size: 18px;
             color: #94a3b8;
@@ -898,6 +939,51 @@
             z-index: 20 !important;
             padding: 0;
         }
+
+        /* COMMUNITY CARD STYLING */
+        .community-card {
+            width: 46px !important;
+            height: 66px !important;
+            background: linear-gradient(145deg, #ffffff, #f0f0f0) !important;
+            border-radius: 6px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 2px;
+            font-weight: 700;
+            box-shadow: 0 4px 14px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.8);
+            border: 2px solid #374151;
+            animation: cardDeal 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        
+        .community-card .card-rank {
+            font-size: 18px;
+            font-weight: 800;
+            line-height: 1;
+        }
+        
+        .community-card .card-suit {
+            font-size: 20px;
+            line-height: 1;
+        }
+        
+        .community-card.red .card-rank,
+        .community-card.red .card-suit {
+            color: #dc2626;
+        }
+        
+        .community-card.black .card-rank,
+        .community-card.black .card-suit {
+            color: #1f2937;
+        }
+        
+        /* Stagger animation for community cards */
+        .community-card:nth-child(1) { animation-delay: 0s; }
+        .community-card:nth-child(2) { animation-delay: 0.15s; }
+        .community-card:nth-child(3) { animation-delay: 0.3s; }
+        .community-card:nth-child(4) { animation-delay: 0.45s; }
+        .community-card:nth-child(5) { animation-delay: 0.6s; }
 
         /* CARDS - BIGGER WITH VISIBLE SUITS + ANIMATION */
         .card {
@@ -2704,6 +2790,37 @@
         }
 
         addDebug('Init');
+        
+        // ═══════════════════════════════════════════════════
+        // SMOOTH SCREEN TRANSITIONS
+        // ═══════════════════════════════════════════════════
+        function showScreen(screenId, hideScreens) {
+            hideScreens = hideScreens || [];
+            
+            // Hide specified screens with animation
+            hideScreens.forEach(function(id) {
+                var el = document.getElementById(id);
+                if (el && !el.classList.contains('hidden')) {
+                    el.classList.add('screen-fade-out');
+                    setTimeout(function() {
+                        el.classList.add('hidden');
+                        el.classList.remove('screen-fade-out');
+                    }, 300);
+                }
+            });
+            
+            // Show new screen with animation
+            setTimeout(function() {
+                var showEl = document.getElementById(screenId);
+                if (showEl) {
+                    showEl.classList.remove('hidden');
+                    showEl.classList.add('screen-fade-in');
+                    setTimeout(function() {
+                        showEl.classList.remove('screen-fade-in');
+                    }, 400);
+                }
+            }, hideScreens.length > 0 ? 250 : 0);
+        }
 
         // Global error handler to catch any JS errors
         window.onerror = function(msg, url, line, col, error) {
@@ -4509,19 +4626,18 @@
             addDebug('Starting multiplayer game: ' + gameSessionId);
             currentGameSession = gameSessionId;
             
-            // Hide waiting room
-            document.getElementById('waitingRoomScreen').classList.add('hidden');
-            
-            // Show poker table
-            document.getElementById('pokerTableScreen').classList.remove('hidden');
+            // Smooth transition from waiting room to poker table
+            showScreen('pokerTableScreen', ['waitingRoomScreen']);
             
             var tableNameEl = document.getElementById('tableName');
             if (tableNameEl) {
                 tableNameEl.textContent = 'Multiplayer: ' + (currentPrivateLobby ? currentPrivateLobby.code : '');
             }
             
-            // Connect to game WebSocket
-            connectToGameWebSocket(gameSessionId);
+            // Connect to game WebSocket after transition starts
+            setTimeout(function() {
+                connectToGameWebSocket(gameSessionId);
+            }, 300);
             
             addDebug('Multiplayer game screen shown');
         }
@@ -4640,7 +4756,7 @@
             }
             
             // Update action buttons based on whose turn it is (using seat)
-            var isMyTurn = gameState.currentPlayerSeat === mySeat;
+            var isMyTurn = parseInt(gameState.currentPlayerSeat) === parseInt(mySeat);
             addDebug('Current seat: ' + gameState.currentPlayerSeat + ', my seat: ' + mySeat + ', my turn: ' + isMyTurn);
             
             var actionBtns = document.querySelectorAll('.action-btn');
@@ -4649,15 +4765,31 @@
                 btn.style.opacity = isMyTurn ? '1' : '0.5';
             });
             
+            // Update Call/Check button text based on current bet
+            var callBtn = document.getElementById('callBtn');
+            if (callBtn && myPlayer) {
+                var callAmount = (gameState.currentBet || 0) - (myPlayer.currentBet || 0);
+                if (callAmount <= 0) {
+                    callBtn.textContent = 'Check';
+                } else {
+                    callBtn.textContent = 'Call $' + callAmount;
+                }
+            }
+            
             // Update players around table
             updatePlayersDisplay(gameState.players, mySeat);
         }
         
         function createCardHTML(card) {
-            var suitClass = card.suit;
+            var isRed = (card.suit === 'hearts' || card.suit === 'diamonds');
+            var colorClass = isRed ? 'red' : 'black';
             var suitSymbol = getSuitSymbol(card.suit);
-            return '<div class="community-card"><div class="card-rank">' + card.rank + '</div>' +
-                '<div class="card-suit ' + suitClass + '">' + suitSymbol + '</div></div>';
+            var rank = formatRank(card.rank);
+            
+            return '<div class="community-card ' + colorClass + '">' +
+                '<span class="card-rank">' + rank + '</span>' +
+                '<span class="card-suit">' + suitSymbol + '</span>' +
+            '</div>';
         }
         
         function getSuitSymbol(suit) {
@@ -4680,7 +4812,12 @@
             var opponentCount = 0;
             
             players.forEach(function(player) {
-                var isMe = player.seat === mySeat;
+                // Compare as numbers to avoid type mismatch
+                var playerSeat = parseInt(player.seat);
+                var myCurrentSeat = parseInt(mySeat);
+                var isMe = playerSeat === myCurrentSeat;
+                
+                addDebug('Player ' + player.name + ' seat=' + playerSeat + ', mySeat=' + myCurrentSeat + ', isMe=' + isMe);
                 
                 // Don't show "me" at the table seats - I'm shown at bottom
                 if (isMe) return;
