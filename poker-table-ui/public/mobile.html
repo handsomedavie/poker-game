@@ -2571,6 +2571,19 @@
 
         addDebug('Init');
 
+        // Global error handler to catch any JS errors
+        window.onerror = function(msg, url, line, col, error) {
+            addDebug('ERROR: ' + msg + ' at line ' + line);
+            console.error('Global error:', msg, url, line, col, error);
+            return false;
+        };
+
+        // Catch promise rejections
+        window.addEventListener('unhandledrejection', function(event) {
+            addDebug('Promise error: ' + event.reason);
+            console.error('Unhandled rejection:', event.reason);
+        });
+
         // ═══════════════════════════════════════════════════
         // FULLSCREEN REQUEST FUNCTIONS
         // ═══════════════════════════════════════════════════
@@ -2607,17 +2620,20 @@
             localStorage.setItem('hasSeenFullscreenRequest', 'true');
             requestFullscreen();
             document.getElementById('fullscreenRequestScreen').classList.add('hidden');
-            showSplashScreen();
+            document.getElementById('splashScreen').style.display = 'flex';
+            startSplashTimer();
         }
 
         function skipFullscreenAndContinue() {
             localStorage.setItem('hasSeenFullscreenRequest', 'true');
             document.getElementById('fullscreenRequestScreen').classList.add('hidden');
-            showSplashScreen();
+            document.getElementById('splashScreen').style.display = 'flex';
+            startSplashTimer();
         }
 
         function showSplashScreen() {
             document.getElementById('splashScreen').style.display = 'flex';
+            startSplashTimer();
         }
 
         // Telegram WebApp
@@ -2632,15 +2648,26 @@
         // APP INITIALIZATION - Show fullscreen request first
         // ═══════════════════════════════════════════════════
         window.addEventListener('DOMContentLoaded', function() {
-            var hasSeenRequest = localStorage.getItem('hasSeenFullscreenRequest');
+            addDebug('DOM loaded');
             
-            if (!hasSeenRequest) {
-                // First time - show fullscreen request, hide splash
-                document.getElementById('splashScreen').style.display = 'none';
-                document.getElementById('fullscreenRequestScreen').classList.remove('hidden');
-            } else {
-                // Already seen - go directly to splash
-                document.getElementById('fullscreenRequestScreen').classList.add('hidden');
+            try {
+                var hasSeenRequest = localStorage.getItem('hasSeenFullscreenRequest');
+                
+                if (!hasSeenRequest) {
+                    // First time - show fullscreen request, hide splash
+                    document.getElementById('splashScreen').style.display = 'none';
+                    document.getElementById('fullscreenRequestScreen').classList.remove('hidden');
+                } else {
+                    // Already seen - go directly to splash and start timer
+                    document.getElementById('fullscreenRequestScreen').classList.add('hidden');
+                    document.getElementById('splashScreen').style.display = 'flex';
+                    startSplashTimer();
+                }
+            } catch (e) {
+                addDebug('Init error: ' + e.message);
+                // Fallback - just show splash
+                document.getElementById('splashScreen').style.display = 'flex';
+                startSplashTimer();
             }
         });
 
@@ -2709,17 +2736,31 @@
             "Draw your cards, cowboy. Let the game begin!"
         ];
 
-        var randomPhrase = welcomePhrases[Math.floor(Math.random() * welcomePhrases.length)];
-        document.getElementById('splashPhrase').textContent = randomPhrase;
-
-        // Transition to main menu after 3 seconds
-        setTimeout(function() {
-            document.getElementById('splashScreen').classList.add('hidden');
-            document.getElementById('mainMenu').classList.remove('hidden');
-            updateUserUI();
-            initUser(); // Register/load user from backend
-            addDebug('Menu shown');
-        }, 3000);
+        var splashTimeout = null;
+        
+        function startSplashTimer() {
+            if (splashTimeout) clearTimeout(splashTimeout);
+            
+            // Set random phrase safely
+            var phraseEl = document.getElementById('splashPhrase');
+            if (phraseEl) {
+                var randomPhrase = welcomePhrases[Math.floor(Math.random() * welcomePhrases.length)];
+                phraseEl.textContent = randomPhrase;
+            }
+            
+            // Transition to main menu after 3 seconds
+            splashTimeout = setTimeout(function() {
+                var splashEl = document.getElementById('splashScreen');
+                var menuEl = document.getElementById('mainMenu');
+                
+                if (splashEl) splashEl.classList.add('hidden');
+                if (menuEl) menuEl.classList.remove('hidden');
+                
+                updateUserUI();
+                initUser(); // Register/load user from backend
+                addDebug('Menu shown');
+            }, 3000);
+        }
 
         // ═══════════════════════════════════════════════════
         // UI UPDATES
@@ -4188,10 +4229,35 @@
 
         // Check for lobby code on page load
         window.addEventListener('load', function() {
+            addDebug('Window loaded');
             setTimeout(function() {
                 checkUrlForLobby();
             }, 500);
         });
+
+        // Fallback: Force show main menu after 10 seconds if nothing is visible
+        setTimeout(function() {
+            var splash = document.getElementById('splashScreen');
+            var menu = document.getElementById('mainMenu');
+            var fullscreen = document.getElementById('fullscreenRequestScreen');
+            var waiting = document.getElementById('waitingRoomScreen');
+            var poker = document.getElementById('pokerTableScreen');
+            
+            // Check if any screen is visible
+            var anyVisible = false;
+            if (menu && !menu.classList.contains('hidden')) anyVisible = true;
+            if (waiting && !waiting.classList.contains('hidden')) anyVisible = true;
+            if (poker && !poker.classList.contains('hidden')) anyVisible = true;
+            
+            // If nothing is visible after 10 seconds, force show menu
+            if (!anyVisible) {
+                addDebug('Fallback: forcing main menu');
+                if (splash) splash.style.display = 'none';
+                if (fullscreen) fullscreen.classList.add('hidden');
+                if (menu) menu.classList.remove('hidden');
+                updateUserUI();
+            }
+        }, 10000);
 
         addDebug('Ready');
     </script>
