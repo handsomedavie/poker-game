@@ -2651,6 +2651,22 @@
             addDebug('DOM loaded');
             
             try {
+                // In Telegram: skip fullscreen request, go straight to splash
+                var isTelegram = window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initData;
+                
+                if (isTelegram) {
+                    addDebug('Telegram detected - fast load');
+                    // Expand Telegram WebApp
+                    try { tg.expand(); } catch(e) {}
+                    
+                    // Skip splash, go directly to main menu for faster loading
+                    document.getElementById('splashScreen').style.display = 'none';
+                    document.getElementById('fullscreenRequestScreen').classList.add('hidden');
+                    document.getElementById('mainMenu').classList.remove('hidden');
+                    updateUserUI();
+                    return;
+                }
+                
                 var hasSeenRequest = localStorage.getItem('hasSeenFullscreenRequest');
                 
                 if (!hasSeenRequest) {
@@ -2665,9 +2681,10 @@
                 }
             } catch (e) {
                 addDebug('Init error: ' + e.message);
-                // Fallback - just show splash
-                document.getElementById('splashScreen').style.display = 'flex';
-                startSplashTimer();
+                // Fallback - show main menu immediately
+                document.getElementById('splashScreen').style.display = 'none';
+                document.getElementById('fullscreenRequestScreen').classList.add('hidden');
+                document.getElementById('mainMenu').classList.remove('hidden');
             }
         });
 
@@ -4752,8 +4769,8 @@
             }, 500);
         });
 
-        // Fallback: Force show main menu after 10 seconds if nothing is visible
-        setTimeout(function() {
+        // Fallback: Force show main menu after 5 seconds if nothing is visible
+        function forceShowMainMenu() {
             var splash = document.getElementById('splashScreen');
             var menu = document.getElementById('mainMenu');
             var fullscreen = document.getElementById('fullscreenRequestScreen');
@@ -4766,15 +4783,21 @@
             if (waiting && !waiting.classList.contains('hidden')) anyVisible = true;
             if (poker && !poker.classList.contains('hidden')) anyVisible = true;
             
-            // If nothing is visible after 10 seconds, force show menu
+            // Force show menu if nothing is visible
             if (!anyVisible) {
                 addDebug('Fallback: forcing main menu');
                 if (splash) splash.style.display = 'none';
                 if (fullscreen) fullscreen.classList.add('hidden');
                 if (menu) menu.classList.remove('hidden');
-                updateUserUI();
+                try { updateUserUI(); } catch(e) {}
             }
-        }, 10000);
+        }
+        
+        // Quick fallback after 3 seconds
+        setTimeout(forceShowMainMenu, 3000);
+        
+        // Backup fallback after 5 seconds
+        setTimeout(forceShowMainMenu, 5000);
 
         addDebug('Ready');
     </script>
