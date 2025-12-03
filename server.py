@@ -1887,6 +1887,14 @@ async def game_websocket(websocket: WebSocket, session_id: str):
                         "message": message,
                     })
                     
+            elif msg_type == "new_hand":
+                # Start new hand (any player can request)
+                from game_engine import start_new_hand
+                updated_game = start_new_hand(session_id)
+                if updated_game:
+                    print(f"🎮 GAME: New hand requested by seat {player_seat}")
+                    await _broadcast_game_state(session_id, updated_game)
+                    
     except WebSocketDisconnect:
         print(f"🎮 GAME WS: Seat {player_seat} disconnected from game {session_id}")
     except Exception as e:

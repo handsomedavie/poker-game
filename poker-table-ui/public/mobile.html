@@ -898,41 +898,41 @@
         
         /* Player positions around the table - Adaptive layout */
         .table-player.position-top {
-            top: 50px;
+            top: 10px;
             left: 50%;
             transform: translateX(-50%);
         }
         
         .table-player.position-top-left {
-            top: 120px;
-            left: 10px;
+            top: 80px;
+            left: 5px;
         }
         
         .table-player.position-top-right {
-            top: 120px;
-            right: 10px;
+            top: 80px;
+            right: 5px;
         }
         
         .table-player.position-left {
-            top: 50%;
-            left: 10px;
+            top: 45%;
+            left: 5px;
             transform: translateY(-50%);
         }
         
         .table-player.position-right {
-            top: 50%;
-            right: 10px;
+            top: 45%;
+            right: 5px;
             transform: translateY(-50%);
         }
         
         .table-player.position-bottom-left {
-            bottom: 220px;
-            left: 10px;
+            bottom: 240px;
+            left: 5px;
         }
         
         .table-player.position-bottom-right {
-            bottom: 220px;
-            right: 10px;
+            bottom: 240px;
+            right: 5px;
         }
         
         /* Current turn indicator */
@@ -4753,6 +4753,18 @@
             
             addDebug('Updating game UI, phase: ' + gameState.phase + ', my seat: ' + mySeat);
             
+            // Handle showdown/finished - show winner
+            if (gameState.phase === 'showdown' || gameState.phase === 'finished') {
+                if (gameState.winnerSeat && gameState.winnerHand) {
+                    var winnerPlayer = gameState.players.find(function(p) {
+                        return p.seat === gameState.winnerSeat;
+                    });
+                    if (winnerPlayer) {
+                        showMultiplayerWinner(winnerPlayer, gameState.winnerHand, gameState.pot);
+                    }
+                }
+            }
+            
             // Update pot
             var potEl = document.getElementById('potAmount');
             if (potEl) {
@@ -4772,14 +4784,24 @@
                 headerPhase.textContent = gameState.phase.toUpperCase().replace('_', '-');
             }
             
-            // Update community cards
+            // Update community cards - only add NEW cards to avoid re-animation
             var communityEl = document.getElementById('communityCards');
             if (communityEl && gameState.communityCards) {
-                var html = '';
-                gameState.communityCards.forEach(function(card) {
-                    html += createCardHTML(card);
-                });
-                communityEl.innerHTML = html;
+                var currentCardCount = communityEl.children.length;
+                var newCardCount = gameState.communityCards.length;
+                
+                // Only update if new cards were dealt
+                if (newCardCount > currentCardCount) {
+                    // Add only new cards
+                    for (var i = currentCardCount; i < newCardCount; i++) {
+                        var cardEl = document.createElement('div');
+                        cardEl.innerHTML = createCardHTML(gameState.communityCards[i]);
+                        communityEl.appendChild(cardEl.firstChild);
+                    }
+                } else if (newCardCount === 0 && currentCardCount > 0) {
+                    // Clear cards for new hand
+                    communityEl.innerHTML = '';
+                }
             }
             
             // Find my player by seat
@@ -4919,6 +4941,51 @@
             } else {
                 // 6 players: top, top-left, top-right, left, right
                 return ['position-top', 'position-top-left', 'position-top-right', 'position-left', 'position-right'];
+            }
+        }
+        
+        // Multiplayer winner display
+        var multiplayerWinnerShown = false;
+        
+        function showMultiplayerWinner(winner, handName, potAmount) {
+            if (multiplayerWinnerShown) return;
+            multiplayerWinnerShown = true;
+            
+            addDebug('WINNER: ' + winner.name + ' with ' + handName);
+            
+            // Use existing winner popup if available
+            var popup = document.getElementById('winnerPopup');
+            if (popup) {
+                var nameEl = popup.querySelector('.winner-name, #winnerName');
+                var handEl = popup.querySelector('.winner-hand, #winnerHand');
+                var potEl = popup.querySelector('.winner-pot, #winnerPot');
+                
+                if (nameEl) nameEl.textContent = winner.name + ' WINS!';
+                if (handEl) handEl.textContent = handName;
+                if (potEl) potEl.textContent = '+$' + potAmount;
+                
+                popup.classList.remove('hidden');
+                popup.style.display = 'flex';
+            } else {
+                // Create simple alert
+                showAlert('🏆 ' + winner.name + ' wins with ' + handName + '! (+$' + potAmount + ')');
+            }
+            
+            // Request new hand after delay
+            setTimeout(function() {
+                multiplayerWinnerShown = false;
+                if (popup) {
+                    popup.classList.add('hidden');
+                    popup.style.display = 'none';
+                }
+                requestNewHand();
+            }, 4000);
+        }
+        
+        function requestNewHand() {
+            if (gameWebSocket && gameWebSocket.readyState === WebSocket.OPEN) {
+                addDebug('Requesting new hand');
+                gameWebSocket.send(JSON.stringify({ type: 'new_hand' }));
             }
         }
         

@@ -87,6 +87,8 @@ class GameState:
     created_at: float = field(default_factory=time.time)
     max_players: int = 2  # How many players expected
     connected_count: int = 0  # How many have connected
+    winner_seat: Optional[int] = None  # Winner's seat number
+    winner_hand: Optional[str] = None  # Winner's hand name
     
     def to_dict(self, for_seat: Optional[int] = None) -> Dict[str, Any]:
         """Convert to dict. If for_seat is set, show only that player's cards."""
@@ -111,6 +113,8 @@ class GameState:
             "minRaise": self.min_raise,
             "maxPlayers": self.max_players,
             "connectedCount": self.connected_count,
+            "winnerSeat": self.winner_seat,
+            "winnerHand": self.winner_hand,
         }
 
 
@@ -456,22 +460,179 @@ def _deal_remaining_cards(game: GameState):
     _determine_winner(game)
 
 
+def evaluate_hand(cards: List[Card]) -> Tuple[int, List[int], str]:
+    """
+    Evaluate a poker hand and return (rank, tiebreakers, name)
+    Rank: 1=High Card, 2=Pair, 3=Two Pair, 4=Three of a Kind, 
+          5=Straight, 6=Flush, 7=Full House, 8=Four of a Kind, 
+          9=Straight Flush, 10=Royal Flush
+    """
+    if len(cards) < 5:
+        return (0, [0], "Incomplete")
+    
+    ranks = sorted([c.rank for c in cards], reverse=True)
+    suits = [c.suit for c in cards]
+    
+    # Check for flush
+    suit_counts = {}
+    for s in suits:
+        suit_counts[s] = suit_counts.get(s, 0) + 1
+    is_flush = any(count >= 5 for count in suit_counts.values())
+    
+    # Check for straight
+    unique_ranks = sorted(set(ranks), reverse=True)
+    is_straight = False
+    straight_high = 0
+    
+    for i in range(len(unique_ranks) - 4):
+        if unique_ranks[i] - unique_ranks[i+4] == 4:
+            is_straight = True
+            straight_high = unique_ranks[i]
+            break
+    
+    # Check for wheel (A-2-3-4-5)
+    if set([14, 2, 3, 4, 5]).issubset(set(ranks)):
+        is_straight = True
+        straight_high = 5
+    
+    # Count rank occurrences
+    rank_counts = {}
+    for r in ranks:
+        rank_counts[r] = rank_counts.get(r, 0) + 1
+    
+    counts = sorted(rank_counts.values(), reverse=True)
+    
+    # Determine hand
+    if is_straight and is_flush:
+        if straight_high == 14:
+            return (10, [14], "Royal Flush")
+        return (9, [straight_high], "Straight Flush")
+    
+    if counts[0] == 4:
+        four_rank = [r for r, c in rank_counts.items() if c == 4][0]
+        return (8, [four_rank], "Four of a Kind")
+    
+    if counts[0] == 3 and counts[1] >= 2:
+        three_rank = [r for r, c in rank_counts.items() if c == 3][0]
+        pair_rank = [r for r, c in rank_counts.items() if c >= 2 and r != three_rank][0]
+        return (7, [three_rank, pair_rank], "Full House")
+    
+    if is_flush:
+        return (6, ranks[:5], "Flush")
+    
+    if is_straight:
+        return (5, [straight_high], "Straight")
+    
+    if counts[0] == 3:
+        three_rank = [r for r, c in rank_counts.items() if c == 3][0]
+        return (4, [three_rank] + [r for r in ranks if r != three_rank][:2], "Three of a Kind")
+    
+    if counts[0] == 2 and counts[1] == 2:
+        pairs = sorted([r for r, c in rank_counts.items() if c == 2], reverse=True)
+        kicker = [r for r in ranks if r not in pairs][0]
+        return (3, pairs + [kicker], "Two Pair")
+    
+    if counts[0] == 2:
+        pair_rank = [r for r, c in rank_counts.items() if c == 2][0]
+        kickers = [r for r in ranks if r != pair_rank][:3]
+        return (2, [pair_rank] + kickers, "Pair")
+    
+    return (1, ranks[:5], "High Card")
+
+
 def _determine_winner(game: GameState):
-    """Determine winner and award pot (simplified - just picks a random active player)"""
+    """Determine winner using proper hand evaluation"""
     active = get_active_players(game)
     
     if len(active) == 1:
         winner = active[0]
+        hand_name = "Last Standing"
     else:
-        # TODO: Implement proper hand evaluation
-        # For now, random winner among active players
-        winner = random.choice(active)
+        # Evaluate all hands
+        best_player = None
+        best_hand = (0, [0], "")
+        
+        for player in active:
+            all_cards = player.cards + game.community_cards
+            hand = evaluate_hand(all_cards)
+            
+            print(f"🎮 HAND: {player.name} has {hand[2]} ({hand[0]})")
+            
+            if hand[0] > best_hand[0]:
+                best_hand = hand
+                best_player = player
+            elif hand[0] == best_hand[0]:
+                # Compare tiebreakers
+                if hand[1] > best_hand[1]:
+                    best_hand = hand
+                    best_player = player
+        
+        winner = best_player
+        hand_name = best_hand[2]
     
     winner.chips += game.pot
-    print(f"🎮 GAME: {winner.name} wins ${game.pot}!")
+    game.winner_seat = winner.seat
+    game.winner_hand = hand_name
+    print(f"🎮 GAME: {winner.name} wins ${game.pot} with {hand_name}!")
     
     game.pot = 0
     game.phase = GamePhase.FINISHED
+
+
+def start_new_hand(session_id: str) -> Optional[GameState]:
+    """Start a new hand in an existing game"""
+    game = active_games.get(session_id)
+    if not game:
+        return None
+    
+    # Reset for new hand
+    game.deck = create_deck()
+    game.community_cards = []
+    game.pot = 0
+    game.current_bet = 0
+    game.phase = GamePhase.PRE_FLOP
+    game.winner_seat = None
+    game.winner_hand = None
+    game.last_raiser_seat = None
+    game.players_acted_this_round = set()
+    
+    # Reset players
+    for player in game.players.values():
+        player.cards = []
+        player.is_folded = False
+        player.is_all_in = False
+        player.current_bet = 0
+        player.is_active = player.chips > 0
+    
+    # Deal cards
+    active = get_active_players(game)
+    for player in active:
+        player.cards = [game.deck.pop(), game.deck.pop()]
+    
+    # Post blinds
+    if len(active) >= 2:
+        sb_player = active[0]
+        bb_player = active[1]
+        
+        sb_amount = min(game.small_blind, sb_player.chips)
+        sb_player.chips -= sb_amount
+        sb_player.current_bet = sb_amount
+        game.pot += sb_amount
+        
+        bb_amount = min(game.big_blind, bb_player.chips)
+        bb_player.chips -= bb_amount
+        bb_player.current_bet = bb_amount
+        game.pot += bb_amount
+        game.current_bet = bb_amount
+        
+        # First to act
+        if len(active) > 2:
+            game.current_player_seat = active[2].seat
+        else:
+            game.current_player_seat = sb_player.seat
+    
+    print(f"🎮 GAME: New hand started!")
+    return game
 
 
 def get_game(session_id: str) -> Optional[GameState]:
