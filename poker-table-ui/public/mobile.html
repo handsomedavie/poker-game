@@ -892,40 +892,79 @@
             font-weight: 500;
         }
         
-        .table-player .player-cards-back {
-            font-size: 14px;
-            margin-top: 5px;
-        }
-        
         .table-player.folded {
             opacity: 0.5;
         }
         
-        /* Player positions around the table - FIXED for heads-up */
+        /* Player positions around the table - Adaptive layout */
         .table-player.position-top {
-            top: 60px;
+            top: 50px;
             left: 50%;
             transform: translateX(-50%);
         }
         
-        .table-player.position-top-right {
-            top: 80px;
-            right: 15px;
-        }
-        
-        .table-player.position-bottom-right {
-            bottom: 200px;
-            right: 15px;
-        }
-        
         .table-player.position-top-left {
-            top: 80px;
-            left: 15px;
+            top: 120px;
+            left: 10px;
+        }
+        
+        .table-player.position-top-right {
+            top: 120px;
+            right: 10px;
+        }
+        
+        .table-player.position-left {
+            top: 50%;
+            left: 10px;
+            transform: translateY(-50%);
+        }
+        
+        .table-player.position-right {
+            top: 50%;
+            right: 10px;
+            transform: translateY(-50%);
         }
         
         .table-player.position-bottom-left {
-            bottom: 200px;
-            left: 15px;
+            bottom: 220px;
+            left: 10px;
+        }
+        
+        .table-player.position-bottom-right {
+            bottom: 220px;
+            right: 10px;
+        }
+        
+        /* Current turn indicator */
+        .table-player.current-turn {
+            box-shadow: 0 0 15px 3px #22c55e;
+        }
+        
+        /* Player bet display */
+        .table-player .player-bet {
+            font-size: 10px;
+            color: #fbbf24;
+            font-weight: 600;
+            background: rgba(251, 191, 36, 0.2);
+            padding: 2px 6px;
+            border-radius: 4px;
+            margin-top: 3px;
+        }
+        
+        /* Card back styling */
+        .table-player .player-cards-back {
+            display: flex;
+            gap: 2px;
+            margin-top: 5px;
+        }
+        
+        .table-player .card-back {
+            width: 24px;
+            height: 34px;
+            background: linear-gradient(135deg, #1e40af, #3b82f6);
+            border-radius: 3px;
+            border: 1px solid #60a5fa;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
         }
 
         /* ═══════ COMMUNITY CARDS - CENTER (LARGER) ═══════ */
@@ -3751,10 +3790,20 @@
             if (currentGameSession && gameWebSocket) {
                 addDebug('Sending multiplayer action: ' + action);
                 var amount = 0;
-                if (action === 'raise' || action === 'bet') {
+                var serverAction = action;
+                
+                // Convert actions for server
+                if (action === 'bet') {
+                    serverAction = 'raise';  // BET is same as RAISE for server
                     amount = currentBetAmount || 20;
+                } else if (action === 'raise') {
+                    amount = currentBetAmount || 20;
+                } else if (action === 'allin') {
+                    serverAction = 'all_in';
                 }
-                sendGameAction(action === 'allin' ? 'all_in' : action, amount);
+                
+                addDebug('Server action: ' + serverAction + ', amount: ' + amount);
+                sendGameAction(serverAction, amount);
                 return;
             }
             
@@ -4711,9 +4760,16 @@
             }
             
             // Update phase indicator
-            var phaseEl = document.getElementById('gamePhase');
-            if (phaseEl) {
-                phaseEl.textContent = gameState.phase.toUpperCase();
+            var phaseIndicator = document.getElementById('gamePhaseIndicator');
+            if (phaseIndicator && gameState.phase) {
+                var phaseDisplay = gameState.phase.toUpperCase().replace('_', '-');
+                phaseIndicator.textContent = phaseDisplay;
+            }
+            
+            // Also update header
+            var headerPhase = document.getElementById('tableInfoBlinds');
+            if (headerPhase && gameState.phase) {
+                headerPhase.textContent = gameState.phase.toUpperCase().replace('_', '-');
             }
             
             // Update community cards
@@ -4804,43 +4860,66 @@
         }
         
         function updatePlayersDisplay(players, mySeat) {
-            // Render all players around the table
+            // Render all opponents around the table based on total player count
             var seatsEl = document.getElementById('playerSeats');
             if (!seatsEl || !players) return;
             
-            var html = '';
-            var opponentCount = 0;
+            var myCurrentSeat = parseInt(mySeat);
+            var totalPlayers = players.length;
             
-            players.forEach(function(player) {
-                // Compare as numbers to avoid type mismatch
-                var playerSeat = parseInt(player.seat);
-                var myCurrentSeat = parseInt(mySeat);
-                var isMe = playerSeat === myCurrentSeat;
-                
-                addDebug('Player ' + player.name + ' seat=' + playerSeat + ', mySeat=' + myCurrentSeat + ', isMe=' + isMe);
-                
-                // Don't show "me" at the table seats - I'm shown at bottom
-                if (isMe) return;
-                
-                opponentCount++;
+            // Get opponents (everyone except me)
+            var opponents = players.filter(function(p) {
+                return parseInt(p.seat) !== myCurrentSeat;
+            });
+            
+            // Get position layout based on total players
+            var positions = getPositionsForPlayerCount(totalPlayers, myCurrentSeat);
+            
+            var html = '';
+            opponents.forEach(function(player, index) {
+                var positionClass = positions[index] || 'position-top';
                 var foldedClass = player.isFolded ? ' folded' : '';
-                var activeClass = player.isActive ? ' active' : '';
+                var isCurrentTurn = player.isCurrentTurn ? ' current-turn' : '';
+                var betAmount = player.currentBet || 0;
                 
-                // For heads-up (2 players), opponent always goes to top
-                var positionClass = 'position-top';
-                
-                html += '<div class="table-player ' + positionClass + foldedClass + activeClass + '">' +
+                html += '<div class="table-player ' + positionClass + foldedClass + isCurrentTurn + '">' +
                     '<div class="player-avatar">' + (player.name ? player.name.charAt(0).toUpperCase() : '?') + '</div>' +
                     '<div class="player-info">' +
                         '<div class="player-name">' + (player.name || 'Player') + '</div>' +
                         '<div class="player-chips">$' + (player.chips || 0) + '</div>' +
+                        (betAmount > 0 ? '<div class="player-bet">$' + betAmount + '</div>' : '') +
                     '</div>' +
-                    (player.hasCards ? '<div class="player-cards-back">🂠🂠</div>' : '') +
+                    '<div class="player-cards-back">' +
+                        '<div class="card-back"></div>' +
+                        '<div class="card-back"></div>' +
+                    '</div>' +
                 '</div>';
             });
             
             seatsEl.innerHTML = html;
-            addDebug('Rendered ' + opponentCount + ' opponents');
+            addDebug('Rendered ' + opponents.length + ' opponents at positions: ' + positions.join(', '));
+        }
+        
+        function getPositionsForPlayerCount(totalPlayers, mySeat) {
+            // Position opponents based on total player count
+            // Hero is always at bottom center
+            
+            if (totalPlayers === 2) {
+                // Heads-up: opponent at top
+                return ['position-top'];
+            } else if (totalPlayers === 3) {
+                // 3 players: one top, one side
+                return ['position-top', 'position-left'];
+            } else if (totalPlayers === 4) {
+                // 4 players: top, left, right
+                return ['position-top', 'position-left', 'position-right'];
+            } else if (totalPlayers === 5) {
+                // 5 players: top, top-left, left, right
+                return ['position-top', 'position-top-left', 'position-left', 'position-right'];
+            } else {
+                // 6 players: top, top-left, top-right, left, right
+                return ['position-top', 'position-top-left', 'position-top-right', 'position-left', 'position-right'];
+            }
         }
         
         // Game action functions for multiplayer

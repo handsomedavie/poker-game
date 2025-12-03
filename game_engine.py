@@ -284,6 +284,10 @@ def process_action(session_id: str, player_seat: int, action: str, amount: int =
     
     action = action.lower()
     
+    # Normalize action names
+    if action == "bet":
+        action = "raise"  # Bet is same as raise
+    
     if action == "fold":
         player.is_folded = True
         print(f"🎮 GAME: Seat {player_seat} ({player.name}) folds")
@@ -375,11 +379,29 @@ def _check_round_complete(game: GameState):
     # Check if betting round is complete
     all_matched = all(p.current_bet == game.current_bet or p.is_all_in for p in active)
     
-    # If we went around and everyone matched
+    # Get next player to act
     next_seat = get_next_player_seat(game)
     
-    if all_matched and (next_seat == game.last_raiser_seat or game.last_raiser_seat is None):
+    # Track actions per round - all players who can act must have acted
+    # For preflop: SB calls, BB checks = round done
+    # For other phases: everyone checks or calls to current bet = round done
+    
+    players_acted = getattr(game, 'players_acted_this_round', set())
+    players_acted.add(game.current_player_seat)
+    game.players_acted_this_round = players_acted
+    
+    all_can_act_seats = set(p.seat for p in can_act)
+    everyone_acted = all_can_act_seats.issubset(players_acted)
+    
+    print(f"🎮 ROUND CHECK: matched={all_matched}, everyone_acted={everyone_acted}, players_acted={players_acted}, can_act={all_can_act_seats}")
+    
+    if all_matched and everyone_acted:
         # Move to next phase
+        game.players_acted_this_round = set()  # Reset for next round
+        _advance_phase(game)
+    elif next_seat == game.last_raiser_seat:
+        # Back to the raiser, round complete
+        game.players_acted_this_round = set()
         _advance_phase(game)
     else:
         # Next player's turn
