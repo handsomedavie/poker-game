@@ -800,6 +800,7 @@
                 inset 0 0 35px rgba(0, 0, 0, 0.3);
             /* NO transform - prevents stacking context issues */
             z-index: 1 !important; /* BASE LAYER - lowest */
+            overflow: visible; /* Allow players to extend beyond table */
         }
 
         .table-felt {
@@ -898,41 +899,41 @@
         
         /* Player positions around the table - Adaptive layout */
         .table-player.position-top {
-            top: 10px;
+            top: -60px;
             left: 50%;
             transform: translateX(-50%);
         }
         
         .table-player.position-top-left {
-            top: 80px;
-            left: 5px;
+            top: 30px;
+            left: -15px;
         }
         
         .table-player.position-top-right {
-            top: 80px;
-            right: 5px;
+            top: 30px;
+            right: -15px;
         }
         
         .table-player.position-left {
-            top: 45%;
-            left: 5px;
+            top: 40%;
+            left: -20px;
             transform: translateY(-50%);
         }
         
         .table-player.position-right {
-            top: 45%;
-            right: 5px;
+            top: 40%;
+            right: -20px;
             transform: translateY(-50%);
         }
         
         .table-player.position-bottom-left {
-            bottom: 240px;
-            left: 5px;
+            bottom: 80px;
+            left: -15px;
         }
         
         .table-player.position-bottom-right {
-            bottom: 240px;
-            right: 5px;
+            bottom: 80px;
+            right: -15px;
         }
         
         /* Current turn indicator */
@@ -4466,7 +4467,6 @@
             
             // Use direct Mini App link with startapp parameter
             // Format: https://t.me/botusername/appname?startapp=param
-            // This opens the Mini App directly without requiring a second click
             var inviteLink = 'https://t.me/' + botUsername + '/poker?startapp=lobby_' + lobbyCode;
             
             var message = '🎰 Join my Private Poker Game!\n\n' +
@@ -4475,13 +4475,19 @@
                 '🎯 Blinds: $' + currentPrivateLobby.smallBlind + '/$' + currentPrivateLobby.bigBlind + '\n\n' +
                 '👇 Click to join:';
             
-            addDebug('Invite via Telegram: ' + lobbyCode);
+            addDebug('Invite via Telegram: ' + lobbyCode + ', link: ' + inviteLink);
             
-            // Build share URL - always open in new tab
+            // Build share URL
             var shareUrl = 'https://t.me/share/url?url=' + encodeURIComponent(inviteLink) + '&text=' + encodeURIComponent(message);
             
-            // Always open in new tab/window
-            window.open(shareUrl, '_blank', 'noopener,noreferrer');
+            // Use Telegram native share if available, otherwise fallback
+            if (tg && tg.openTelegramLink) {
+                tg.openTelegramLink(shareUrl);
+            } else if (tg && tg.openLink) {
+                tg.openLink(shareUrl);
+            } else {
+                window.open(shareUrl, '_blank', 'noopener,noreferrer');
+            }
         }
 
         function copyLobbyLink() {
@@ -5056,27 +5062,51 @@
         function checkUrlForLobby() {
             var lobbyCode = null;
             
+            addDebug('Checking for lobby invite...');
+            
             // Check Telegram WebApp startapp parameter first (highest priority)
             // This is set when user clicks direct Mini App link: t.me/bot/app?startapp=lobby_XXXXX
-            if (tg && tg.initDataUnsafe && tg.initDataUnsafe.start_param) {
-                var startParam = tg.initDataUnsafe.start_param;
-                addDebug('TG start_param: ' + startParam);
+            if (tg && tg.initDataUnsafe) {
+                addDebug('TG initDataUnsafe available, start_param: ' + (tg.initDataUnsafe.start_param || 'none'));
                 
-                if (startParam.startsWith('lobby_')) {
-                    lobbyCode = startParam.replace('lobby_', '');
+                if (tg.initDataUnsafe.start_param) {
+                    var startParam = tg.initDataUnsafe.start_param;
+                    
+                    if (startParam.startsWith('lobby_')) {
+                        lobbyCode = startParam.replace('lobby_', '');
+                        addDebug('Found lobby code in start_param: ' + lobbyCode);
+                    }
                 }
+            } else {
+                addDebug('TG initDataUnsafe not available');
             }
             
             // Fallback: check URL parameter
             if (!lobbyCode) {
                 var urlParams = new URLSearchParams(window.location.search);
                 lobbyCode = urlParams.get('lobby');
+                if (lobbyCode) {
+                    addDebug('Found lobby code in URL: ' + lobbyCode);
+                }
+            }
+            
+            // Also check URL hash for startapp parameter (some Telegram versions use this)
+            if (!lobbyCode && window.location.hash) {
+                var hashParams = new URLSearchParams(window.location.hash.substring(1));
+                var startappHash = hashParams.get('startapp') || hashParams.get('tgWebAppStartParam');
+                if (startappHash && startappHash.startsWith('lobby_')) {
+                    lobbyCode = startappHash.replace('lobby_', '');
+                    addDebug('Found lobby code in hash: ' + lobbyCode);
+                }
             }
             
             if (lobbyCode) {
-                addDebug('Lobby code found: ' + lobbyCode);
+                addDebug('Joining lobby: ' + lobbyCode);
                 joinLobbyByCode(lobbyCode);
+                return true;
             }
+            
+            return false;
         }
 
         async function joinLobbyByCode(code) {
@@ -5264,16 +5294,25 @@
             }
         }
 
+        // Track if we're joining a lobby
+        var joiningLobby = false;
+        
         // Check for lobby code on page load
         window.addEventListener('load', function() {
             addDebug('Window loaded');
             setTimeout(function() {
-                checkUrlForLobby();
-            }, 500);
+                joiningLobby = checkUrlForLobby();
+            }, 300);
         });
 
         // Fallback: Force show main menu after 5 seconds if nothing is visible
         function forceShowMainMenu() {
+            // Don't force menu if we're joining a lobby
+            if (joiningLobby) {
+                addDebug('Skipping force menu - joining lobby');
+                return;
+            }
+            
             var splash = document.getElementById('splashScreen');
             var menu = document.getElementById('mainMenu');
             var fullscreen = document.getElementById('fullscreenRequestScreen');
