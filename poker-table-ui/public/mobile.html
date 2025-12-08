@@ -425,7 +425,7 @@
         }
 
         .game-card {
-            aspect-ratio: 1;
+            min-height: 130px;
             border-radius: 20px;
             padding: 16px;
             cursor: pointer;
@@ -468,7 +468,7 @@
         }
 
         .game-card-icon {
-            font-size: 42px;
+            font-size: 36px;
             margin-bottom: 8px;
         }
 
@@ -2760,22 +2760,32 @@
          SCREEN 2: MAIN MENU
          ═══════════════════════════════════════════════════ -->
     <div id="mainMenu" class="hidden">
-        <!-- Profile Bar: Avatar+Info | 2x2 Buttons -->
+        <!-- Profile Bar - Compact -->
         <div class="profile-bar">
             <div class="profile-left">
                 <div class="profile-avatar" id="menuAvatar">P</div>
                 <div class="profile-info">
                     <div class="profile-name" id="menuName">Player</div>
                     <div class="profile-handle" id="menuHandle"></div>
-                    <div class="profile-balance" id="menuBalance">$1,000</div>
+                    <div class="profile-balance" id="menuBalance">$100.00</div>
                 </div>
             </div>
             <div class="profile-right">
-                <button class="profile-action-btn primary" onclick="handleDeposit()" title="Deposit">💳</button>
-                <button class="profile-action-btn" onclick="handleWithdraw()" title="Withdraw">💰</button>
                 <button class="profile-action-btn" onclick="handleHistory()" title="History">📋</button>
                 <button class="profile-action-btn" onclick="handleSettings()" title="Settings">⚙️</button>
             </div>
+        </div>
+
+        <!-- Deposit & Withdraw Buttons -->
+        <div class="deposit-section">
+            <button class="deposit-btn" onclick="handleDeposit()">
+                <span class="icon">💳</span>
+                <span>Deposit</span>
+            </button>
+            <button class="withdraw-btn" onclick="handleWithdraw()">
+                <span>💰</span>
+                <span>Withdraw</span>
+            </button>
         </div>
 
         <!-- Game Modes Grid 2x2 -->
