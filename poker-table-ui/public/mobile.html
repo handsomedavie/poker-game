@@ -60,6 +60,59 @@
         }
 
         .hidden { display: none !important; }
+        
+        /* ═══════ SCREEN TRANSITION ANIMATIONS ═══════ */
+        .screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            opacity: 1;
+            transition: opacity 0.4s ease, transform 0.4s ease;
+        }
+        
+        .screen.fade-out {
+            opacity: 0;
+            transform: scale(0.95);
+        }
+        
+        .screen.fade-in {
+            animation: screenFadeIn 0.4s ease forwards;
+        }
+        
+        @keyframes screenFadeIn {
+            from {
+                opacity: 0;
+                transform: scale(1.05);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+        
+        @keyframes screenSlideIn {
+            from {
+                opacity: 0;
+                transform: translateX(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        @keyframes screenSlideOut {
+            from {
+                opacity: 1;
+                transform: translateX(0);
+            }
+            to {
+                opacity: 0;
+                transform: translateX(-30px);
+            }
+        }
 
         /* ═══════════════════════════════════════════════════
            SPLASH SCREEN STYLES
@@ -1123,6 +1176,195 @@
                     0 4px 12px rgba(0,0,0,0.4);
                 border-color: #f59e0b;
             }
+        }
+
+        /* ═══════ WINNER OVERLAY ANIMATIONS ═══════ */
+        .winner-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+            opacity: 0;
+            transition: opacity 0.4s ease;
+            pointer-events: none;
+        }
+        
+        .winner-overlay.visible {
+            opacity: 1;
+        }
+        
+        .winner-overlay.hiding {
+            opacity: 0;
+        }
+        
+        /* Winner content - MY WIN (colorful) */
+        .winner-content-me {
+            background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 50%, #d97706 100%);
+            border: 4px solid #fcd34d;
+            border-radius: 24px;
+            padding: 30px 50px;
+            text-align: center;
+            box-shadow: 
+                0 0 60px rgba(251, 191, 36, 0.8),
+                0 0 120px rgba(251, 191, 36, 0.4),
+                0 20px 60px rgba(0, 0, 0, 0.5);
+            animation: winnerPulse 0.5s ease-out, winnerFloat 2s ease-in-out infinite;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .winner-glow {
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.3) 0%, transparent 70%);
+            animation: rotateGlow 3s linear infinite;
+        }
+        
+        .winner-confetti {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: 
+                radial-gradient(circle, #ff6b6b 2px, transparent 2px),
+                radial-gradient(circle, #4ecdc4 2px, transparent 2px),
+                radial-gradient(circle, #ffe66d 2px, transparent 2px),
+                radial-gradient(circle, #95e1d3 2px, transparent 2px);
+            background-size: 40px 40px, 60px 60px, 50px 50px, 70px 70px;
+            animation: confettiFall 1s linear infinite;
+            opacity: 0.6;
+        }
+        
+        .winner-trophy {
+            font-size: 64px;
+            animation: trophyBounce 0.6s ease-out;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .winner-title {
+            font-size: 36px;
+            font-weight: 900;
+            color: #1f2937;
+            text-shadow: 2px 2px 0 #fff, -2px -2px 0 #fff, 2px -2px 0 #fff, -2px 2px 0 #fff;
+            margin: 10px 0;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .winner-hand-name {
+            font-size: 20px;
+            font-weight: 700;
+            color: #422006;
+            margin: 5px 0;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .winner-amount {
+            font-size: 32px;
+            font-weight: 900;
+            color: #166534;
+            text-shadow: 1px 1px 0 #fff;
+            margin-top: 10px;
+            animation: amountPop 0.5s ease-out 0.3s both;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .winner-sparkles {
+            font-size: 24px;
+            animation: sparkle 0.8s ease-in-out infinite;
+            position: relative;
+            z-index: 1;
+        }
+        
+        /* Winner content - OTHER WIN (modest) */
+        .winner-content-other {
+            background: linear-gradient(135deg, #374151 0%, #1f2937 100%);
+            border: 2px solid #6b7280;
+            border-radius: 16px;
+            padding: 20px 40px;
+            text-align: center;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+            animation: otherWinSlide 0.4s ease-out;
+        }
+        
+        .winner-icon {
+            font-size: 40px;
+            margin-bottom: 5px;
+        }
+        
+        .winner-other-name {
+            font-size: 22px;
+            font-weight: 700;
+            color: #f3f4f6;
+            margin: 5px 0;
+        }
+        
+        .winner-hand-name-small {
+            font-size: 14px;
+            color: #9ca3af;
+            margin: 5px 0;
+        }
+        
+        .winner-amount-small {
+            font-size: 20px;
+            font-weight: 700;
+            color: #fbbf24;
+            margin-top: 5px;
+        }
+        
+        @keyframes winnerPulse {
+            0% { transform: scale(0.5); opacity: 0; }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        
+        @keyframes winnerFloat {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        @keyframes rotateGlow {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        @keyframes confettiFall {
+            0% { background-position: 0 0, 0 0, 0 0, 0 0; }
+            100% { background-position: 40px 40px, 60px 60px, 50px 50px, 70px 70px; }
+        }
+        
+        @keyframes trophyBounce {
+            0% { transform: scale(0) rotate(-20deg); }
+            50% { transform: scale(1.3) rotate(10deg); }
+            100% { transform: scale(1) rotate(0deg); }
+        }
+        
+        @keyframes amountPop {
+            0% { transform: scale(0); }
+            70% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+        
+        @keyframes sparkle {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(1.2); }
+        }
+        
+        @keyframes otherWinSlide {
+            0% { transform: translateY(-30px); opacity: 0; }
+            100% { transform: translateY(0); opacity: 1; }
         }
 
         .card.red { color: #dc2626 !important; }
@@ -2837,29 +3079,74 @@
         function showScreen(screenId, hideScreens) {
             hideScreens = hideScreens || [];
             
-            // Hide specified screens with animation
+            addDebug('Transition: showing ' + screenId + ', hiding: ' + hideScreens.join(', '));
+            
+            // Hide specified screens with smooth animation
             hideScreens.forEach(function(id) {
                 var el = document.getElementById(id);
                 if (el && !el.classList.contains('hidden')) {
-                    el.classList.add('screen-fade-out');
+                    el.style.transition = 'opacity 0.35s ease, transform 0.35s ease';
+                    el.style.opacity = '0';
+                    el.style.transform = 'scale(0.95)';
                     setTimeout(function() {
                         el.classList.add('hidden');
-                        el.classList.remove('screen-fade-out');
-                    }, 300);
+                        el.style.opacity = '';
+                        el.style.transform = '';
+                        el.style.transition = '';
+                    }, 350);
                 }
             });
             
-            // Show new screen with animation
+            // Show new screen with smooth animation
             setTimeout(function() {
                 var showEl = document.getElementById(screenId);
                 if (showEl) {
+                    showEl.style.opacity = '0';
+                    showEl.style.transform = 'scale(1.03)';
                     showEl.classList.remove('hidden');
-                    showEl.classList.add('screen-fade-in');
+                    
+                    // Trigger reflow
+                    showEl.offsetHeight;
+                    
+                    showEl.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
+                    showEl.style.opacity = '1';
+                    showEl.style.transform = 'scale(1)';
+                    
                     setTimeout(function() {
-                        showEl.classList.remove('screen-fade-in');
-                    }, 400);
+                        showEl.style.transition = '';
+                        showEl.style.transform = '';
+                    }, 450);
                 }
-            }, hideScreens.length > 0 ? 250 : 0);
+            }, hideScreens.length > 0 ? 300 : 0);
+        }
+        
+        // Quick transition for faster navigation
+        function quickTransition(showId, hideId) {
+            var hideEl = document.getElementById(hideId);
+            var showEl = document.getElementById(showId);
+            
+            if (hideEl) {
+                hideEl.style.transition = 'opacity 0.25s ease';
+                hideEl.style.opacity = '0';
+                setTimeout(function() {
+                    hideEl.classList.add('hidden');
+                    hideEl.style.opacity = '';
+                    hideEl.style.transition = '';
+                }, 250);
+            }
+            
+            setTimeout(function() {
+                if (showEl) {
+                    showEl.style.opacity = '0';
+                    showEl.classList.remove('hidden');
+                    showEl.offsetHeight;
+                    showEl.style.transition = 'opacity 0.3s ease';
+                    showEl.style.opacity = '1';
+                    setTimeout(function() {
+                        showEl.style.transition = '';
+                    }, 300);
+                }
+            }, hideEl ? 200 : 0);
         }
 
         // Global error handler to catch any JS errors
@@ -3119,16 +3406,17 @@
             };
 
             document.getElementById('lobbyTitle').textContent = titles[mode] || 'Lobby';
-            document.getElementById('mainMenu').classList.add('hidden');
-            document.getElementById('lobbyScreen').classList.remove('hidden');
+            
+            // Smooth transition to lobby
+            showScreen('lobbyScreen', ['mainMenu']);
 
             renderTables(mode);
         }
 
         function goBack() {
             addDebug('Back');
-            document.getElementById('lobbyScreen').classList.add('hidden');
-            document.getElementById('mainMenu').classList.remove('hidden');
+            // Smooth transition back to main menu
+            showScreen('mainMenu', ['lobbyScreen']);
         }
 
         function switchTab(btn, filter) {
@@ -3436,9 +3724,8 @@
                 p.status = 'active';
             });
             
-            // Show table screen
-            document.getElementById('lobbyScreen').classList.add('hidden');
-            document.getElementById('pokerTableScreen').classList.remove('hidden');
+            // Show table screen with smooth transition
+            showScreen('pokerTableScreen', ['lobbyScreen']);
             
             // Request fullscreen when entering game
             if (tg) tg.expand();
@@ -4218,8 +4505,8 @@
             addDebug('Leave table');
             clearInterval(gameState.timerInterval);
             gameState.phase = 'waiting';
-            document.getElementById('pokerTableScreen').classList.add('hidden');
-            document.getElementById('lobbyScreen').classList.remove('hidden');
+            // Smooth transition back to lobby
+            showScreen('lobbyScreen', ['pokerTableScreen']);
         }
 
         // ═══════════════════════════════════════════════════
@@ -4444,14 +4731,13 @@
                 
                 // Close modal and go to waiting room (NOT start game!)
                 closePrivateGameModal();
-                document.getElementById('mainMenu').classList.add('hidden');
                 
                 // Connect to WebSocket for real-time updates
                 connectToLobbyWebSocket(code);
                 
-                // Show waiting room
+                // Show waiting room with smooth transition
                 updateWaitingRoomUI();
-                document.getElementById('waitingRoomScreen').classList.remove('hidden');
+                showScreen('waitingRoomScreen', ['mainMenu', 'lobbyScreen']);
                 
             } catch (err) {
                 addDebug('Join lobby error: ' + err.message);
@@ -4465,9 +4751,9 @@
             var lobbyCode = currentPrivateLobby.code;
             var botUsername = 'pokerhouse77bot';
             
-            // Use direct Mini App link with startapp parameter
-            // Format: https://t.me/botusername/appname?startapp=param
-            var inviteLink = 'https://t.me/' + botUsername + '/poker?startapp=lobby_' + lobbyCode;
+            // Use bot start link - bot will redirect to Mini App with the lobby code
+            // Format: https://t.me/botusername?start=lobby_CODE
+            var inviteLink = 'https://t.me/' + botUsername + '?start=lobby_' + lobbyCode;
             
             var message = '🎰 Join my Private Poker Game!\n\n' +
                 '📍 Lobby Code: ' + lobbyCode + '\n' +
@@ -4496,8 +4782,8 @@
             var lobbyCode = currentPrivateLobby.code;
             var botUsername = 'pokerhouse77bot';
             
-            // Use direct Mini App link - opens app directly without extra click
-            var inviteLink = 'https://t.me/' + botUsername + '/poker?startapp=lobby_' + lobbyCode;
+            // Use bot start link - bot will show join button
+            var inviteLink = 'https://t.me/' + botUsername + '?start=lobby_' + lobbyCode;
             
             // Copy to clipboard
             if (navigator.clipboard) {
@@ -4550,7 +4836,6 @@
             
             // Close modal
             closePrivateGameModal();
-            document.getElementById('mainMenu').classList.add('hidden');
             
             // Connect to WebSocket for real-time updates
             connectToLobbyWebSocket(currentPrivateLobby.code);
@@ -4558,8 +4843,8 @@
             // Update waiting room UI
             updateWaitingRoomUI();
             
-            // Show waiting room
-            document.getElementById('waitingRoomScreen').classList.remove('hidden');
+            // Show waiting room with smooth transition
+            showScreen('waitingRoomScreen', ['mainMenu', 'lobbyScreen']);
         }
 
         function updateWaitingRoomUI() {
@@ -4634,8 +4919,8 @@
         }
 
         function leaveWaitingRoom() {
-            document.getElementById('waitingRoomScreen').classList.add('hidden');
-            document.getElementById('mainMenu').classList.remove('hidden');
+            // Smooth transition back to main menu
+            showScreen('mainMenu', ['waitingRoomScreen']);
             currentPrivateLobby = null;
         }
 
@@ -4953,39 +5238,65 @@
         // Multiplayer winner display
         var multiplayerWinnerShown = false;
         
-        function showMultiplayerWinner(winner, handName, potAmount) {
+        function showMultiplayerWinner(winner, handName, potAmount, isMe) {
             if (multiplayerWinnerShown) return;
             multiplayerWinnerShown = true;
             
-            addDebug('WINNER: ' + winner.name + ' with ' + handName);
+            // Check if winner is current player
+            var iAmWinner = isMe || (mySeat && parseInt(winner.seat) === parseInt(mySeat));
             
-            // Use existing winner popup if available
-            var popup = document.getElementById('winnerPopup');
-            if (popup) {
-                var nameEl = popup.querySelector('.winner-name, #winnerName');
-                var handEl = popup.querySelector('.winner-hand, #winnerHand');
-                var potEl = popup.querySelector('.winner-pot, #winnerPot');
-                
-                if (nameEl) nameEl.textContent = winner.name + ' WINS!';
-                if (handEl) handEl.textContent = handName;
-                if (potEl) potEl.textContent = '+$' + potAmount;
-                
-                popup.classList.remove('hidden');
-                popup.style.display = 'flex';
+            addDebug('WINNER: ' + winner.name + ' with ' + handName + ', isMe: ' + iAmWinner);
+            
+            // Remove any existing winner popup
+            var existingPopup = document.getElementById('winnerOverlay');
+            if (existingPopup) existingPopup.remove();
+            
+            // Create beautiful animated winner popup
+            var overlay = document.createElement('div');
+            overlay.id = 'winnerOverlay';
+            overlay.className = iAmWinner ? 'winner-overlay winner-me' : 'winner-overlay winner-other';
+            
+            if (iAmWinner) {
+                // Красочная анимация для победителя
+                overlay.innerHTML = 
+                    '<div class="winner-content winner-content-me">' +
+                        '<div class="winner-confetti"></div>' +
+                        '<div class="winner-glow"></div>' +
+                        '<div class="winner-trophy">🏆</div>' +
+                        '<div class="winner-title">YOU WIN!</div>' +
+                        '<div class="winner-hand-name">' + handName + '</div>' +
+                        '<div class="winner-amount">+$' + potAmount.toLocaleString() + '</div>' +
+                        '<div class="winner-sparkles">✨✨✨</div>' +
+                    '</div>';
             } else {
-                // Create simple alert
-                showAlert('🏆 ' + winner.name + ' wins with ' + handName + '! (+$' + potAmount + ')');
+                // Скромная анимация для проигравшего
+                overlay.innerHTML = 
+                    '<div class="winner-content winner-content-other">' +
+                        '<div class="winner-icon">🃏</div>' +
+                        '<div class="winner-other-name">' + winner.name + ' wins</div>' +
+                        '<div class="winner-hand-name-small">' + handName + '</div>' +
+                        '<div class="winner-amount-small">+$' + potAmount.toLocaleString() + '</div>' +
+                    '</div>';
             }
             
-            // Request new hand after delay
+            document.body.appendChild(overlay);
+            
+            // Trigger animation
             setTimeout(function() {
-                multiplayerWinnerShown = false;
-                if (popup) {
-                    popup.classList.add('hidden');
-                    popup.style.display = 'none';
-                }
-                requestNewHand();
-            }, 4000);
+                overlay.classList.add('visible');
+            }, 50);
+            
+            // Hide after 3 seconds
+            setTimeout(function() {
+                overlay.classList.remove('visible');
+                overlay.classList.add('hiding');
+                
+                setTimeout(function() {
+                    multiplayerWinnerShown = false;
+                    overlay.remove();
+                    requestNewHand();
+                }, 500);
+            }, 3000);
         }
         
         function requestNewHand() {
@@ -5171,15 +5482,14 @@
                 
                 // Skip splash/main menu and go directly to waiting room
                 document.getElementById('splashScreen').style.display = 'none';
-                document.getElementById('mainMenu').classList.add('hidden');
                 document.getElementById('fullscreenRequestScreen').classList.add('hidden');
                 
                 // Connect to WebSocket for real-time updates
                 connectToLobbyWebSocket(code);
                 
-                // Show waiting room
+                // Show waiting room with smooth transition
                 updateWaitingRoomUI();
-                document.getElementById('waitingRoomScreen').classList.remove('hidden');
+                showScreen('waitingRoomScreen', ['mainMenu', 'lobbyScreen']);
                 
             } catch (err) {
                 addDebug('Join lobby error: ' + err.message);

@@ -319,26 +319,38 @@ def process_action(session_id: str, player_seat: int, action: str, amount: int =
             print(f"🎮 GAME: Seat {player_seat} ({player.name}) calls ${actual_call}")
         
     elif action == "raise":
-        if amount < game.min_raise:
-            return False, f"Minimum raise is ${game.min_raise}", None
+        # Amount is the TOTAL bet the player wants to make (not additional raise)
+        # Example: current_bet=40, player_current_bet=20, amount=100 means raise TO $100
         
-        call_amount = game.current_bet - player.current_bet
-        total_needed = call_amount + amount
+        # If amount is less than current bet + min_raise, it's invalid
+        min_total = game.current_bet + game.min_raise
+        if amount < min_total and amount < player.chips + player.current_bet:
+            return False, f"Minimum raise to ${min_total}", None
         
-        if total_needed > player.chips:
+        # Calculate how much player needs to put in
+        chips_needed = amount - player.current_bet
+        
+        if chips_needed > player.chips:
             return False, "Not enough chips", None
         
-        player.chips -= total_needed
-        player.current_bet += total_needed
-        game.pot += total_needed
-        game.current_bet = player.current_bet
-        game.min_raise = amount
+        if chips_needed <= 0:
+            return False, "Raise amount must be higher than current bet", None
+        
+        # Calculate raise increment for min_raise tracking
+        raise_increment = amount - game.current_bet
+        if raise_increment > 0:
+            game.min_raise = raise_increment
+        
+        player.chips -= chips_needed
+        player.current_bet = amount
+        game.pot += chips_needed
+        game.current_bet = amount
         game.last_raiser_seat = player_seat
         
         if player.chips == 0:
             player.is_all_in = True
         
-        print(f"🎮 GAME: Seat {player_seat} ({player.name}) raises to ${player.current_bet}")
+        print(f"🎮 GAME: Seat {player_seat} ({player.name}) raises to ${amount}")
         
     elif action == "all_in":
         all_in_amount = player.chips
