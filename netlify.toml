@@ -2,15 +2,29 @@
   publish = "poker-table-ui/public"
   command = "echo 'Static site - no build needed'"
 
+# Главная страница - редирект на mobile.html
+[[redirects]]
+  from = "/"
+  to = "/mobile.html"
+  status = 200
+  force = true
+
+# Также для index.html
+[[redirects]]
+  from = "/index.html"
+  to = "/mobile.html"
+  status = 301
+  force = true
+
 [[redirects]]
   from = "/api/*"
-  to = "https://pokerhouse77-backend.onrender.com/api/:splat"
+  to = "https://poker-game-poker-game.up.railway.app/api/:splat"
   status = 200
   force = true
 
 [[redirects]]
   from = "/ws/*"
-  to = "wss://pokerhouse77-backend.onrender.com/ws/:splat"
+  to = "wss://poker-game-poker-game.up.railway.app/ws/:splat"
   status = 200
   force = true
 
