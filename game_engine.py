@@ -95,8 +95,17 @@ class GameState:
         players_list = []
         for seat, p in sorted(self.players.items()):
             # Only show cards if it's the requesting player or showdown
-            hide = for_seat != seat and self.phase != GamePhase.SHOWDOWN
-            players_list.append(p.to_dict(hide_cards=hide))
+            is_showdown = self.phase in [GamePhase.SHOWDOWN, GamePhase.FINISHED]
+            hide = for_seat != seat and not is_showdown
+            player_dict = p.to_dict(hide_cards=hide)
+            
+            # Add hand name at showdown for each active player
+            if is_showdown and not p.is_folded and len(p.cards) >= 2 and len(self.community_cards) >= 3:
+                all_cards = p.cards + self.community_cards
+                hand = evaluate_hand(all_cards)
+                player_dict["handName"] = hand[2]  # e.g., "Pair", "Two Pair", etc.
+            
+            players_list.append(player_dict)
         
         return {
             "sessionId": self.session_id,

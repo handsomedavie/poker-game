@@ -1020,6 +1020,42 @@
             border: 1px solid #60a5fa;
             box-shadow: 0 2px 4px rgba(0,0,0,0.3);
         }
+        
+        /* Showdown - revealed cards for opponents */
+        .table-player .player-cards-shown {
+            display: flex;
+            gap: 2px;
+            margin-top: 5px;
+        }
+        
+        .table-player .mini-card {
+            width: 26px;
+            height: 36px;
+            background: linear-gradient(145deg, #ffffff, #f0f0f0);
+            border-radius: 4px;
+            border: 1px solid #374151;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            font-weight: 700;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .table-player .mini-card.red { color: #dc2626; }
+        .table-player .mini-card.black { color: #1f2937; }
+        
+        .table-player .player-hand-name {
+            font-size: 9px;
+            color: #fbbf24;
+            font-weight: 600;
+            text-align: center;
+            margin-top: 3px;
+            background: rgba(0,0,0,0.5);
+            padding: 2px 4px;
+            border-radius: 3px;
+            white-space: nowrap;
+        }
 
         /* ═══════ COMMUNITY CARDS - CENTER (LARGER) ═══════ */
         .community-cards {
@@ -1535,6 +1571,35 @@
 
         .hero-card .card-rank { font-size: 22px; line-height: 1; }
         .hero-card .card-suit { font-size: 24px; line-height: 1; }
+
+        /* GOLDEN HIGHLIGHT for combination cards (PAIR and above) */
+        .golden-highlight,
+        .hero-card.golden-highlight,
+        .community-card.golden-highlight {
+            border: 3px solid #fbbf24 !important;
+            box-shadow: 
+                0 0 15px rgba(251, 191, 36, 0.9),
+                0 0 30px rgba(251, 191, 36, 0.5),
+                0 6px 20px rgba(0,0,0,0.4) !important;
+            animation: goldenPulse 1.5s ease-in-out infinite;
+        }
+        
+        @keyframes goldenPulse {
+            0%, 100% {
+                box-shadow: 
+                    0 0 12px rgba(251, 191, 36, 0.8),
+                    0 0 25px rgba(251, 191, 36, 0.4),
+                    0 6px 20px rgba(0,0,0,0.4);
+                border-color: #f59e0b;
+            }
+            50% {
+                box-shadow: 
+                    0 0 20px rgba(255, 215, 0, 1),
+                    0 0 45px rgba(255, 215, 0, 0.6),
+                    0 6px 20px rgba(0,0,0,0.4);
+                border-color: #fcd34d;
+            }
+        }
 
         /* GOLDEN SHIMMER for hero combo cards */
         .hero-card.combo-card {
@@ -3081,72 +3146,57 @@
             
             addDebug('Transition: showing ' + screenId + ', hiding: ' + hideScreens.join(', '));
             
-            // Hide specified screens with smooth animation
+            // Hide specified screens with very smooth animation
             hideScreens.forEach(function(id) {
                 var el = document.getElementById(id);
                 if (el && !el.classList.contains('hidden')) {
-                    el.style.transition = 'opacity 0.35s ease, transform 0.35s ease';
+                    el.style.transition = 'opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1), transform 0.5s cubic-bezier(0.4, 0, 0.2, 1)';
                     el.style.opacity = '0';
-                    el.style.transform = 'scale(0.95)';
+                    el.style.transform = 'scale(0.97) translateY(10px)';
                     setTimeout(function() {
                         el.classList.add('hidden');
                         el.style.opacity = '';
                         el.style.transform = '';
                         el.style.transition = '';
-                    }, 350);
+                    }, 500);
                 }
             });
             
-            // Show new screen with smooth animation
+            // Show new screen with very smooth animation
             setTimeout(function() {
                 var showEl = document.getElementById(screenId);
                 if (showEl) {
                     showEl.style.opacity = '0';
-                    showEl.style.transform = 'scale(1.03)';
+                    showEl.style.transform = 'scale(1.02) translateY(-10px)';
                     showEl.classList.remove('hidden');
                     
                     // Trigger reflow
                     showEl.offsetHeight;
                     
-                    showEl.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
+                    showEl.style.transition = 'opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1), transform 0.6s cubic-bezier(0.4, 0, 0.2, 1)';
                     showEl.style.opacity = '1';
-                    showEl.style.transform = 'scale(1)';
+                    showEl.style.transform = 'scale(1) translateY(0)';
                     
                     setTimeout(function() {
                         showEl.style.transition = '';
                         showEl.style.transform = '';
-                    }, 450);
+                    }, 650);
                 }
-            }, hideScreens.length > 0 ? 300 : 0);
+            }, hideScreens.length > 0 ? 400 : 0);
         }
         
-        // Quick transition for faster navigation
-        function quickTransition(showId, hideId) {
-            var hideEl = document.getElementById(hideId);
-            var showEl = document.getElementById(showId);
-            
-            if (hideEl) {
-                hideEl.style.transition = 'opacity 0.25s ease';
-                hideEl.style.opacity = '0';
+        // Instant hide for cleanup
+        function hideScreen(screenId) {
+            var el = document.getElementById(screenId);
+            if (el) {
+                el.style.transition = 'opacity 0.4s ease';
+                el.style.opacity = '0';
                 setTimeout(function() {
-                    hideEl.classList.add('hidden');
-                    hideEl.style.opacity = '';
-                    hideEl.style.transition = '';
-                }, 250);
+                    el.classList.add('hidden');
+                    el.style.opacity = '';
+                    el.style.transition = '';
+                }, 400);
             }
-            
-            setTimeout(function() {
-                if (showEl) {
-                    showEl.style.opacity = '0';
-                    showEl.classList.remove('hidden');
-                    showEl.offsetHeight;
-                    showEl.style.transition = 'opacity 0.3s ease';
-                    showEl.style.opacity = '1';
-                    setTimeout(function() {
-                        showEl.style.transition = '';
-                    }, 300);
-                }
-            }, hideEl ? 200 : 0);
         }
 
         // Global error handler to catch any JS errors
@@ -4080,14 +4130,35 @@
                 var amount = 0;
                 var serverAction = action;
                 
+                // Get current game state info
+                var myPlayer = null;
+                var currentBet = 0;
+                if (lastGameState) {
+                    currentBet = lastGameState.currentBet || 0;
+                    if (mySeat && lastGameState.players) {
+                        myPlayer = lastGameState.players.find(function(p) {
+                            return parseInt(p.seat) === parseInt(mySeat);
+                        });
+                    }
+                }
+                var myCurrentBet = myPlayer ? (myPlayer.currentBet || 0) : 0;
+                var callAmount = currentBet - myCurrentBet;
+                
                 // Convert actions for server
-                if (action === 'bet') {
+                if (action === 'call') {
+                    // Call sends the amount to match current bet
+                    serverAction = 'call';
+                    amount = callAmount;
+                    addDebug('Call amount: ' + amount + ' (current bet: ' + currentBet + ', my bet: ' + myCurrentBet + ')');
+                } else if (action === 'bet' || action === 'raise') {
                     serverAction = 'raise';  // BET is same as RAISE for server
-                    amount = currentBetAmount || 20;
-                } else if (action === 'raise') {
-                    amount = currentBetAmount || 20;
+                    // Amount is the TOTAL bet (not additional)
+                    amount = currentBetAmount || (currentBet + 20);
+                    addDebug('Raise to: ' + amount);
                 } else if (action === 'allin') {
                     serverAction = 'all_in';
+                } else if (action === 'fold') {
+                    serverAction = 'fold';
                 }
                 
                 addDebug('Server action: ' + serverAction + ', amount: ' + amount);
@@ -4961,6 +5032,7 @@
         var gameWebSocket = null;
         var currentGameSession = null;
         var mySeat = null;  // My seat number (1-based)
+        var lastGameState = null;  // Store last game state for action calculations
         
         function startMultiplayerGame(gameSessionId) {
             addDebug('Starting multiplayer game: ' + gameSessionId);
@@ -5042,6 +5114,9 @@
         function updateGameUI(gameState) {
             if (!gameState) return;
             
+            // Store for action calculations
+            lastGameState = gameState;
+            
             addDebug('Updating game UI, phase: ' + gameState.phase + ', my seat: ' + mySeat);
             
             // Handle showdown/finished - show winner
@@ -5104,7 +5179,7 @@
                 addDebug('My player: ' + (myPlayer ? myPlayer.name : 'not found') + ', cards: ' + (myPlayer && myPlayer.cards ? myPlayer.cards.length : 0));
             }
             
-            // Update hero cards at bottom
+            // Update hero cards at bottom with highlighting
             var heroCardsEl = document.getElementById('heroCards');
             if (heroCardsEl && myPlayer && myPlayer.cards && myPlayer.cards.length >= 2) {
                 var card1 = myPlayer.cards[0];
@@ -5113,15 +5188,30 @@
                 var color1 = (card1.suit === 'hearts' || card1.suit === 'diamonds') ? 'red' : 'black';
                 var color2 = (card2.suit === 'hearts' || card2.suit === 'diamonds') ? 'red' : 'black';
                 
+                // Check if we should highlight cards (PAIR or better)
+                var highlight1 = '';
+                var highlight2 = '';
+                if (myPlayer.handName && myPlayer.handName !== 'High Card' && myPlayer.handName !== 'Incomplete') {
+                    // Highlight hero cards that are part of the winning combination
+                    var highlightInfo = getHighlightCards(myPlayer.cards, gameState.communityCards, myPlayer.handName);
+                    if (highlightInfo.heroCard1) highlight1 = ' golden-highlight';
+                    if (highlightInfo.heroCard2) highlight2 = ' golden-highlight';
+                }
+                
                 heroCardsEl.innerHTML = 
-                    '<div class="hero-card ' + color1 + '">' +
+                    '<div class="hero-card ' + color1 + highlight1 + '">' +
                         '<span class="card-rank">' + formatRank(card1.rank) + '</span>' +
                         '<span class="card-suit">' + getSuitSymbol(card1.suit) + '</span>' +
                     '</div>' +
-                    '<div class="hero-card ' + color2 + '">' +
+                    '<div class="hero-card ' + color2 + highlight2 + '">' +
                         '<span class="card-rank">' + formatRank(card2.rank) + '</span>' +
                         '<span class="card-suit">' + getSuitSymbol(card2.suit) + '</span>' +
                     '</div>';
+                
+                // Also highlight community cards
+                if (myPlayer.handName && myPlayer.handName !== 'High Card' && myPlayer.handName !== 'Incomplete') {
+                    highlightCommunityCards(myPlayer.cards, gameState.communityCards, myPlayer.handName);
+                }
             }
             
             // Update action buttons based on whose turn it is (using seat)
@@ -5172,6 +5262,122 @@
             return rankMap[rank] || rank;
         }
         
+        // Get which cards to highlight based on hand type
+        function getHighlightCards(heroCards, communityCards, handName) {
+            if (!heroCards || heroCards.length < 2) {
+                return { heroCard1: false, heroCard2: false, communityIndices: [] };
+            }
+            
+            var result = { heroCard1: false, heroCard2: false, communityIndices: [] };
+            var card1Rank = parseInt(heroCards[0].rank) || heroCards[0].rank;
+            var card2Rank = parseInt(heroCards[1].rank) || heroCards[1].rank;
+            var card1Suit = heroCards[0].suit;
+            var card2Suit = heroCards[1].suit;
+            
+            // Normalize rank for comparison
+            function normalizeRank(r) {
+                if (r === 'A') return 14;
+                if (r === 'K') return 13;
+                if (r === 'Q') return 12;
+                if (r === 'J') return 11;
+                return parseInt(r) || r;
+            }
+            
+            card1Rank = normalizeRank(card1Rank);
+            card2Rank = normalizeRank(card2Rank);
+            
+            // Count ranks in all cards
+            var allCards = heroCards.concat(communityCards || []);
+            var rankCounts = {};
+            allCards.forEach(function(c) {
+                var r = normalizeRank(c.rank);
+                rankCounts[r] = (rankCounts[r] || 0) + 1;
+            });
+            
+            // For Pair, Two Pair, Three of a Kind, Four of a Kind - highlight matching ranks
+            if (handName === 'Pair' || handName === 'Two Pair' || handName === 'Three of a Kind' || handName === 'Four of a Kind' || handName === 'Full House') {
+                // Find which ranks are paired+
+                var pairedRanks = [];
+                for (var r in rankCounts) {
+                    if (rankCounts[r] >= 2) {
+                        pairedRanks.push(parseInt(r));
+                    }
+                }
+                
+                // Check if hero cards are part of pairs
+                if (pairedRanks.indexOf(card1Rank) !== -1) result.heroCard1 = true;
+                if (pairedRanks.indexOf(card2Rank) !== -1) result.heroCard2 = true;
+                
+                // Find community cards with paired ranks
+                if (communityCards) {
+                    communityCards.forEach(function(c, idx) {
+                        var r = normalizeRank(c.rank);
+                        if (pairedRanks.indexOf(r) !== -1) {
+                            result.communityIndices.push(idx);
+                        }
+                    });
+                }
+            }
+            
+            // For Flush - highlight all cards of same suit
+            if (handName === 'Flush' || handName === 'Straight Flush' || handName === 'Royal Flush') {
+                var suitCounts = {};
+                allCards.forEach(function(c) {
+                    suitCounts[c.suit] = (suitCounts[c.suit] || 0) + 1;
+                });
+                
+                var flushSuit = null;
+                for (var s in suitCounts) {
+                    if (suitCounts[s] >= 5) flushSuit = s;
+                }
+                
+                if (flushSuit) {
+                    if (card1Suit === flushSuit) result.heroCard1 = true;
+                    if (card2Suit === flushSuit) result.heroCard2 = true;
+                    
+                    if (communityCards) {
+                        communityCards.forEach(function(c, idx) {
+                            if (c.suit === flushSuit) {
+                                result.communityIndices.push(idx);
+                            }
+                        });
+                    }
+                }
+            }
+            
+            // For Straight - highlight all 5 cards in sequence
+            if (handName === 'Straight' || handName === 'Straight Flush' || handName === 'Royal Flush') {
+                // Simplified: highlight both hero cards for straights
+                result.heroCard1 = true;
+                result.heroCard2 = true;
+                // Highlight all community cards for straight
+                if (communityCards) {
+                    communityCards.forEach(function(c, idx) {
+                        result.communityIndices.push(idx);
+                    });
+                }
+            }
+            
+            return result;
+        }
+        
+        function highlightCommunityCards(heroCards, communityCards, handName) {
+            if (!communityCards || communityCards.length === 0) return;
+            
+            var highlightInfo = getHighlightCards(heroCards, communityCards, handName);
+            var communityEl = document.getElementById('communityCards');
+            if (!communityEl) return;
+            
+            var cards = communityEl.querySelectorAll('.community-card');
+            cards.forEach(function(cardEl, idx) {
+                if (highlightInfo.communityIndices.indexOf(idx) !== -1) {
+                    cardEl.classList.add('golden-highlight');
+                } else {
+                    cardEl.classList.remove('golden-highlight');
+                }
+            });
+        }
+        
         function updatePlayersDisplay(players, mySeat) {
             // Render all opponents around the table based on total player count
             var seatsEl = document.getElementById('playerSeats');
@@ -5179,6 +5385,7 @@
             
             var myCurrentSeat = parseInt(mySeat);
             var totalPlayers = players.length;
+            var isShowdown = lastGameState && (lastGameState.phase === 'showdown' || lastGameState.phase === 'finished');
             
             // Get opponents (everyone except me)
             var opponents = players.filter(function(p) {
@@ -5195,6 +5402,32 @@
                 var isCurrentTurn = player.isCurrentTurn ? ' current-turn' : '';
                 var betAmount = player.currentBet || 0;
                 
+                // Show cards at showdown (if not folded and cards are visible)
+                var cardsHtml = '';
+                if (isShowdown && !player.isFolded && player.cards && player.cards.length >= 2) {
+                    // Show actual cards at showdown
+                    var card1 = player.cards[0];
+                    var card2 = player.cards[1];
+                    var color1 = (card1.suit === 'hearts' || card1.suit === 'diamonds') ? 'red' : 'black';
+                    var color2 = (card2.suit === 'hearts' || card2.suit === 'diamonds') ? 'red' : 'black';
+                    
+                    cardsHtml = '<div class="player-cards-shown">' +
+                        '<div class="mini-card ' + color1 + '">' + formatRank(card1.rank) + getSuitSymbol(card1.suit) + '</div>' +
+                        '<div class="mini-card ' + color2 + '">' + formatRank(card2.rank) + getSuitSymbol(card2.suit) + '</div>' +
+                    '</div>';
+                    
+                    // Show hand name if available
+                    if (player.handName) {
+                        cardsHtml += '<div class="player-hand-name">' + player.handName + '</div>';
+                    }
+                } else {
+                    // Show card backs
+                    cardsHtml = '<div class="player-cards-back">' +
+                        '<div class="card-back"></div>' +
+                        '<div class="card-back"></div>' +
+                    '</div>';
+                }
+                
                 html += '<div class="table-player ' + positionClass + foldedClass + isCurrentTurn + '">' +
                     '<div class="player-avatar">' + (player.name ? player.name.charAt(0).toUpperCase() : '?') + '</div>' +
                     '<div class="player-info">' +
@@ -5202,15 +5435,12 @@
                         '<div class="player-chips">$' + (player.chips || 0) + '</div>' +
                         (betAmount > 0 ? '<div class="player-bet">$' + betAmount + '</div>' : '') +
                     '</div>' +
-                    '<div class="player-cards-back">' +
-                        '<div class="card-back"></div>' +
-                        '<div class="card-back"></div>' +
-                    '</div>' +
+                    cardsHtml +
                 '</div>';
             });
             
             seatsEl.innerHTML = html;
-            addDebug('Rendered ' + opponents.length + ' opponents at positions: ' + positions.join(', '));
+            addDebug('Rendered ' + opponents.length + ' opponents at positions: ' + positions.join(', ') + ', showdown: ' + isShowdown);
         }
         
         function getPositionsForPlayerCount(totalPlayers, mySeat) {
