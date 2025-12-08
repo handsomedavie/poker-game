@@ -1083,7 +1083,28 @@
             font-weight: 700;
             box-shadow: 0 4px 14px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.8);
             border: 2px solid #374151;
-            animation: cardDeal 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+            opacity: 0;
+            animation: communityCardDeal 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+        }
+        
+        /* Community card slow reveal animation */
+        @keyframes communityCardDeal {
+            0% {
+                opacity: 0;
+                transform: translateY(-30px) scale(0.5) rotateY(180deg);
+            }
+            30% {
+                opacity: 0.3;
+                transform: translateY(-15px) scale(0.75) rotateY(90deg);
+            }
+            60% {
+                opacity: 0.7;
+                transform: translateY(-5px) scale(0.95) rotateY(30deg);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0) scale(1) rotateY(0deg);
+            }
         }
         
         .community-card .card-rank {
@@ -1107,12 +1128,12 @@
             color: #1f2937;
         }
         
-        /* Stagger animation for community cards */
+        /* Stagger animation for community cards - slower reveal */
         .community-card:nth-child(1) { animation-delay: 0s; }
-        .community-card:nth-child(2) { animation-delay: 0.15s; }
-        .community-card:nth-child(3) { animation-delay: 0.3s; }
-        .community-card:nth-child(4) { animation-delay: 0.45s; }
-        .community-card:nth-child(5) { animation-delay: 0.6s; }
+        .community-card:nth-child(2) { animation-delay: 0.3s; }
+        .community-card:nth-child(3) { animation-delay: 0.6s; }
+        .community-card:nth-child(4) { animation-delay: 0.9s; }
+        .community-card:nth-child(5) { animation-delay: 1.2s; }
 
         /* CARDS - BIGGER WITH VISIBLE SUITS + ANIMATION */
         .card {
@@ -3133,16 +3154,52 @@
         var isMusicEnabled = true;
         var bgMusicInterval = null;
         
+        var audioInitialized = false;
+        
         function initAudio() {
+            if (audioInitialized) return;
             try {
                 audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                audioInitialized = true;
+                console.log('Audio initialized successfully');
+                
+                // Resume context if suspended (required by browser policies)
+                if (audioContext.state === 'suspended') {
+                    audioContext.resume().then(function() {
+                        console.log('AudioContext resumed');
+                    });
+                }
             } catch (e) {
-                console.log('Audio not supported');
+                console.log('Audio not supported:', e);
             }
         }
         
+        // Initialize audio on first user interaction (required by browsers)
+        function setupAudioOnUserInteraction() {
+            var initOnce = function() {
+                initAudio();
+                if (audioContext && audioContext.state === 'suspended') {
+                    audioContext.resume();
+                }
+                document.removeEventListener('click', initOnce);
+                document.removeEventListener('touchstart', initOnce);
+                document.removeEventListener('keydown', initOnce);
+            };
+            document.addEventListener('click', initOnce);
+            document.addEventListener('touchstart', initOnce);
+            document.addEventListener('keydown', initOnce);
+        }
+        setupAudioOnUserInteraction();
+        
         function playTone(frequency, duration, type, volume) {
-            if (!audioContext || !isSoundEnabled) return;
+            if (!isSoundEnabled) return;
+            
+            // Try to init audio if not done yet
+            if (!audioContext) {
+                initAudio();
+            }
+            if (!audioContext) return;
+            
             try {
                 if (audioContext.state === 'suspended') {
                     audioContext.resume();
@@ -3157,7 +3214,9 @@
                 gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + duration);
                 oscillator.start(audioContext.currentTime);
                 oscillator.stop(audioContext.currentTime + duration);
-            } catch (e) {}
+            } catch (e) {
+                console.log('Audio play error:', e);
+            }
         }
         
         function playCardSound() {
@@ -5325,12 +5384,12 @@
                 
                 // Only update if new cards were dealt
                 if (newCardCount > currentCardCount) {
-                    // Play card sound for each new community card
+                    // Play card sound for each new community card with delays matching animation
                     for (var i = currentCardCount; i < newCardCount; i++) {
                         (function(cardIndex) {
                             setTimeout(function() {
                                 playCommunityCardSound();
-                            }, (cardIndex - currentCardCount) * 150);
+                            }, (cardIndex - currentCardCount) * 350); // 350ms to match CSS animation delay
                         })(i);
                         
                         var cardEl = document.createElement('div');
@@ -5406,6 +5465,15 @@
                 } else {
                     callBtn.textContent = 'Call $' + callAmount;
                 }
+            }
+            
+            // Update Bet/Raise button text based on current bet (Texas Hold'em rules)
+            var raiseBtn = document.getElementById('raiseBtn');
+            if (raiseBtn) {
+                var currentBetValue = gameState.currentBet || 0;
+                // BET when no one has bet yet, RAISE when there's an existing bet
+                var actionName = currentBetValue > 0 ? 'Raise' : 'Bet';
+                raiseBtn.textContent = actionName + ' $' + currentBetAmount;
             }
             
             // Update players around table
