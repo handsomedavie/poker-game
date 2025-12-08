@@ -499,6 +499,47 @@
             transform: scale(0.97);
         }
 
+        /* Private Game Button */
+        .private-game-section {
+            padding: 0 16px;
+            margin-bottom: 12px;
+        }
+
+        .private-game-btn {
+            width: 100%;
+            padding: 16px;
+            border-radius: 16px;
+            border: 2px solid #fbbf24;
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            transition: all 0.2s;
+            -webkit-tap-highlight-color: transparent;
+            box-shadow: 0 6px 20px rgba(245, 158, 11, 0.4);
+        }
+
+        .private-game-btn:active {
+            transform: scale(0.98);
+        }
+
+        .private-game-btn .private-icon {
+            font-size: 28px;
+        }
+
+        .private-game-btn .private-text {
+            font-size: 16px;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        .private-game-btn .private-desc {
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
         /* Game Mode Description */
         .game-mode-desc {
             text-align: center;
@@ -2861,6 +2902,15 @@
                 <span class="tab-icon">⚡</span>
                 <span class="tab-title">Sit & Go</span>
             </div>
+        </div>
+
+        <!-- Private Game Button -->
+        <div class="private-game-section">
+            <button class="private-game-btn" onclick="openLobby('private')">
+                <span class="private-icon">🎰</span>
+                <span class="private-text">Private Game</span>
+                <span class="private-desc">Create or join private tables</span>
+            </button>
         </div>
 
         <!-- Mode Description -->
