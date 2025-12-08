@@ -2303,6 +2303,8 @@
             font-weight: 600;
             cursor: pointer;
             transition: all 0.2s;
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
         }
 
         .pg-tab.active {
@@ -2313,6 +2315,63 @@
 
         .pg-tab:hover:not(.active) {
             background: rgba(59, 130, 246, 0.2);
+        }
+
+        /* Private Game View Animations */
+        #createLobbyView,
+        #joinLobbyView,
+        #lobbyCreatedView {
+            animation: fadeInView 0.25s ease forwards;
+        }
+
+        #createLobbyView.hidden,
+        #joinLobbyView.hidden,
+        #lobbyCreatedView.hidden {
+            display: none !important;
+        }
+
+        @keyframes fadeInView {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Modal Open/Close Animation */
+        .private-game-modal {
+            animation: fadeInModal 0.3s ease forwards;
+        }
+
+        .private-game-modal.hidden {
+            display: none !important;
+        }
+
+        @keyframes fadeInModal {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        .private-game-content {
+            animation: slideInContent 0.3s ease forwards;
+        }
+
+        @keyframes slideInContent {
+            from {
+                opacity: 0;
+                transform: scale(0.95) translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
         }
 
         /* Create Lobby Form */
@@ -2375,6 +2434,8 @@
             cursor: pointer;
             margin-top: 10px;
             transition: all 0.2s;
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
         }
 
         .create-btn:hover {
@@ -2412,6 +2473,8 @@
             font-weight: 700;
             cursor: pointer;
             transition: all 0.2s;
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
         }
 
         .join-btn:hover {
@@ -2493,6 +2556,8 @@
             cursor: pointer;
             border: none;
             transition: all 0.2s;
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
         }
 
         .invite-btn.telegram {
@@ -2526,6 +2591,8 @@
             cursor: pointer;
             margin-top: 10px;
             transition: all 0.2s;
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
         }
 
         .start-game-btn:hover {
@@ -5635,11 +5702,25 @@
                 var color2 = (card2.suit === 'hearts' || card2.suit === 'diamonds') ? 'red' : 'black';
                 
                 // Check if we should highlight cards (PAIR or better)
+                // Use LOCAL evaluation instead of waiting for server handName
                 var highlight1 = '';
                 var highlight2 = '';
-                if (myPlayer.handName && myPlayer.handName !== 'High Card' && myPlayer.handName !== 'Incomplete') {
+                var handName = myPlayer.handName; // From server (only on showdown)
+                
+                // If no handName from server, calculate locally
+                if (!handName && gameState.communityCards && gameState.communityCards.length >= 3) {
+                    var convertedCards = convertCardsForEval(myPlayer.cards.concat(gameState.communityCards));
+                    if (convertedCards.length >= 5) {
+                        var localHand = evaluateHand(convertedCards);
+                        if (localHand && localHand.name) {
+                            handName = localHand.name;
+                        }
+                    }
+                }
+                
+                if (handName && handName !== 'High Card' && handName !== 'Incomplete' && handName !== 'Not enough cards') {
                     // Highlight hero cards that are part of the winning combination
-                    var highlightInfo = getHighlightCards(myPlayer.cards, gameState.communityCards, myPlayer.handName);
+                    var highlightInfo = getHighlightCards(myPlayer.cards, gameState.communityCards, handName);
                     if (highlightInfo.heroCard1) highlight1 = ' golden-highlight';
                     if (highlightInfo.heroCard2) highlight2 = ' golden-highlight';
                 }
@@ -5655,8 +5736,8 @@
                     '</div>';
                 
                 // Also highlight community cards
-                if (myPlayer.handName && myPlayer.handName !== 'High Card' && myPlayer.handName !== 'Incomplete') {
-                    highlightCommunityCards(myPlayer.cards, gameState.communityCards, myPlayer.handName);
+                if (handName && handName !== 'High Card' && handName !== 'Incomplete' && handName !== 'Not enough cards') {
+                    highlightCommunityCards(myPlayer.cards, gameState.communityCards, handName);
                 }
             }
             
@@ -5721,6 +5802,20 @@
             // Convert numeric rank to display value
             var rankMap = { 14: 'A', 13: 'K', 12: 'Q', 11: 'J', 10: '10' };
             return rankMap[rank] || rank;
+        }
+        
+        // Convert server-format cards to evaluateHand format
+        function convertCardsForEval(cards) {
+            if (!cards || !Array.isArray(cards)) return [];
+            
+            var rankMap = { 14: 'A', 13: 'K', 12: 'Q', 11: 'J', 10: '10' };
+            var suitSymbols = { hearts: '♥', diamonds: '♦', clubs: '♣', spades: '♠' };
+            
+            return cards.map(function(card) {
+                var rank = rankMap[card.rank] || card.rank;
+                var suit = suitSymbols[card.suit] || card.suit;
+                return { rank: rank, suit: suit };
+            });
         }
         
         // Get which cards to highlight based on hand type
