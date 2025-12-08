@@ -1358,6 +1358,10 @@ class CreateLobbyRequest(BaseModel):
 
 class JoinLobbyRequest(BaseModel):
     initData: str = ""
+    # Fallback user info if initData parsing fails
+    telegramId: Optional[int] = None
+    firstName: Optional[str] = None
+    username: Optional[str] = None
 
 @app.post("/api/lobby/create")
 async def api_create_lobby(request: CreateLobbyRequest):
@@ -1434,12 +1438,22 @@ async def api_join_lobby(lobby_code: str, request: JoinLobbyRequest):
     
     user = _extract_telegram_user(request.initData)
     if not user:
-        # For development: create guest user
-        user = {
-            "id": random.randint(100000, 999999),
-            "first_name": "Guest",
-            "username": f"guest_{random.randint(1000, 9999)}"
-        }
+        # Try fallback data from request
+        if request.telegramId and request.firstName:
+            user = {
+                "id": request.telegramId,
+                "first_name": request.firstName,
+                "username": request.username or f"user_{request.telegramId}"
+            }
+            print(f"⚠️ API: Using fallback user data: {user}")
+        else:
+            # For development: create guest user
+            user = {
+                "id": random.randint(100000, 999999),
+                "first_name": "Guest",
+                "username": f"guest_{random.randint(1000, 9999)}"
+            }
+            print(f"⚠️ API: No user data, using guest: {user}")
     
     telegram_id = user.get("id")
     username = user.get("username")

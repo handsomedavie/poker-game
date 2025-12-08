@@ -3720,6 +3720,13 @@
         }
 
         function getHero() {
+            // In multiplayer, use mySeat to find hero
+            if (mySeat && lastGameState && lastGameState.players) {
+                return lastGameState.players.find(function(p) {
+                    return parseInt(p.seat) === parseInt(mySeat);
+                });
+            }
+            // Fallback for local game
             return gameState.players.find(function(p) { return p.isHero; });
         }
 
@@ -4253,12 +4260,17 @@
 
         function updateHandHUD() {
             var hero = getHero();
-            if (!hero || !hero.cards || hero.cards.length < 2 || gameState.communityCards.length < 3) {
+            // Use lastGameState for multiplayer, gameState for local
+            var communityCards = (lastGameState && lastGameState.communityCards) 
+                ? lastGameState.communityCards 
+                : gameState.communityCards;
+            
+            if (!hero || !hero.cards || hero.cards.length < 2 || !communityCards || communityCards.length < 3) {
                 document.getElementById('handHud').classList.add('hidden');
                 return;
             }
             
-            var allCards = hero.cards.concat(gameState.communityCards);
+            var allCards = hero.cards.concat(communityCards);
             var hand = evaluateHand(allCards);
             
             var hud = document.getElementById('handHud');
@@ -4758,13 +4770,21 @@
                 var lobbyData = await lobbyResponse.json();
                 addDebug('Found lobby on server');
                 
-                // Join the lobby
+                // Join the lobby - send initData and fallback user info
+                var joinBody = {
+                    initData: tg ? tg.initData : ''
+                };
+                // Add fallback user info if available from Telegram WebApp
+                if (tg && tg.initDataUnsafe && tg.initDataUnsafe.user) {
+                    joinBody.telegramId = tg.initDataUnsafe.user.id;
+                    joinBody.firstName = tg.initDataUnsafe.user.first_name;
+                    joinBody.username = tg.initDataUnsafe.user.username;
+                }
+                
                 var joinResponse = await fetch(API_BASE + '/api/lobby/' + code + '/join', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        initData: tg ? tg.initData : ''
-                    })
+                    body: JSON.stringify(joinBody)
                 });
                 
                 if (!joinResponse.ok) {
@@ -4881,17 +4901,12 @@
             gameState.smallBlind = currentPrivateLobby.smallBlind;
             gameState.bigBlind = currentPrivateLobby.bigBlind;
             
-            // Hide all screens
-            document.getElementById('mainMenu').classList.add('hidden');
-            document.getElementById('lobbyScreen').classList.add('hidden');
-            document.getElementById('waitingRoomScreen').classList.add('hidden');
+            // Smooth transition to poker table
+            showScreen('pokerTableScreen', ['mainMenu', 'lobbyScreen', 'waitingRoomScreen']);
             
-            // Join table with lobby settings
-            joinTable({
-                name: 'Private: ' + currentPrivateLobby.code,
-                buyIn: '$' + currentPrivateLobby.buyIn.toLocaleString(),
-                blinds: currentPrivateLobby.smallBlind + '/' + currentPrivateLobby.bigBlind
-            });
+            // Update table info
+            document.getElementById('tableInfoName').textContent = 'Private: ' + currentPrivateLobby.code;
+            document.getElementById('tableInfoBlinds').textContent = 'Blinds: ' + gameState.smallBlind + '/' + gameState.bigBlind;
         }
 
         // ═══════════════════════════════════════════════════
@@ -5237,6 +5252,9 @@
             
             // Update players around table
             updatePlayersDisplay(gameState.players, mySeat);
+            
+            // Update hand HUD for multiplayer
+            updateHandHUD();
         }
         
         function createCardHTML(card) {
@@ -5378,18 +5396,24 @@
             });
         }
         
-        function updatePlayersDisplay(players, mySeat) {
+        function updatePlayersDisplay(players, myCurrentSeatParam) {
             // Render all opponents around the table based on total player count
             var seatsEl = document.getElementById('playerSeats');
             if (!seatsEl || !players) return;
             
-            var myCurrentSeat = parseInt(mySeat);
+            // Use global mySeat if param is invalid
+            var myCurrentSeat = parseInt(myCurrentSeatParam) || parseInt(mySeat) || 0;
             var totalPlayers = players.length;
             var isShowdown = lastGameState && (lastGameState.phase === 'showdown' || lastGameState.phase === 'finished');
             
+            addDebug('updatePlayersDisplay: mySeat=' + myCurrentSeat + ', totalPlayers=' + totalPlayers);
+            
             // Get opponents (everyone except me)
             var opponents = players.filter(function(p) {
-                return parseInt(p.seat) !== myCurrentSeat;
+                var pSeat = parseInt(p.seat);
+                var isMe = pSeat === myCurrentSeat;
+                addDebug('Player ' + p.name + ' seat=' + pSeat + ', isMe=' + isMe);
+                return !isMe;
             });
             
             // Get position layout based on total players
@@ -5666,13 +5690,21 @@
                 var lobbyData = await lobbyResponse.json();
                 addDebug('Found lobby: ' + JSON.stringify(lobbyData.lobby));
                 
-                // Join the lobby
+                // Join the lobby - send initData and fallback user info
+                var joinBody2 = {
+                    initData: tg ? tg.initData : ''
+                };
+                // Add fallback user info if available from Telegram WebApp
+                if (tg && tg.initDataUnsafe && tg.initDataUnsafe.user) {
+                    joinBody2.telegramId = tg.initDataUnsafe.user.id;
+                    joinBody2.firstName = tg.initDataUnsafe.user.first_name;
+                    joinBody2.username = tg.initDataUnsafe.user.username;
+                }
+                
                 var joinResponse = await fetch(API_BASE + '/api/lobby/' + code + '/join', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        initData: tg ? tg.initData : ''
-                    })
+                    body: JSON.stringify(joinBody2)
                 });
                 
                 if (!joinResponse.ok) {
