@@ -4318,23 +4318,42 @@
         // BET SLIDER & QUICK BETS
         // ═══════════════════════════════════════════════════
         var currentBetAmount = 20;
+        var stackDisplayMode = 'chips'; // 'chips' or 'bb'
+        
+        function formatChips(amount, forceMode) {
+            var mode = forceMode || stackDisplayMode;
+            if (mode === 'bb') {
+                var bb = (lastGameState && lastGameState.bigBlind) || gameState.bigBlind || 20;
+                return Math.round(amount / bb * 10) / 10 + ' BB';
+            }
+            return amount.toLocaleString();
+        }
+        
+        function toggleStackDisplay() {
+            stackDisplayMode = stackDisplayMode === 'chips' ? 'bb' : 'chips';
+            // Re-render UI
+            if (lastGameState) {
+                updateGameUI(lastGameState);
+            }
+        }
 
         function updateBetSlider(value) {
             currentBetAmount = parseInt(value);
-            document.getElementById('betDisplay').textContent = '$' + currentBetAmount;
-            document.getElementById('raiseBtn').textContent = (gameState.currentBet > 0 ? 'Raise' : 'Bet') + ' $' + currentBetAmount;
+            document.getElementById('betDisplay').textContent = formatChips(currentBetAmount);
+            var actionName = (gameState.currentBet > 0 || (lastGameState && lastGameState.currentBet > 0)) ? 'Raise' : 'Bet';
+            document.getElementById('raiseBtn').textContent = actionName + ' ' + formatChips(currentBetAmount);
         }
         
         function resetBetSlider() {
             // Reset slider to minimum (big blind) after making a bet
-            var minBet = gameState.bigBlind || 20;
+            var minBet = (lastGameState && lastGameState.bigBlind) || gameState.bigBlind || 20;
             currentBetAmount = minBet;
             var slider = document.getElementById('betSlider');
             if (slider) {
                 slider.value = minBet;
             }
-            document.getElementById('betDisplay').textContent = '$' + minBet;
-            document.getElementById('raiseBtn').textContent = 'Bet $' + minBet;
+            document.getElementById('betDisplay').textContent = formatChips(minBet);
+            document.getElementById('raiseBtn').textContent = 'Bet ' + formatChips(minBet);
         }
 
         function quickBet(multiplier) {
@@ -4636,12 +4655,17 @@
             if (!hero) return;
             
             var slider = document.getElementById('betSlider');
-            slider.min = gameState.bigBlind;
-            slider.max = hero.chips;
+            var gs = lastGameState || gameState;
+            
+            // Use minRaiseTo from server if available, otherwise calculate
+            var minBet = gs.minRaiseTo || gs.bigBlind || 20;
+            
+            slider.min = minBet;
+            slider.max = hero.chips + (hero.currentBet || 0); // Max is all-in total
             
             // Ensure current bet is within limits
-            if (currentBetAmount < gameState.bigBlind) {
-                currentBetAmount = gameState.bigBlind;
+            if (currentBetAmount < minBet) {
+                currentBetAmount = minBet;
                 slider.value = currentBetAmount;
                 updateBetSlider(currentBetAmount);
             }
@@ -4733,7 +4757,7 @@
             // Update call button
             var callBtn = document.getElementById('callBtn');
             if (callBtn) {
-                callBtn.textContent = callAmount > 0 ? 'Call $' + callAmount : 'Check';
+                callBtn.textContent = callAmount > 0 ? 'Call ' + formatChips(callAmount) : 'Check';
                 callBtn.className = 'action-btn ' + (callAmount > 0 ? 'call' : 'check');
                 callBtn.disabled = !isMyTurn;
             }
@@ -4741,7 +4765,8 @@
             // Update raise button
             var raiseBtn = document.getElementById('raiseBtn');
             if (raiseBtn) {
-                raiseBtn.textContent = (gameState.currentBet > 0 ? 'Raise' : 'Bet') + ' $' + currentBetAmount;
+                var actionName = gameState.currentBet > 0 ? 'Raise' : 'Bet';
+                raiseBtn.textContent = actionName + ' ' + formatChips(currentBetAmount);
                 raiseBtn.disabled = !isMyTurn;
             }
             
@@ -4787,8 +4812,8 @@
                     '<div class="player-card-container">' +
                         '<div class="' + avatarClass + '">' + player.name.charAt(0) + timerHtml + '</div>' +
                         '<div class="player-name">' + player.name + '</div>' +
-                        '<div class="player-chips">$' + player.chips + '</div>' +
-                        (player.bet > 0 ? '<div class="player-bet">$' + player.bet + '</div>' : '') +
+                        '<div class="player-chips" onclick="toggleStackDisplay()">' + formatChips(player.chips) + '</div>' +
+                        (player.bet > 0 ? '<div class="player-bet">' + formatChips(player.bet) + '</div>' : '') +
                         '<div class="player-cards"><div class="player-card"></div><div class="player-card"></div></div>' +
                     '</div>' +
                 '</div>';
@@ -5511,9 +5536,12 @@
                 if (callAmount <= 0) {
                     callBtn.textContent = 'Check';
                 } else {
-                    callBtn.textContent = 'Call $' + callAmount;
+                    callBtn.textContent = 'Call ' + formatChips(callAmount);
                 }
             }
+            
+            // Update bet slider limits with minRaiseTo
+            updateBetSliderLimits();
             
             // Update Bet/Raise button text based on current bet (Texas Hold'em rules)
             var raiseBtn = document.getElementById('raiseBtn');
@@ -5521,7 +5549,7 @@
                 var currentBetValue = gameState.currentBet || 0;
                 // BET when no one has bet yet, RAISE when there's an existing bet
                 var actionName = currentBetValue > 0 ? 'Raise' : 'Bet';
-                raiseBtn.textContent = actionName + ' $' + currentBetAmount;
+                raiseBtn.textContent = actionName + ' ' + formatChips(currentBetAmount);
             }
             
             // Update players around table
@@ -5730,8 +5758,8 @@
                     '<div class="player-avatar">' + (player.name ? player.name.charAt(0).toUpperCase() : '?') + '</div>' +
                     '<div class="player-info">' +
                         '<div class="player-name">' + (player.name || 'Player') + '</div>' +
-                        '<div class="player-chips">$' + (player.chips || 0) + '</div>' +
-                        (betAmount > 0 ? '<div class="player-bet">$' + betAmount + '</div>' : '') +
+                        '<div class="player-chips" onclick="toggleStackDisplay()">' + formatChips(player.chips || 0) + '</div>' +
+                        (betAmount > 0 ? '<div class="player-bet">' + formatChips(betAmount) + '</div>' : '') +
                     '</div>' +
                     cardsHtml +
                 '</div>';

@@ -82,13 +82,16 @@ class GameState:
     dealer_seat: int = 0
     current_player_seat: Optional[int] = None  # Current player's SEAT number
     phase: GamePhase = GamePhase.WAITING
-    min_raise: int = 0
+    min_raise: int = 0  # Last raise delta (for calculating min raise)
     last_raiser_seat: Optional[int] = None
     created_at: float = field(default_factory=time.time)
     max_players: int = 2  # How many players expected
     connected_count: int = 0  # How many have connected
     winner_seat: Optional[int] = None  # Winner's seat number
     winner_hand: Optional[str] = None  # Winner's hand name
+    # Tournament configuration
+    buy_in_usd: float = 1.0  # Entry fee in USD
+    starting_chips: int = 1000  # Chips given for buy-in
     
     def to_dict(self, for_seat: Optional[int] = None) -> Dict[str, Any]:
         """Convert to dict. If for_seat is set, show only that player's cards."""
@@ -107,6 +110,14 @@ class GameState:
             
             players_list.append(player_dict)
         
+        # Calculate minimum raise TO amount (not delta)
+        # If no bet yet: min bet = big blind
+        # If bet exists: min raise TO = current_bet + last_raise_delta (at least BB)
+        if self.current_bet == 0:
+            min_raise_to = self.big_blind
+        else:
+            min_raise_to = self.current_bet + max(self.min_raise, self.big_blind)
+        
         return {
             "sessionId": self.session_id,
             "lobbyCode": self.lobby_code,
@@ -119,11 +130,15 @@ class GameState:
             "dealerSeat": self.dealer_seat,
             "currentPlayerSeat": self.current_player_seat,
             "phase": self.phase.value,
-            "minRaise": self.min_raise,
+            "minRaise": self.min_raise,  # Last raise delta
+            "minRaiseTo": min_raise_to,  # Minimum total bet for raise
             "maxPlayers": self.max_players,
             "connectedCount": self.connected_count,
             "winnerSeat": self.winner_seat,
             "winnerHand": self.winner_hand,
+            # Tournament config
+            "buyInUsd": self.buy_in_usd,
+            "startingChips": self.starting_chips,
         }
 
 
@@ -373,13 +388,23 @@ def process_action(session_id: str, player_seat: int, action: str, amount: int =
         
     elif action == "all_in":
         all_in_amount = player.chips
+        new_total_bet = player.current_bet + all_in_amount
+        
         player.chips = 0
-        player.current_bet += all_in_amount
+        player.current_bet = new_total_bet
         game.pot += all_in_amount
         player.is_all_in = True
         
-        if player.current_bet > game.current_bet:
-            game.current_bet = player.current_bet
+        # Update game state if this is a raise
+        if new_total_bet > game.current_bet:
+            # Calculate raise increment for min_raise tracking
+            raise_increment = new_total_bet - game.current_bet
+            # Only update min_raise if it's a full raise (>= current min_raise)
+            # If it's a "short all-in" (less than min raise), it doesn't reopen betting
+            if raise_increment >= game.min_raise or raise_increment >= game.big_blind:
+                game.min_raise = max(raise_increment, game.big_blind)
+            
+            game.current_bet = new_total_bet
             game.last_raiser_seat = player_seat
         
         print(f"🎮 GAME: Seat {player_seat} ({player.name}) goes ALL IN for ${all_in_amount}")

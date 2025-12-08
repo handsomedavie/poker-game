@@ -36,7 +36,14 @@ from game_engine import (
 )
 import json
 
-START_BALANCE = 1000
+# ═══════════════════════════════════════════════════
+# TOURNAMENT & ECONOMY CONFIGURATION
+# ═══════════════════════════════════════════════════
+START_BALANCE_USD = 100.0  # Starting balance in USD
+DEFAULT_BUY_IN_USD = 1.0   # Entry fee in USD
+DEFAULT_STARTING_CHIPS = 1000  # Chips given for buy-in
+DEFAULT_SMALL_BLIND = 10
+DEFAULT_BIG_BLIND = 20
 
 # ═══════════════════════════════════════════════════
 # USER MODELS & STORAGE
@@ -49,14 +56,14 @@ class UserInitRequest(BaseModel):
 
 class UserInitResponse(BaseModel):
     user_id: int
-    balance: int
+    balance_usd: float  # Real money balance in USD
     username: str
     first_name: str
     created_at: str
 
 class BalanceUpdateRequest(BaseModel):
     telegram_id: int
-    new_balance: int
+    new_balance_usd: float
 
 # In-memory user storage (replace with database for production)
 users_db: Dict[int, Dict[str, Any]] = {}
@@ -252,7 +259,7 @@ class TablePlayer:
     user_id: str
     display_name: str
     seat: int
-    stack: int = START_BALANCE
+    stack: int = DEFAULT_STARTING_CHIPS  # Tournament chips (not USD!)
     cards: List[Dict[str, str]] = field(default_factory=list)
     has_folded: bool = False
     has_acted: bool = False
@@ -1171,7 +1178,7 @@ class TableSession:
                 self._process_bet_or_raise(player, amount, command, now)
             elif command == "rebuy" and player.is_busted:
                 self._cancel_bustout_task(user_id)
-                player.stack = START_BALANCE
+                player.stack = DEFAULT_STARTING_CHIPS  # Tournament chips
                 player.is_busted = False
                 player.bust_deadline_ms = None
                 self.event_log.append({
@@ -1266,11 +1273,11 @@ async def me(payload: Dict[str, str]):
     init_data = payload.get("initData", "")
     if not init_data:
         # Guest mode for local browser testing
-        db_user = await get_user(0, START_BALANCE, "Guest")
+        db_user = await get_user(0, int(START_BALANCE_USD), "Guest")
         return {
             "user_id": db_user["user_id"],
             "display_name": db_user.get("display_name") or "Guest",
-            "balance": db_user["balance"],
+            "balance_usd": float(db_user["balance"]),  # Real USD balance
         }
 
     bot_token = os.getenv("TELEGRAM_TOKEN")
@@ -1281,13 +1288,13 @@ async def me(payload: Dict[str, str]):
     user_id = user.get("id") or 0
     display = user.get("first_name") or "Player"
 
-    db_user = await get_user(user_id, START_BALANCE, display)
+    db_user = await get_user(user_id, int(START_BALANCE_USD), display)
     if user_id:
         await set_display_name(user_id, display)
     return {
         "user_id": db_user["user_id"],
         "display_name": db_user.get("display_name") or display,
-        "balance": db_user["balance"],
+        "balance_usd": float(db_user["balance"]),  # Real USD balance
     }
 
 
@@ -1573,38 +1580,38 @@ async def api_start_game(lobby_code: str, request: JoinLobbyRequest):
 async def init_user(data: UserInitRequest):
     """
     Initialize or retrieve user by Telegram ID.
-    Creates new user with starting balance if not exists.
-    Returns user data with current balance.
+    Creates new user with starting USD balance if not exists.
+    Returns user data with current USD balance.
     """
     telegram_id = data.telegram_id
     
     # Check if user exists
     if telegram_id in users_db:
         user = users_db[telegram_id]
-        print(f"👤 User found: {telegram_id} - {user['username']} - ${user['balance']}")
+        print(f"👤 User found: {telegram_id} - {user['username']} - ${user['balance_usd']}")
         return UserInitResponse(
             user_id=telegram_id,
-            balance=user["balance"],
+            balance_usd=user["balance_usd"],
             username=user["username"],
             first_name=user["first_name"],
             created_at=user["created_at"]
         )
     
-    # Create new user with starting balance
+    # Create new user with starting USD balance
     new_user = {
         "telegram_id": telegram_id,
         "username": data.username or "Player",
         "first_name": data.first_name or "Guest",
-        "balance": START_BALANCE,
+        "balance_usd": START_BALANCE_USD,  # Real money in USD
         "created_at": datetime.now().isoformat()
     }
     
     users_db[telegram_id] = new_user
-    print(f"✅ New user created: {telegram_id} - {new_user['username']} - ${START_BALANCE}")
+    print(f"✅ New user created: {telegram_id} - {new_user['username']} - ${START_BALANCE_USD}")
     
     return UserInitResponse(
         user_id=telegram_id,
-        balance=START_BALANCE,
+        balance_usd=START_BALANCE_USD,
         username=new_user["username"],
         first_name=new_user["first_name"],
         created_at=new_user["created_at"]
@@ -1613,22 +1620,22 @@ async def init_user(data: UserInitRequest):
 
 @app.post("/api/user/balance/update")
 async def update_user_balance(data: BalanceUpdateRequest):
-    """Update user balance (for game results, deposits, etc.)"""
+    """Update user USD balance (for game results, deposits, etc.)"""
     telegram_id = data.telegram_id
     
     if telegram_id not in users_db:
         raise HTTPException(status_code=404, detail="User not found")
     
-    old_balance = users_db[telegram_id]["balance"]
-    users_db[telegram_id]["balance"] = data.new_balance
+    old_balance = users_db[telegram_id]["balance_usd"]
+    users_db[telegram_id]["balance_usd"] = data.new_balance_usd
     
-    print(f"💰 Balance updated: {telegram_id} - ${old_balance} → ${data.new_balance}")
+    print(f"💰 Balance updated: {telegram_id} - ${old_balance} → ${data.new_balance_usd}")
     
     return {
         "success": True,
         "telegram_id": telegram_id,
-        "old_balance": old_balance,
-        "new_balance": data.new_balance
+        "old_balance_usd": old_balance,
+        "new_balance_usd": data.new_balance_usd
     }
 
 
@@ -1643,7 +1650,7 @@ async def get_user_info(telegram_id: int):
         "user_id": telegram_id,
         "username": user["username"],
         "first_name": user["first_name"],
-        "balance": user["balance"],
+        "balance_usd": user["balance_usd"],  # Real USD balance
         "created_at": user["created_at"]
     }
 
@@ -1653,7 +1660,7 @@ async def get_users_count():
     """Get total registered users count"""
     return {
         "total_users": len(users_db),
-        "total_balance": sum(u["balance"] for u in users_db.values())
+        "total_balance_usd": sum(u["balance_usd"] for u in users_db.values())
     }
 
 
