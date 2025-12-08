@@ -3126,6 +3126,124 @@
 
     <script>
         // ═══════════════════════════════════════════════════
+        // AUDIO SYSTEM
+        // ═══════════════════════════════════════════════════
+        var audioContext = null;
+        var isSoundEnabled = true;
+        var isMusicEnabled = true;
+        var bgMusicInterval = null;
+        
+        function initAudio() {
+            try {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            } catch (e) {
+                console.log('Audio not supported');
+            }
+        }
+        
+        function playTone(frequency, duration, type, volume) {
+            if (!audioContext || !isSoundEnabled) return;
+            try {
+                if (audioContext.state === 'suspended') {
+                    audioContext.resume();
+                }
+                var oscillator = audioContext.createOscillator();
+                var gainNode = audioContext.createGain();
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                oscillator.type = type || 'sine';
+                oscillator.frequency.value = frequency;
+                gainNode.gain.setValueAtTime(volume || 0.1, audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + duration);
+                oscillator.start(audioContext.currentTime);
+                oscillator.stop(audioContext.currentTime + duration);
+            } catch (e) {}
+        }
+        
+        function playCardSound() {
+            // Quick snap sound for card dealing
+            playTone(800, 0.05, 'square', 0.08);
+            setTimeout(function() { playTone(600, 0.03, 'square', 0.05); }, 30);
+        }
+        
+        function playCommunityCardSound() {
+            // Slightly different sound for community cards
+            playTone(500, 0.08, 'triangle', 0.1);
+            setTimeout(function() { playTone(700, 0.06, 'triangle', 0.08); }, 50);
+        }
+        
+        function playChipSound() {
+            // Chip/bet sound
+            playTone(300, 0.1, 'sine', 0.08);
+            setTimeout(function() { playTone(400, 0.08, 'sine', 0.06); }, 60);
+        }
+        
+        function playWinSound() {
+            // Victory fanfare
+            var notes = [523, 659, 784, 1047]; // C5, E5, G5, C6
+            notes.forEach(function(note, i) {
+                setTimeout(function() {
+                    playTone(note, 0.3, 'sine', 0.12);
+                }, i * 150);
+            });
+        }
+        
+        function playFoldSound() {
+            // Subtle fold sound
+            playTone(200, 0.15, 'sine', 0.05);
+        }
+        
+        function playCheckSound() {
+            // Knock/tap sound
+            playTone(400, 0.05, 'triangle', 0.06);
+        }
+        
+        function startBgMusic() {
+            if (!isMusicEnabled || !audioContext || bgMusicInterval) return;
+            // Ambient background music - soft chord progressions
+            var chords = [
+                [261, 329, 392], // C major
+                [293, 369, 440], // D minor
+                [329, 415, 493], // E minor
+                [349, 440, 523]  // F major
+            ];
+            var chordIndex = 0;
+            bgMusicInterval = setInterval(function() {
+                if (!isMusicEnabled) {
+                    stopBgMusic();
+                    return;
+                }
+                var chord = chords[chordIndex % chords.length];
+                chord.forEach(function(freq) {
+                    playTone(freq, 2.5, 'sine', 0.02);
+                });
+                chordIndex++;
+            }, 3000);
+        }
+        
+        function stopBgMusic() {
+            if (bgMusicInterval) {
+                clearInterval(bgMusicInterval);
+                bgMusicInterval = null;
+            }
+        }
+        
+        function toggleSound() {
+            isSoundEnabled = !isSoundEnabled;
+            return isSoundEnabled;
+        }
+        
+        function toggleMusic() {
+            isMusicEnabled = !isMusicEnabled;
+            if (isMusicEnabled) {
+                startBgMusic();
+            } else {
+                stopBgMusic();
+            }
+            return isMusicEnabled;
+        }
+        
+        // ═══════════════════════════════════════════════════
         // DEBUG & INITIALIZATION
         // ═══════════════════════════════════════════════════
         var debugLog = [];
@@ -3409,6 +3527,10 @@
                 updateUserUI();
                 initUser(); // Register/load user from backend
                 addDebug('Menu shown');
+                
+                // Initialize audio and start background music in menu
+                initAudio();
+                startBgMusic();
             }, 3000);
         }
 
@@ -4110,6 +4232,18 @@
             document.getElementById('betDisplay').textContent = '$' + currentBetAmount;
             document.getElementById('raiseBtn').textContent = (gameState.currentBet > 0 ? 'Raise' : 'Bet') + ' $' + currentBetAmount;
         }
+        
+        function resetBetSlider() {
+            // Reset slider to minimum (big blind) after making a bet
+            var minBet = gameState.bigBlind || 20;
+            currentBetAmount = minBet;
+            var slider = document.getElementById('betSlider');
+            if (slider) {
+                slider.value = minBet;
+            }
+            document.getElementById('betDisplay').textContent = '$' + minBet;
+            document.getElementById('raiseBtn').textContent = 'Bet $' + minBet;
+        }
 
         function quickBet(multiplier) {
             var base = gameState.bigBlind;
@@ -4151,21 +4285,27 @@
                 var myCurrentBet = myPlayer ? (myPlayer.currentBet || 0) : 0;
                 var callAmount = currentBet - myCurrentBet;
                 
-                // Convert actions for server
+                // Convert actions for server and play sounds
                 if (action === 'call') {
                     // Call sends the amount to match current bet
                     serverAction = 'call';
                     amount = callAmount;
                     addDebug('Call amount: ' + amount + ' (current bet: ' + currentBet + ', my bet: ' + myCurrentBet + ')');
+                    if (amount > 0) playChipSound(); else playCheckSound();
                 } else if (action === 'bet' || action === 'raise') {
                     serverAction = 'raise';  // BET is same as RAISE for server
                     // Amount is the TOTAL bet (not additional)
                     amount = currentBetAmount || (currentBet + 20);
                     addDebug('Raise to: ' + amount);
+                    // Reset slider after bet/raise
+                    resetBetSlider();
+                    playChipSound();
                 } else if (action === 'allin') {
                     serverAction = 'all_in';
+                    playChipSound();
                 } else if (action === 'fold') {
                     serverAction = 'fold';
+                    playFoldSound();
                 }
                 
                 addDebug('Server action: ' + serverAction + ', amount: ' + amount);
@@ -4588,6 +4728,8 @@
             addDebug('Leave table');
             clearInterval(gameState.timerInterval);
             gameState.phase = 'waiting';
+            // Resume background music when leaving game
+            startBgMusic();
             // Smooth transition back to lobby
             showScreen('lobbyScreen', ['pokerTableScreen']);
         }
@@ -5053,6 +5195,9 @@
             addDebug('Starting multiplayer game: ' + gameSessionId);
             currentGameSession = gameSessionId;
             
+            // Stop background music when game starts
+            stopBgMusic();
+            
             // Smooth transition from waiting room to poker table
             showScreen('pokerTableScreen', ['waitingRoomScreen']);
             
@@ -5065,6 +5210,12 @@
             setTimeout(function() {
                 connectToGameWebSocket(gameSessionId);
             }, 300);
+            
+            // Play card dealing sounds
+            setTimeout(function() {
+                playCardSound();
+                setTimeout(function() { playCardSound(); }, 200);
+            }, 500);
             
             addDebug('Multiplayer game screen shown');
         }
@@ -5142,6 +5293,7 @@
                     });
                     if (winnerPlayer) {
                         showMultiplayerWinner(winnerPlayer, gameState.winnerHand, gameState.pot);
+                        playWinSound(); // Play victory sound
                     }
                 }
             }
@@ -5173,8 +5325,14 @@
                 
                 // Only update if new cards were dealt
                 if (newCardCount > currentCardCount) {
-                    // Add only new cards
+                    // Play card sound for each new community card
                     for (var i = currentCardCount; i < newCardCount; i++) {
+                        (function(cardIndex) {
+                            setTimeout(function() {
+                                playCommunityCardSound();
+                            }, (cardIndex - currentCardCount) * 150);
+                        })(i);
+                        
                         var cardEl = document.createElement('div');
                         cardEl.innerHTML = createCardHTML(gameState.communityCards[i]);
                         communityEl.appendChild(cardEl.firstChild);

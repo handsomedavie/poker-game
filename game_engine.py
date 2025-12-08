@@ -331,10 +331,17 @@ def process_action(session_id: str, player_seat: int, action: str, amount: int =
         # Amount is the TOTAL bet the player wants to make (not additional raise)
         # Example: current_bet=40, player_current_bet=20, amount=100 means raise TO $100
         
-        # If amount is less than current bet + min_raise, it's invalid
-        min_total = game.current_bet + game.min_raise
+        # Calculate minimum valid amount based on Texas Hold'em rules
+        if game.current_bet == 0:
+            # This is a BET (first bet on the street) - minimum is big blind
+            min_total = game.big_blind
+        else:
+            # This is a RAISE - minimum is current bet + last raise size (or big blind if first raise)
+            min_total = game.current_bet + game.min_raise
+        
+        # Allow all-in for less if player doesn't have enough chips
         if amount < min_total and amount < player.chips + player.current_bet:
-            return False, f"Minimum raise to ${min_total}", None
+            return False, f"Minimum bet ${min_total}", None
         
         # Calculate how much player needs to put in
         chips_needed = amount - player.current_bet
@@ -343,12 +350,14 @@ def process_action(session_id: str, player_seat: int, action: str, amount: int =
             return False, "Not enough chips", None
         
         if chips_needed <= 0:
-            return False, "Raise amount must be higher than current bet", None
+            return False, "Bet amount must be higher than current bet", None
         
         # Calculate raise increment for min_raise tracking
-        raise_increment = amount - game.current_bet
-        if raise_increment > 0:
-            game.min_raise = raise_increment
+        # Only update min_raise if this is an actual raise (not just matching)
+        if amount > game.current_bet:
+            raise_increment = amount - game.current_bet
+            # min_raise should be at least big_blind
+            game.min_raise = max(raise_increment, game.big_blind)
         
         player.chips -= chips_needed
         player.current_bet = amount
@@ -359,7 +368,8 @@ def process_action(session_id: str, player_seat: int, action: str, amount: int =
         if player.chips == 0:
             player.is_all_in = True
         
-        print(f"🎮 GAME: Seat {player_seat} ({player.name}) raises to ${amount}")
+        action_name = "bets" if game.current_bet == amount else "raises to"
+        print(f"🎮 GAME: Seat {player_seat} ({player.name}) {action_name} ${amount}")
         
     elif action == "all_in":
         all_in_amount = player.chips
@@ -440,6 +450,7 @@ def _advance_phase(game: GameState):
         p.current_bet = 0
     game.current_bet = 0
     game.last_raiser_seat = None
+    game.min_raise = game.big_blind  # Reset min raise to big blind for new street
     
     active = get_active_players(game)
     if active:
