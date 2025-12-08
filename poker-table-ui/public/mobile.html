@@ -3259,30 +3259,63 @@
         
         function startBgMusic() {
             if (!isMusicEnabled || !audioContext || bgMusicInterval) return;
-            // Ambient background music - soft chord progressions
-            var chords = [
-                [261, 329, 392], // C major
-                [293, 369, 440], // D minor
-                [329, 415, 493], // E minor
-                [349, 440, 523]  // F major
+            
+            // Texas Hold'em style - jazzy/bluesy ambient music with arpeggios
+            // Using minor 7th and dominant 7th chords for that smoky casino feel
+            var sequences = [
+                // Am7 arpeggio (A C E G)
+                { notes: [220, 261, 329, 392], delay: 400 },
+                // Dm7 arpeggio (D F A C)  
+                { notes: [146, 174, 220, 261], delay: 400 },
+                // G7 arpeggio (G B D F)
+                { notes: [196, 246, 293, 349], delay: 400 },
+                // Cmaj7 arpeggio (C E G B)
+                { notes: [130, 164, 196, 246], delay: 400 },
+                // Fmaj7 arpeggio (F A C E)
+                { notes: [174, 220, 261, 329], delay: 400 },
+                // Bm7b5 arpeggio (B D F A)
+                { notes: [123, 146, 174, 220], delay: 400 },
+                // E7 arpeggio (E G# B D)
+                { notes: [164, 207, 246, 293], delay: 400 },
+                // Am7 resolution
+                { notes: [220, 261, 329, 392], delay: 400 }
             ];
-            var chordIndex = 0;
-            bgMusicInterval = setInterval(function() {
+            
+            var seqIndex = 0;
+            var noteIndex = 0;
+            
+            function playNextNote() {
                 if (!isMusicEnabled) {
                     stopBgMusic();
                     return;
                 }
-                var chord = chords[chordIndex % chords.length];
-                chord.forEach(function(freq) {
-                    playTone(freq, 2.5, 'sine', 0.02);
-                });
-                chordIndex++;
-            }, 3000);
+                
+                var seq = sequences[seqIndex % sequences.length];
+                var note = seq.notes[noteIndex];
+                
+                // Play note with soft attack and decay
+                playTone(note, 1.8, 'sine', 0.025);
+                // Add subtle octave harmonic
+                playTone(note * 2, 1.2, 'sine', 0.008);
+                
+                noteIndex++;
+                if (noteIndex >= seq.notes.length) {
+                    noteIndex = 0;
+                    seqIndex++;
+                    // Longer pause between chords
+                    bgMusicInterval = setTimeout(playNextNote, 800);
+                } else {
+                    bgMusicInterval = setTimeout(playNextNote, seq.delay);
+                }
+            }
+            
+            // Start with slight delay
+            bgMusicInterval = setTimeout(playNextNote, 500);
         }
         
         function stopBgMusic() {
             if (bgMusicInterval) {
-                clearInterval(bgMusicInterval);
+                clearTimeout(bgMusicInterval);
                 bgMusicInterval = null;
             }
         }
@@ -5058,13 +5091,28 @@
             // Build share URL
             var shareUrl = 'https://t.me/share/url?url=' + encodeURIComponent(inviteLink) + '&text=' + encodeURIComponent(message);
             
-            // Use Telegram native share if available, otherwise fallback
-            if (tg && tg.openTelegramLink) {
+            // Check if running inside Telegram Mini App
+            var isTelegramWebApp = tg && tg.initData && tg.initData.length > 0;
+            
+            if (isTelegramWebApp && tg.openTelegramLink) {
+                // Inside Telegram - use native share
                 tg.openTelegramLink(shareUrl);
-            } else if (tg && tg.openLink) {
-                tg.openLink(shareUrl);
             } else {
-                window.open(shareUrl, '_blank', 'noopener,noreferrer');
+                // Desktop/Browser - always open in new tab
+                // Use window.open with specific features to ensure new tab
+                var newWindow = window.open(shareUrl, '_blank', 'noopener,noreferrer');
+                
+                // Fallback if popup was blocked
+                if (!newWindow || newWindow.closed || typeof newWindow.closed === 'undefined') {
+                    // Create a temporary link and click it
+                    var link = document.createElement('a');
+                    link.href = shareUrl;
+                    link.target = '_blank';
+                    link.rel = 'noopener noreferrer';
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                }
             }
         }
 

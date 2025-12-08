@@ -56,21 +56,23 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     args = context.args
     if args and args[0].startswith("lobby_"):
         lobby_code = args[0].replace("lobby_", "")
-        # Use mobile.html with lobby parameter + cache busting
+        # Use mobile.html with lobby parameter
         base_url = WEBAPP_URL.replace("/mobile.html", "")
         lobby_url = f"{base_url}/mobile.html?lobby={lobby_code}"
         
         keyboard = [[
             InlineKeyboardButton(
-                f"🎮 Join Lobby {lobby_code}", 
+                f"� TAP TO JOIN GAME", 
                 web_app=WebAppInfo(url=lobby_url)
             )
         ]]
         
         await update.message.reply_text(
-            f"🎰 *Welcome, {name}!*\n\n"
-            f"You've been invited to join a poker lobby!\n"
-            f"Click the button below to join:",
+            f"� *POKER INVITATION*\n\n"
+            f"👋 Hey {name}!\n\n"
+            f"You've been invited to join a private poker game!\n\n"
+            f"🎰 *Lobby Code:* `{lobby_code}`\n\n"
+            f"⬇️ *Tap the button below to join instantly:*",
             parse_mode="Markdown",
             reply_markup=InlineKeyboardMarkup(keyboard)
         )
