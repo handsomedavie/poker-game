@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: pokerhouse77-backend
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: python server.py
+    envVars:
+      - key: TELEGRAM_BOT_TOKEN
+        sync: false
+      - key: TELEGRAM_BOT_USERNAME
+        sync: false
+      - key: FRONTEND_URL
+        value: https://pokerhouse77.netlify.app
