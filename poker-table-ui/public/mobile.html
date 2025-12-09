@@ -2870,6 +2870,363 @@
         .waiting-dot {
             animation: pulse 1.5s infinite;
         }
+
+        /* ═══════════════════════════════════════════════════
+           SETTINGS MODAL STYLES
+           ═══════════════════════════════════════════════════ */
+        .settings-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            animation: fadeInModal 0.3s ease forwards;
+        }
+
+        .settings-modal.hidden {
+            display: none !important;
+        }
+
+        .settings-content {
+            background: linear-gradient(145deg, #1e293b, #0f172a);
+            border-radius: 20px;
+            padding: 24px;
+            width: 100%;
+            max-width: 380px;
+            border: 2px solid rgba(59, 130, 246, 0.3);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            animation: slideInContent 0.3s ease forwards;
+        }
+
+        .settings-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        .settings-title {
+            font-size: 22px;
+            font-weight: 700;
+            color: #3b82f6;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .settings-close {
+            background: rgba(239, 68, 68, 0.2);
+            border: none;
+            color: #ef4444;
+            font-size: 24px;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.2s;
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
+        }
+
+        .settings-close:hover {
+            background: rgba(239, 68, 68, 0.4);
+        }
+
+        .settings-section {
+            margin-bottom: 20px;
+        }
+
+        .settings-section-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #94a3b8;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .setting-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(15, 23, 42, 0.6);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 10px;
+        }
+
+        .setting-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .setting-icon {
+            font-size: 24px;
+        }
+
+        .setting-text {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .setting-name {
+            font-size: 16px;
+            font-weight: 600;
+            color: #fff;
+        }
+
+        .setting-desc {
+            font-size: 12px;
+            color: #94a3b8;
+            margin-top: 2px;
+        }
+
+        /* Toggle Switch Styles */
+        .toggle-switch {
+            position: relative;
+            width: 56px;
+            height: 30px;
+            background: rgba(148, 163, 184, 0.3);
+            border-radius: 15px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .toggle-switch.active {
+            background: linear-gradient(135deg, #22c55e, #16a34a);
+        }
+
+        .toggle-switch::before {
+            content: '';
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            width: 24px;
+            height: 24px;
+            background: #fff;
+            border-radius: 50%;
+            transition: transform 0.3s ease;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .toggle-switch.active::before {
+            transform: translateX(26px);
+        }
+
+        .toggle-label {
+            position: absolute;
+            font-size: 10px;
+            font-weight: 700;
+            top: 50%;
+            transform: translateY(-50%);
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .toggle-label.on {
+            left: 8px;
+            opacity: 0;
+        }
+
+        .toggle-label.off {
+            right: 6px;
+            opacity: 1;
+        }
+
+        .toggle-switch.active .toggle-label.on {
+            opacity: 1;
+        }
+
+        .toggle-switch.active .toggle-label.off {
+            opacity: 0;
+        }
+
+        /* ═══════════════════════════════════════════════════
+           HISTORY MODAL STYLES
+           ═══════════════════════════════════════════════════ */
+        .history-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            animation: fadeInModal 0.3s ease forwards;
+        }
+
+        .history-modal.hidden {
+            display: none !important;
+        }
+
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            background: linear-gradient(145deg, #1e293b, #0f172a);
+            border-bottom: 1px solid rgba(251, 191, 36, 0.2);
+        }
+
+        .history-title {
+            font-size: 22px;
+            font-weight: 700;
+            color: #fbbf24;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .history-close {
+            background: rgba(239, 68, 68, 0.2);
+            border: none;
+            color: #ef4444;
+            font-size: 24px;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.2s;
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
+        }
+
+        .history-stats {
+            display: flex;
+            gap: 12px;
+            padding: 16px 20px;
+            background: rgba(15, 23, 42, 0.8);
+        }
+
+        .history-stat {
+            flex: 1;
+            background: rgba(30, 41, 59, 0.8);
+            border-radius: 12px;
+            padding: 12px;
+            text-align: center;
+        }
+
+        .history-stat-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        .history-stat-value.wins {
+            color: #22c55e;
+        }
+
+        .history-stat-value.losses {
+            color: #ef4444;
+        }
+
+        .history-stat-label {
+            font-size: 11px;
+            color: #94a3b8;
+            margin-top: 4px;
+            text-transform: uppercase;
+        }
+
+        .history-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px 20px;
+        }
+
+        .history-empty {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: #64748b;
+            text-align: center;
+        }
+
+        .history-empty-icon {
+            font-size: 64px;
+            margin-bottom: 16px;
+        }
+
+        .history-empty-text {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .history-empty-hint {
+            font-size: 14px;
+            color: #475569;
+        }
+
+        .history-item {
+            background: linear-gradient(145deg, #1e293b, #0f172a);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 12px;
+            border-left: 4px solid #64748b;
+        }
+
+        .history-item.win {
+            border-left-color: #22c55e;
+        }
+
+        .history-item.loss {
+            border-left-color: #ef4444;
+        }
+
+        .history-item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .history-item-result {
+            font-size: 16px;
+            font-weight: 700;
+        }
+
+        .history-item-result.win {
+            color: #22c55e;
+        }
+
+        .history-item-result.loss {
+            color: #ef4444;
+        }
+
+        .history-item-date {
+            font-size: 12px;
+            color: #64748b;
+        }
+
+        .history-item-details {
+            display: flex;
+            gap: 16px;
+            font-size: 13px;
+            color: #94a3b8;
+        }
+
+        .history-item-amount {
+            font-weight: 600;
+        }
+
+        .history-item-amount.positive {
+            color: #22c55e;
+        }
+
+        .history-item-amount.negative {
+            color: #ef4444;
+        }
     </style>
 </head>
 <body>
@@ -3227,6 +3584,101 @@
             <div class="waiting-status" id="waitingStatus">
                 <span class="waiting-dot">⏳</span> Waiting for players to join...
             </div>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════
+         SETTINGS MODAL
+         ═══════════════════════════════════════════════════ -->
+    <div id="settingsModal" class="settings-modal hidden">
+        <div class="settings-content">
+            <div class="settings-header">
+                <div class="settings-title">⚙️ Settings</div>
+                <button class="settings-close" onclick="closeSettings()">✕</button>
+            </div>
+
+            <div class="settings-section">
+                <div class="settings-section-title">Audio</div>
+                
+                <div class="setting-item">
+                    <div class="setting-info">
+                        <span class="setting-icon">🎵</span>
+                        <div class="setting-text">
+                            <span class="setting-name">Background Music</span>
+                            <span class="setting-desc">Play music during gameplay</span>
+                        </div>
+                    </div>
+                    <div class="toggle-switch" id="musicToggle" onclick="toggleMusic()">
+                        <span class="toggle-label on">ON</span>
+                        <span class="toggle-label off">OFF</span>
+                    </div>
+                </div>
+
+                <div class="setting-item">
+                    <div class="setting-info">
+                        <span class="setting-icon">🔊</span>
+                        <div class="setting-text">
+                            <span class="setting-name">Sound Effects</span>
+                            <span class="setting-desc">Card sounds and notifications</span>
+                        </div>
+                    </div>
+                    <div class="toggle-switch active" id="sfxToggle" onclick="toggleSFX()">
+                        <span class="toggle-label on">ON</span>
+                        <span class="toggle-label off">OFF</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="settings-section">
+                <div class="settings-section-title">Display</div>
+                
+                <div class="setting-item">
+                    <div class="setting-info">
+                        <span class="setting-icon">🌙</span>
+                        <div class="setting-text">
+                            <span class="setting-name">Dark Mode</span>
+                            <span class="setting-desc">Always enabled for poker</span>
+                        </div>
+                    </div>
+                    <div class="toggle-switch active" style="opacity: 0.5; cursor: not-allowed;">
+                        <span class="toggle-label on">ON</span>
+                        <span class="toggle-label off">OFF</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════
+         HISTORY MODAL
+         ═══════════════════════════════════════════════════ -->
+    <div id="historyModal" class="history-modal hidden">
+        <div class="history-header">
+            <div class="history-title">📋 Game History</div>
+            <button class="history-close" onclick="closeHistory()">✕</button>
+        </div>
+
+        <div class="history-stats">
+            <div class="history-stat">
+                <div class="history-stat-value" id="historyTotalGames">0</div>
+                <div class="history-stat-label">Games</div>
+            </div>
+            <div class="history-stat">
+                <div class="history-stat-value wins" id="historyWins">0</div>
+                <div class="history-stat-label">Wins</div>
+            </div>
+            <div class="history-stat">
+                <div class="history-stat-value losses" id="historyLosses">0</div>
+                <div class="history-stat-label">Losses</div>
+            </div>
+            <div class="history-stat">
+                <div class="history-stat-value" id="historyProfit">$0</div>
+                <div class="history-stat-label">Profit</div>
+            </div>
+        </div>
+
+        <div class="history-list" id="historyList">
+            <!-- History items will be rendered here -->
         </div>
     </div>
 
@@ -4455,10 +4907,15 @@
             // Show winner animation
             showWinnerPopup(winner, handName, gameState.pot);
             
-            // Update balance if hero won
+            // Record game result to history
             if (winner.isHero) {
+                addGameToHistory('win', gameState.pot, handName, 'Bot Game');
                 userBalance = winner.chips;
                 updateBalanceUI();
+            } else {
+                // Lost the hand
+                var lossAmount = gameState.bigBlind * 2; // Approximate loss
+                addGameToHistory('loss', lossAmount, handName, 'Bot Game');
             }
             
             // Start new hand after delay
@@ -5081,13 +5538,214 @@
         }
 
         function handleHistory() {
-            addDebug('History');
-            showAlert('📋 Transaction history coming soon!');
+            addDebug('Opening History');
+            openHistory();
         }
 
         function handleSettings() {
-            addDebug('Settings');
-            showAlert('⚙️ Settings coming soon!');
+            addDebug('Opening Settings');
+            openSettings();
+        }
+
+        // ═══════════════════════════════════════════════════
+        // SETTINGS MODAL FUNCTIONS
+        // ═══════════════════════════════════════════════════
+        var userSettings = {
+            musicEnabled: false,
+            sfxEnabled: true
+        };
+
+        // Load settings from localStorage
+        function loadSettings() {
+            try {
+                var saved = localStorage.getItem('pokerSettings');
+                if (saved) {
+                    userSettings = JSON.parse(saved);
+                }
+            } catch (e) {
+                addDebug('Error loading settings: ' + e);
+            }
+            updateSettingsUI();
+        }
+
+        // Save settings to localStorage
+        function saveSettings() {
+            try {
+                localStorage.setItem('pokerSettings', JSON.stringify(userSettings));
+            } catch (e) {
+                addDebug('Error saving settings: ' + e);
+            }
+        }
+
+        function openSettings() {
+            loadSettings();
+            document.getElementById('settingsModal').classList.remove('hidden');
+        }
+
+        function closeSettings() {
+            document.getElementById('settingsModal').classList.add('hidden');
+        }
+
+        function updateSettingsUI() {
+            var musicToggle = document.getElementById('musicToggle');
+            var sfxToggle = document.getElementById('sfxToggle');
+            
+            if (musicToggle) {
+                if (userSettings.musicEnabled) {
+                    musicToggle.classList.add('active');
+                } else {
+                    musicToggle.classList.remove('active');
+                }
+            }
+            
+            if (sfxToggle) {
+                if (userSettings.sfxEnabled) {
+                    sfxToggle.classList.add('active');
+                } else {
+                    sfxToggle.classList.remove('active');
+                }
+            }
+        }
+
+        function toggleMusic() {
+            userSettings.musicEnabled = !userSettings.musicEnabled;
+            saveSettings();
+            updateSettingsUI();
+            
+            if (userSettings.musicEnabled) {
+                // Start background music
+                playBgMusic();
+                showAlert('🎵 Music enabled');
+            } else {
+                // Stop background music
+                stopBgMusic();
+                showAlert('🔇 Music disabled');
+            }
+        }
+
+        function toggleSFX() {
+            userSettings.sfxEnabled = !userSettings.sfxEnabled;
+            saveSettings();
+            updateSettingsUI();
+            
+            if (userSettings.sfxEnabled) {
+                showAlert('🔊 Sound effects enabled');
+            } else {
+                showAlert('🔈 Sound effects disabled');
+            }
+        }
+
+        // ═══════════════════════════════════════════════════
+        // HISTORY MODAL FUNCTIONS
+        // ═══════════════════════════════════════════════════
+        var gameHistory = [];
+
+        function loadGameHistory() {
+            try {
+                var saved = localStorage.getItem('pokerHistory');
+                if (saved) {
+                    gameHistory = JSON.parse(saved);
+                }
+            } catch (e) {
+                addDebug('Error loading history: ' + e);
+                gameHistory = [];
+            }
+        }
+
+        function saveGameHistory() {
+            try {
+                // Keep only last 50 games
+                if (gameHistory.length > 50) {
+                    gameHistory = gameHistory.slice(-50);
+                }
+                localStorage.setItem('pokerHistory', JSON.stringify(gameHistory));
+            } catch (e) {
+                addDebug('Error saving history: ' + e);
+            }
+        }
+
+        function addGameToHistory(result, amount, handName, gameType) {
+            var game = {
+                id: Date.now(),
+                result: result, // 'win' or 'loss'
+                amount: amount,
+                handName: handName || 'Unknown',
+                gameType: gameType || 'Cash Game',
+                date: new Date().toISOString()
+            };
+            gameHistory.push(game);
+            saveGameHistory();
+        }
+
+        function openHistory() {
+            loadGameHistory();
+            renderHistory();
+            document.getElementById('historyModal').classList.remove('hidden');
+        }
+
+        function closeHistory() {
+            document.getElementById('historyModal').classList.add('hidden');
+        }
+
+        function renderHistory() {
+            var listEl = document.getElementById('historyList');
+            
+            // Calculate stats
+            var totalGames = gameHistory.length;
+            var wins = gameHistory.filter(function(g) { return g.result === 'win'; }).length;
+            var losses = totalGames - wins;
+            var profit = gameHistory.reduce(function(sum, g) {
+                return sum + (g.result === 'win' ? g.amount : -g.amount);
+            }, 0);
+            
+            // Update stats display
+            document.getElementById('historyTotalGames').textContent = totalGames;
+            document.getElementById('historyWins').textContent = wins;
+            document.getElementById('historyLosses').textContent = losses;
+            
+            var profitEl = document.getElementById('historyProfit');
+            profitEl.textContent = (profit >= 0 ? '+' : '') + '$' + profit.toLocaleString();
+            profitEl.className = 'history-stat-value ' + (profit >= 0 ? 'wins' : 'losses');
+            
+            // Render list
+            if (gameHistory.length === 0) {
+                listEl.innerHTML = 
+                    '<div class="history-empty">' +
+                        '<div class="history-empty-icon">🎰</div>' +
+                        '<div class="history-empty-text">No games yet</div>' +
+                        '<div class="history-empty-hint">Play some poker to see your history!</div>' +
+                    '</div>';
+                return;
+            }
+            
+            // Render games (newest first)
+            var html = '';
+            var sortedHistory = gameHistory.slice().reverse();
+            
+            sortedHistory.forEach(function(game) {
+                var date = new Date(game.date);
+                var dateStr = date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                var isWin = game.result === 'win';
+                
+                html += 
+                    '<div class="history-item ' + game.result + '">' +
+                        '<div class="history-item-header">' +
+                            '<span class="history-item-result ' + game.result + '">' + 
+                                (isWin ? '🏆 WIN' : '❌ LOSS') + 
+                            '</span>' +
+                            '<span class="history-item-date">' + dateStr + '</span>' +
+                        '</div>' +
+                        '<div class="history-item-details">' +
+                            '<span>' + game.gameType + '</span>' +
+                            '<span>🃏 ' + game.handName + '</span>' +
+                            '<span class="history-item-amount ' + (isWin ? 'positive' : 'negative') + '">' +
+                                (isWin ? '+' : '-') + '$' + game.amount.toLocaleString() +
+                            '</span>' +
+                        '</div>' +
+                    '</div>';
+            });
+            
+            listEl.innerHTML = html;
         }
 
         // ═══════════════════════════════════════════════════
@@ -6039,6 +6697,15 @@
             
             addDebug('WINNER: ' + winner.name + ' with ' + handName + ', isMe: ' + iAmWinner);
             
+            // Record game result to history
+            if (iAmWinner) {
+                addGameToHistory('win', potAmount, handName, 'Multiplayer');
+            } else {
+                // Estimate loss as the current bet/buy-in
+                var lossAmount = currentPrivateLobby ? currentPrivateLobby.buyIn : 100;
+                addGameToHistory('loss', lossAmount, handName, 'Multiplayer');
+            }
+            
             // Remove any existing winner popup
             var existingPopup = document.getElementById('winnerOverlay');
             if (existingPopup) existingPopup.remove();
@@ -6450,6 +7117,10 @@
         
         // Backup fallback after 5 seconds
         setTimeout(forceShowMainMenu, 5000);
+
+        // Load user settings and history on startup
+        loadSettings();
+        loadGameHistory();
 
         addDebug('Ready');
     </script>

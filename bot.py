@@ -62,29 +62,53 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         
         keyboard = [[
             InlineKeyboardButton(
-                f"� TAP TO JOIN GAME", 
+                "🎯 TAP TO JOIN GAME", 
                 web_app=WebAppInfo(url=lobby_url)
             )
         ]]
         
+        invite_banner = (
+            "━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
+            "       🎰 *POKER INVITATION* 🎰\n"
+            "━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n"
+            f"👋 Hey *{name}*!\n\n"
+            "🃏 You've been invited to a\n"
+            "      *PRIVATE POKER TABLE*\n\n"
+            f"🔑 Lobby Code: `{lobby_code}`\n\n"
+            "━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
+            "   💰 Real stakes • Fast action 💰\n"
+            "━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n"
+            "⬇️ *Tap below to join instantly:*"
+        )
+        
         await update.message.reply_text(
-            f"� *POKER INVITATION*\n\n"
-            f"👋 Hey {name}!\n\n"
-            f"You've been invited to join a private poker game!\n\n"
-            f"🎰 *Lobby Code:* `{lobby_code}`\n\n"
-            f"⬇️ *Tap the button below to join instantly:*",
+            invite_banner,
             parse_mode="Markdown",
             reply_markup=InlineKeyboardMarkup(keyboard)
         )
         return
     
-    # Regular start
+    # Beautiful welcome banner for regular start
+    welcome_banner = (
+        "╔═══════════════════════════════╗\n"
+        "║     🎰 *POKER HOUSE* 🎰       ║\n"
+        "╚═══════════════════════════════╝\n\n"
+        f"👋 Welcome, *{name}*!\n\n"
+        "┌─────────────────────────────┐\n"
+        "│  🃏  *Texas Hold'em Poker*  │\n"
+        "│  🏆  *Tournaments Daily*    │\n"
+        "│  �  *Win Big Prizes*       │\n"
+        "│  👥  *Play with Friends*    │\n"
+        "└─────────────────────────────┘\n\n"
+        "🔥 *Join thousands of players!*\n\n"
+        "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
+        " 💵 FREE chips • 🎁 Daily bonuses \n"
+        "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n"
+        "⬇️ *Tap to start playing:*"
+    )
+    
     await update.message.reply_text(
-        f"🎰 *Welcome to Poker House, {name}!*\n\n"
-        "🃏 Play Texas Hold'em with friends\n"
-        "🏆 Join tournaments and compete\n"
-        "💰 Win big prizes!\n\n"
-        "Tap the button below to start playing:",
+        welcome_banner,
         parse_mode="Markdown",
         reply_markup=get_main_keyboard()
     )
