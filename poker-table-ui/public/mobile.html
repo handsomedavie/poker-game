@@ -5615,11 +5615,9 @@
             if (userSettings.musicEnabled) {
                 // Start background music
                 playBgMusic();
-                showAlert('🎵 Music enabled');
             } else {
                 // Stop background music
                 stopBgMusic();
-                showAlert('🔇 Music disabled');
             }
         }
 
@@ -5627,12 +5625,7 @@
             userSettings.sfxEnabled = !userSettings.sfxEnabled;
             saveSettings();
             updateSettingsUI();
-            
-            if (userSettings.sfxEnabled) {
-                showAlert('🔊 Sound effects enabled');
-            } else {
-                showAlert('🔈 Sound effects disabled');
-            }
+            // No alert - just visual toggle feedback
         }
 
         // ═══════════════════════════════════════════════════

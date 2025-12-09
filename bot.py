@@ -29,19 +29,22 @@ BOT_USERNAME = os.environ.get("BOT_USERNAME", "pokerhouse77bot")
 # Cache headers are set in Netlify _headers file to prevent caching
 WEBAPP_URL = os.environ.get("WEBAPP_URL", "https://dapper-heliotrope-03aa40.netlify.app/mobile.html")
 
+# Banner image for welcome messages (poker-themed)
+BANNER_IMAGE_URL = "https://images.unsplash.com/photo-1511193311914-0346f16efe90?w=800&h=400&fit=crop"
+
 
 def get_main_keyboard() -> InlineKeyboardMarkup:
     """Build main menu keyboard with Mini App button"""
     keyboard = [
         [
             InlineKeyboardButton(
-                "🎰 Play Poker", 
+                "🎰 Играть в покер", 
                 web_app=WebAppInfo(url=WEBAPP_URL)
             )
         ],
         [
-            InlineKeyboardButton("📊 Leaderboard", callback_data="leaderboard"),
-            InlineKeyboardButton("❓ Help", callback_data="help"),
+            InlineKeyboardButton("📊 Рейтинг", callback_data="leaderboard"),
+            InlineKeyboardButton("❓ Помощь", callback_data="help"),
         ],
     ]
     return InlineKeyboardMarkup(keyboard)
@@ -62,53 +65,49 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         
         keyboard = [[
             InlineKeyboardButton(
-                "🎯 TAP TO JOIN GAME", 
+                "🎯 Присоединиться к игре", 
                 web_app=WebAppInfo(url=lobby_url)
             )
         ]]
         
-        invite_banner = (
+        invite_caption = (
+            f"🎰 *POKER HOUSE* — Приглашение в игру!\n\n"
+            f"👋 Привет, *{name}*!\n\n"
+            f"🃏 Тебя пригласили за *приватный покерный стол*\n\n"
+            f"🔑 Код лобби: `{lobby_code}`\n\n"
             "━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
-            "       🎰 *POKER INVITATION* 🎰\n"
-            "━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n"
-            f"👋 Hey *{name}*!\n\n"
-            "🃏 You've been invited to a\n"
-            "      *PRIVATE POKER TABLE*\n\n"
-            f"🔑 Lobby Code: `{lobby_code}`\n\n"
-            "━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
-            "   💰 Real stakes • Fast action 💰\n"
-            "━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n"
-            "⬇️ *Tap below to join instantly:*"
+            "💰 *Реальные ставки • Быстрая игра*\n"
+            "━━━━━━━━━━━━━━━━━━━━━━━━━━"
         )
         
-        await update.message.reply_text(
-            invite_banner,
+        # Send photo with invite
+        await update.message.reply_photo(
+            photo=BANNER_IMAGE_URL,
+            caption=invite_caption,
             parse_mode="Markdown",
             reply_markup=InlineKeyboardMarkup(keyboard)
         )
         return
     
-    # Beautiful welcome banner for regular start
-    welcome_banner = (
-        "╔═══════════════════════════════╗\n"
-        "║     🎰 *POKER HOUSE* 🎰       ║\n"
-        "╚═══════════════════════════════╝\n\n"
-        f"👋 Welcome, *{name}*!\n\n"
-        "┌─────────────────────────────┐\n"
-        "│  🃏  *Texas Hold'em Poker*  │\n"
-        "│  🏆  *Tournaments Daily*    │\n"
-        "│  �  *Win Big Prizes*       │\n"
-        "│  👥  *Play with Friends*    │\n"
-        "└─────────────────────────────┘\n\n"
-        "🔥 *Join thousands of players!*\n\n"
-        "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
-        " 💵 FREE chips • 🎁 Daily bonuses \n"
-        "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n"
-        "⬇️ *Tap to start playing:*"
+    # Beautiful welcome banner with image for regular start
+    welcome_caption = (
+        f"🎰 *POKER HOUSE*\n\n"
+        f"👋 Добро пожаловать, *{name}*!\n\n"
+        "🃏 *Texas Hold'em Poker* — играй с друзьями\n"
+        "прямо в Telegram без регистрации и VPN!\n\n"
+        "━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
+        "Тебя ждёт:\n"
+        "� *Бесплатные фишки* каждый день\n"
+        "🏆 *Турниры* с призами\n"
+        "� *Приватные столы* с друзьями\n"
+        "⚡ *Быстрые игры* Sit & Go\n"
+        "━━━━━━━━━━━━━━━━━━━━━━━━━━"
     )
     
-    await update.message.reply_text(
-        welcome_banner,
+    # Send photo banner with welcome message
+    await update.message.reply_photo(
+        photo=BANNER_IMAGE_URL,
+        caption=welcome_caption,
         parse_mode="Markdown",
         reply_markup=get_main_keyboard()
     )
