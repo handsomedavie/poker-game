@@ -1834,7 +1834,7 @@ async def _broadcast_game_state(session_id: str, game: GameState):
 
 
 @app.websocket("/ws/game/{session_id}")
-async def game_websocket(websocket: WebSocket, session_id: str):
+async def game_websocket(websocket: WebSocket, session_id: str, telegram_id: str = None):
     """WebSocket for real-time game updates"""
     await websocket.accept()
     
@@ -1851,16 +1851,27 @@ async def game_websocket(websocket: WebSocket, session_id: str):
     # Use lock to prevent race conditions when assigning seats
     player_seat = None
     async with game_connection_locks[session_id]:
-        # Find first unconnected seat
-        connected_seats = set(game_connections.get(session_id, {}).keys())
-        for seat in sorted(game.players.keys()):
-            if seat not in connected_seats:
-                player_seat = seat
-                print(f"🎮 GAME WS: Assigning seat {seat} to new connection")
-                break
+        # FIND SEAT BY TELEGRAM_ID (correct way - player gets their own seat)
+        if telegram_id:
+            for seat, player in game.players.items():
+                # player is a Player object, access telegram_id attribute directly
+                player_tg_id = player.telegram_id if hasattr(player, 'telegram_id') else 0
+                if str(player_tg_id) == str(telegram_id):
+                    player_seat = seat
+                    print(f"🎮 GAME WS: Found seat {seat} for telegram_id {telegram_id} (player: {player.name})")
+                    break
+        
+        # Fallback: Find first unconnected seat (legacy behavior)
+        if not player_seat:
+            connected_seats = set(game_connections.get(session_id, {}).keys())
+            for seat in sorted(game.players.keys()):
+                if seat not in connected_seats:
+                    player_seat = seat
+                    print(f"🎮 GAME WS: Fallback - assigning seat {seat} to new connection (no telegram_id match)")
+                    break
         
         if not player_seat:
-            print(f"🎮 GAME WS: No seats available, all connected: {connected_seats}")
+            print(f"🎮 GAME WS: No seats available for telegram_id {telegram_id}")
             await websocket.send_json({"type": "error", "message": "No available seat"})
             await websocket.close()
             return

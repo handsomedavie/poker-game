@@ -162,18 +162,19 @@ def create_game(session_id: str, lobby_code: str, players_data: List[Dict],
     
     num_players = len(players_data)
     
-    # Create empty player slots by SEAT number
+    # Create player slots by SEAT number with telegram_id from lobby
     players = {}
     for i, p in enumerate(players_data):
         seat = i + 1
         player = Player(
-            telegram_id=0,  # Will be set when player connects
+            telegram_id=p.get("telegram_id", 0),  # Use telegram_id from lobby data
             name=p.get("first_name", p.get("username", f"Player{seat}")),
             seat=seat,
             chips=1000,  # Starting chips
             cards=[],
         )
-        players[seat] = player  # Key is SEAT, not telegram_id!
+        players[seat] = player  # Key is SEAT, telegram_id stored in player
+        print(f"🎮 Created player: seat={seat}, telegram_id={player.telegram_id}, name={player.name}")
     
     game = GameState(
         session_id=session_id,
