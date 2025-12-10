@@ -4734,7 +4734,30 @@
             try {
                 tg.ready();
                 tg.expand();
-            } catch(e) {}
+                
+                // Request fullscreen mode (Telegram API v8.0+)
+                if (tg.requestFullscreen) {
+                    tg.requestFullscreen();
+                    addDebug('TG fullscreen requested');
+                }
+                
+                // Disable vertical swipes to prevent accidental closing
+                if (tg.disableVerticalSwipes) {
+                    tg.disableVerticalSwipes();
+                }
+                
+                // Set dark header color to match app theme
+                if (tg.setHeaderColor) {
+                    tg.setHeaderColor('#0d0618');
+                }
+                
+                // Set dark background color
+                if (tg.setBackgroundColor) {
+                    tg.setBackgroundColor('#0d0618');
+                }
+            } catch(e) {
+                addDebug('TG init error: ' + e.message);
+            }
             addDebug('TG OK');
         }
 
@@ -4742,6 +4765,47 @@
         function hideInitialLoader() {
             var loader = document.getElementById('initialLoader');
             if (loader) loader.classList.add('loaded');
+        }
+
+        // ═══════════════════════════════════════════════════
+        // TELEGRAM FULLSCREEN HANDLING
+        // ═══════════════════════════════════════════════════
+        var isFullscreenEnabled = false;
+        
+        function tryTelegramFullscreen() {
+            if (tg && tg.requestFullscreen && !isFullscreenEnabled) {
+                try {
+                    tg.requestFullscreen();
+                } catch(e) {
+                    addDebug('Fullscreen error: ' + e.message);
+                }
+            }
+        }
+        
+        // Listen to Telegram fullscreen events
+        if (tg) {
+            // Handle fullscreen change
+            if (tg.onEvent) {
+                tg.onEvent('fullscreenChanged', function() {
+                    isFullscreenEnabled = tg.isFullscreen;
+                    addDebug('Fullscreen changed: ' + isFullscreenEnabled);
+                });
+                
+                tg.onEvent('fullscreenFailed', function(event) {
+                    addDebug('Fullscreen failed: ' + (event && event.error));
+                });
+            }
+            
+            // Try fullscreen on first user interaction (required by some platforms)
+            document.addEventListener('click', function onFirstClick() {
+                tryTelegramFullscreen();
+                document.removeEventListener('click', onFirstClick);
+            }, { once: true });
+            
+            document.addEventListener('touchstart', function onFirstTouch() {
+                tryTelegramFullscreen();
+                document.removeEventListener('touchstart', onFirstTouch);
+            }, { once: true });
         }
 
         // ═══════════════════════════════════════════════════
@@ -4761,6 +4825,9 @@
                     document.getElementById('fullscreenRequestScreen').classList.add('hidden');
                     document.getElementById('mainMenu').classList.remove('hidden');
                     try { updateUserUI(); } catch(e) {}
+                    
+                    // Try fullscreen again after DOM loaded
+                    setTimeout(tryTelegramFullscreen, 100);
                     return;
                 }
                 
