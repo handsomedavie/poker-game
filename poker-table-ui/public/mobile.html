@@ -3711,6 +3711,376 @@
         }
 
         /* ═══════════════════════════════════════════════════
+           WALLET MODAL STYLES (Deposit/Withdraw)
+           ═══════════════════════════════════════════════════ */
+        .wallet-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(180deg, #1a0f2e 0%, #0f0a1a 50%, #0d0618 100%);
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            padding-top: var(--safe-top);
+            padding-bottom: var(--safe-bottom);
+            animation: fadeInModal 0.3s ease forwards;
+            overflow-y: auto;
+        }
+
+        .wallet-modal.hidden {
+            display: none !important;
+        }
+
+        .wallet-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 20px;
+            background: rgba(26, 15, 46, 0.9);
+            border-bottom: 1px solid rgba(168, 85, 247, 0.2);
+        }
+
+        .wallet-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .wallet-title-icon {
+            font-size: 24px;
+        }
+
+        .wallet-close-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #fff;
+            font-size: 18px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Wallet Tabs */
+        .wallet-tabs {
+            display: flex;
+            padding: 12px 16px;
+            gap: 8px;
+            background: rgba(15, 10, 26, 0.5);
+        }
+
+        .wallet-tab {
+            flex: 1;
+            padding: 12px 16px;
+            border-radius: 12px;
+            border: none;
+            background: rgba(255, 255, 255, 0.05);
+            color: #94a3b8;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .wallet-tab.active {
+            background: linear-gradient(135deg, #a855f7 0%, #7c3aed 100%);
+            color: #fff;
+            box-shadow: 0 4px 15px rgba(168, 85, 247, 0.4);
+        }
+
+        /* Wallet Content */
+        .wallet-content {
+            flex: 1;
+            padding: 16px;
+            overflow-y: auto;
+        }
+
+        /* Promo Banner */
+        .wallet-promo-banner {
+            background: linear-gradient(135deg, #7c3aed 0%, #a855f7 50%, #c084fc 100%);
+            border-radius: 16px;
+            padding: 16px 20px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .wallet-promo-banner::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -20%;
+            width: 150px;
+            height: 150px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+        }
+
+        .wallet-promo-text {
+            flex: 1;
+        }
+
+        .wallet-promo-text h3 {
+            font-size: 16px;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 4px;
+        }
+
+        .wallet-promo-text p {
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .wallet-promo-icons {
+            font-size: 40px;
+            opacity: 0.9;
+        }
+
+        /* Balance Display (for Withdraw) */
+        .wallet-balance-display {
+            background: rgba(26, 15, 46, 0.6);
+            border: 1px solid rgba(168, 85, 247, 0.3);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .wallet-balance-label {
+            font-size: 13px;
+            color: #94a3b8;
+            margin-bottom: 8px;
+        }
+
+        .wallet-balance-amount {
+            font-size: 36px;
+            font-weight: 700;
+            color: #fbbf24;
+            text-shadow: 0 0 20px rgba(251, 191, 36, 0.4);
+        }
+
+        .wallet-balance-currency {
+            font-size: 18px;
+            color: #94a3b8;
+            margin-left: 8px;
+        }
+
+        /* Amount Input */
+        .wallet-amount-input-wrapper {
+            background: rgba(26, 15, 46, 0.6);
+            border: 1px solid rgba(168, 85, 247, 0.3);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 20px;
+        }
+
+        .wallet-amount-label {
+            font-size: 13px;
+            color: #94a3b8;
+            margin-bottom: 8px;
+        }
+
+        .wallet-amount-input {
+            width: 100%;
+            background: rgba(15, 10, 26, 0.8);
+            border: 1px solid rgba(168, 85, 247, 0.2);
+            border-radius: 8px;
+            padding: 14px 16px;
+            font-size: 20px;
+            font-weight: 600;
+            color: #fff;
+            outline: none;
+        }
+
+        .wallet-amount-input::placeholder {
+            color: #64748b;
+        }
+
+        .wallet-amount-input:focus {
+            border-color: #a855f7;
+            box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.2);
+        }
+
+        /* Region/Currency Selector */
+        .wallet-region-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 16px;
+            background: rgba(26, 15, 46, 0.4);
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+
+        .wallet-region-label {
+            font-size: 14px;
+            color: #94a3b8;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .wallet-currency-select {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .wallet-currency-flag {
+            font-size: 18px;
+        }
+
+        .wallet-currency-code {
+            font-size: 14px;
+            font-weight: 600;
+            color: #fff;
+        }
+
+        /* Section Title */
+        .wallet-section-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #e2e8f0;
+            margin-bottom: 12px;
+            padding-left: 4px;
+        }
+
+        /* Payment Methods Grid */
+        .wallet-methods-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        /* Payment Method Card */
+        .wallet-method-card {
+            background: rgba(26, 15, 46, 0.6);
+            border: 1px solid rgba(168, 85, 247, 0.2);
+            border-radius: 16px;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .wallet-method-card:hover {
+            border-color: rgba(168, 85, 247, 0.5);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(168, 85, 247, 0.2);
+        }
+
+        .wallet-method-card.wide {
+            grid-column: span 2;
+            flex-direction: row;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .wallet-method-name {
+            font-size: 14px;
+            font-weight: 600;
+            color: #fff;
+        }
+
+        .wallet-method-min {
+            font-size: 12px;
+            color: #64748b;
+        }
+
+        .wallet-method-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05));
+            align-self: flex-end;
+        }
+
+        .wallet-method-icon.sber {
+            background: linear-gradient(135deg, #21a038, #1a8f30);
+        }
+
+        .wallet-method-icon.tpay {
+            background: linear-gradient(135deg, #ffdd2d, #fcc521);
+            color: #000;
+        }
+
+        .wallet-method-icon.alfa {
+            background: linear-gradient(135deg, #ef3124, #d62d20);
+        }
+
+        .wallet-method-icon.sbp {
+            background: linear-gradient(135deg, #5b2d8e, #8b5cf6);
+        }
+
+        .wallet-method-icon.card {
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+        }
+
+        .wallet-method-icon.piastrix {
+            background: linear-gradient(135deg, #ff6b9d, #c44569);
+        }
+
+        .wallet-method-icon.usdt {
+            background: linear-gradient(135deg, #26a17b, #1a8f6e);
+        }
+
+        .wallet-method-icon.ton {
+            background: linear-gradient(135deg, #0098ea, #0088d1);
+        }
+
+        .wallet-method-icon.trx {
+            background: linear-gradient(135deg, #ff0013, #eb0029);
+        }
+
+        /* Bonus Badge */
+        .wallet-method-bonus {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: linear-gradient(135deg, #22c55e, #16a34a);
+            color: #fff;
+            font-size: 10px;
+            font-weight: 700;
+            padding: 3px 8px;
+            border-radius: 6px;
+        }
+
+        /* More Methods Card */
+        .wallet-more-methods {
+            background: linear-gradient(135deg, rgba(168, 85, 247, 0.2), rgba(124, 58, 237, 0.2));
+            border: 1px dashed rgba(168, 85, 247, 0.4);
+        }
+
+        .wallet-more-methods .wallet-method-name {
+            color: #c084fc;
+        }
+
+        /* ═══════════════════════════════════════════════════
            HISTORY MODAL STYLES
            ═══════════════════════════════════════════════════ */
         .history-modal {
@@ -4344,6 +4714,189 @@
 
         <div class="history-list" id="historyList">
             <!-- History items will be rendered here -->
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════
+         WALLET MODAL (Deposit/Withdraw)
+         ═══════════════════════════════════════════════════ -->
+    <div id="walletModal" class="wallet-modal hidden">
+        <!-- Header -->
+        <div class="wallet-header">
+            <div class="wallet-title">
+                <span class="wallet-title-icon">💰</span>
+                Кошелек
+            </div>
+            <button class="wallet-close-btn" onclick="closeWalletModal()">✕</button>
+        </div>
+
+        <!-- Tabs -->
+        <div class="wallet-tabs">
+            <button class="wallet-tab active" onclick="switchWalletTab('deposit')" id="tabDeposit">Депозит</button>
+            <button class="wallet-tab" onclick="switchWalletTab('withdraw')" id="tabWithdraw">Вывод</button>
+            <button class="wallet-tab" onclick="switchWalletTab('history')" id="tabHistory">История</button>
+        </div>
+
+        <!-- Content -->
+        <div class="wallet-content">
+            <!-- Deposit Tab Content -->
+            <div id="walletDepositContent">
+                <!-- Promo Banner -->
+                <div class="wallet-promo-banner">
+                    <div class="wallet-promo-text">
+                        <h3>+5% на первое пополнение</h3>
+                        <p>Бонус начисляется автоматически</p>
+                    </div>
+                    <div class="wallet-promo-icons">🎁💎</div>
+                </div>
+
+                <!-- Region/Currency -->
+                <div class="wallet-region-row">
+                    <div class="wallet-region-label">
+                        Регион оплаты <span style="opacity:0.5">ⓘ</span>
+                    </div>
+                    <div class="wallet-currency-select">
+                        <span class="wallet-currency-flag">🇷🇺</span>
+                        <span class="wallet-currency-code">RUB</span>
+                        <span style="opacity:0.5">▼</span>
+                    </div>
+                </div>
+
+                <!-- Bank Payment Section -->
+                <div class="wallet-section-title">Банковский платеж</div>
+                <div class="wallet-methods-grid">
+                    <div class="wallet-method-card" onclick="selectPaymentMethod('sber')">
+                        <div class="wallet-method-name">SberPay</div>
+                        <div class="wallet-method-min">от 200 ₽</div>
+                        <div class="wallet-method-icon sber">💳</div>
+                    </div>
+                    <div class="wallet-method-card" onclick="selectPaymentMethod('tpay')">
+                        <div class="wallet-method-name">T-Pay</div>
+                        <div class="wallet-method-min">от 200 ₽</div>
+                        <div class="wallet-method-icon tpay">💳</div>
+                    </div>
+                    <div class="wallet-method-card" onclick="selectPaymentMethod('alfa')">
+                        <div class="wallet-method-name">Альфа-Банк</div>
+                        <div class="wallet-method-min">от 1000 ₽</div>
+                        <div class="wallet-method-icon alfa">💳</div>
+                    </div>
+                    <div class="wallet-method-card wallet-more-methods" onclick="showMoreMethods()">
+                        <div class="wallet-method-name">Ещё 5 способов</div>
+                        <div class="wallet-method-icon">→</div>
+                    </div>
+                </div>
+
+                <!-- Crypto Section -->
+                <div class="wallet-section-title">Криптовалюта</div>
+                <div class="wallet-methods-grid">
+                    <div class="wallet-method-card" onclick="selectPaymentMethod('usdt-trc20')">
+                        <div class="wallet-method-bonus">+5%</div>
+                        <div class="wallet-method-name">USDT</div>
+                        <div class="wallet-method-min">(TRC20)</div>
+                        <div class="wallet-method-icon usdt">₮</div>
+                    </div>
+                    <div class="wallet-method-card" onclick="selectPaymentMethod('ton')">
+                        <div class="wallet-method-bonus">+5%</div>
+                        <div class="wallet-method-name">TON</div>
+                        <div class="wallet-method-min">(Toncoin)</div>
+                        <div class="wallet-method-icon ton">💎</div>
+                    </div>
+                    <div class="wallet-method-card" onclick="selectPaymentMethod('usdt-ton')">
+                        <div class="wallet-method-bonus">+5%</div>
+                        <div class="wallet-method-name">USDT</div>
+                        <div class="wallet-method-min">(TON)</div>
+                        <div class="wallet-method-icon usdt">₮</div>
+                    </div>
+                    <div class="wallet-method-card" onclick="selectPaymentMethod('trx')">
+                        <div class="wallet-method-name">TRX</div>
+                        <div class="wallet-method-min">(Tron)</div>
+                        <div class="wallet-method-icon trx">⟐</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Withdraw Tab Content -->
+            <div id="walletWithdrawContent" style="display: none;">
+                <!-- Promo Banner -->
+                <div class="wallet-promo-banner">
+                    <div class="wallet-promo-text">
+                        <h3>Быстрый вывод</h3>
+                        <p>Средства поступят в течение 24 часов</p>
+                    </div>
+                    <div class="wallet-promo-icons">⚡💸</div>
+                </div>
+
+                <!-- Balance Display -->
+                <div class="wallet-balance-display">
+                    <div class="wallet-balance-label">Ваш баланс</div>
+                    <div>
+                        <span class="wallet-balance-amount" id="walletBalance">1,000</span>
+                        <span class="wallet-balance-currency">₽</span>
+                    </div>
+                </div>
+
+                <!-- Amount Input -->
+                <div class="wallet-amount-input-wrapper">
+                    <div class="wallet-amount-label">Сумма вывода</div>
+                    <input type="number" class="wallet-amount-input" placeholder="Введите сумму" id="withdrawAmount">
+                </div>
+
+                <!-- Bank Payment Section -->
+                <div class="wallet-section-title">Банковский платеж</div>
+                <div class="wallet-methods-grid">
+                    <div class="wallet-method-card wide" onclick="selectWithdrawMethod('card')">
+                        <div>
+                            <div class="wallet-method-name">Перевод на карту</div>
+                            <div class="wallet-method-min">от 3000 ₽</div>
+                        </div>
+                        <div class="wallet-method-icon card">💳</div>
+                    </div>
+                    <div class="wallet-method-card" onclick="selectWithdrawMethod('sbp')">
+                        <div class="wallet-method-name">СБП</div>
+                        <div class="wallet-method-min">от 3000 ₽</div>
+                        <div class="wallet-method-icon sbp">⚡</div>
+                    </div>
+                    <div class="wallet-method-card" onclick="selectWithdrawMethod('piastrix')">
+                        <div class="wallet-method-name">Piastrix</div>
+                        <div class="wallet-method-min">от 2000 ₽</div>
+                        <div class="wallet-method-icon piastrix">✿</div>
+                    </div>
+                </div>
+
+                <!-- Crypto Section -->
+                <div class="wallet-section-title">Криптовалюта</div>
+                <div class="wallet-methods-grid">
+                    <div class="wallet-method-card" onclick="selectWithdrawMethod('usdt-trc20')">
+                        <div class="wallet-method-name">USDT</div>
+                        <div class="wallet-method-min">(TRC20)</div>
+                        <div class="wallet-method-icon usdt">₮</div>
+                    </div>
+                    <div class="wallet-method-card" onclick="selectWithdrawMethod('ton')">
+                        <div class="wallet-method-name">TON</div>
+                        <div class="wallet-method-min">(Toncoin)</div>
+                        <div class="wallet-method-icon ton">💎</div>
+                    </div>
+                    <div class="wallet-method-card" onclick="selectWithdrawMethod('usdt-ton')">
+                        <div class="wallet-method-name">USDT</div>
+                        <div class="wallet-method-min">(TON)</div>
+                        <div class="wallet-method-icon usdt">₮</div>
+                    </div>
+                    <div class="wallet-method-card" onclick="selectWithdrawMethod('trx')">
+                        <div class="wallet-method-name">TRX</div>
+                        <div class="wallet-method-min">(Tron)</div>
+                        <div class="wallet-method-icon trx">⟐</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- History Tab Content -->
+            <div id="walletHistoryContent" style="display: none;">
+                <div style="text-align: center; padding: 40px 20px; color: #64748b;">
+                    <div style="font-size: 48px; margin-bottom: 16px;">📋</div>
+                    <div style="font-size: 16px; margin-bottom: 8px;">История транзакций</div>
+                    <div style="font-size: 14px;">Пока нет операций</div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -6270,16 +6823,6 @@
             }
         }
 
-        function handleDeposit() {
-            addDebug('Deposit');
-            showAlert('💳 Deposit feature coming soon!');
-        }
-
-        function handleWithdraw() {
-            addDebug('Withdraw');
-            showAlert('💰 Withdraw feature coming soon!');
-        }
-
         function handleHistory() {
             addDebug('Opening History');
             openHistory();
@@ -6288,6 +6831,91 @@
         function handleSettings() {
             addDebug('Opening Settings');
             openSettings();
+        }
+
+        // ═══════════════════════════════════════════════════
+        // WALLET MODAL FUNCTIONS
+        // ═══════════════════════════════════════════════════
+        var currentWalletTab = 'deposit';
+
+        function openWalletModal(tab) {
+            tab = tab || 'deposit';
+            addDebug('Opening Wallet Modal: ' + tab);
+            
+            var modal = document.getElementById('walletModal');
+            if (modal) {
+                modal.classList.remove('hidden');
+                switchWalletTab(tab);
+                
+                // Update balance display
+                var balanceEl = document.getElementById('walletBalance');
+                if (balanceEl) {
+                    balanceEl.textContent = userBalance.toLocaleString();
+                }
+            }
+        }
+
+        function closeWalletModal() {
+            addDebug('Closing Wallet Modal');
+            var modal = document.getElementById('walletModal');
+            if (modal) {
+                modal.classList.add('hidden');
+            }
+        }
+
+        function switchWalletTab(tab) {
+            currentWalletTab = tab;
+            addDebug('Switching to wallet tab: ' + tab);
+            
+            // Update tab buttons
+            document.getElementById('tabDeposit').classList.remove('active');
+            document.getElementById('tabWithdraw').classList.remove('active');
+            document.getElementById('tabHistory').classList.remove('active');
+            
+            if (tab === 'deposit') {
+                document.getElementById('tabDeposit').classList.add('active');
+            } else if (tab === 'withdraw') {
+                document.getElementById('tabWithdraw').classList.add('active');
+            } else if (tab === 'history') {
+                document.getElementById('tabHistory').classList.add('active');
+            }
+            
+            // Update content visibility
+            document.getElementById('walletDepositContent').style.display = tab === 'deposit' ? 'block' : 'none';
+            document.getElementById('walletWithdrawContent').style.display = tab === 'withdraw' ? 'block' : 'none';
+            document.getElementById('walletHistoryContent').style.display = tab === 'history' ? 'block' : 'none';
+        }
+
+        function selectPaymentMethod(method) {
+            addDebug('Selected deposit method: ' + method);
+            // TODO: Implement payment flow
+            alert('Депозит через ' + method + ' скоро будет доступен!');
+        }
+
+        function selectWithdrawMethod(method) {
+            addDebug('Selected withdraw method: ' + method);
+            // TODO: Implement withdraw flow
+            var amount = document.getElementById('withdrawAmount').value;
+            if (!amount || amount <= 0) {
+                alert('Введите сумму для вывода');
+                return;
+            }
+            alert('Вывод ' + amount + '₽ через ' + method + ' скоро будет доступен!');
+        }
+
+        function showMoreMethods() {
+            addDebug('Show more payment methods');
+            alert('Дополнительные методы оплаты скоро будут доступны!');
+        }
+
+        function handleDeposit() {
+            addDebug('Opening Deposit');
+            openWalletModal('deposit');
+        }
+
+        function handleWithdraw() {
+            addDebug('Opening Withdraw');
+            openWalletModal('withdraw');
         }
 
         // ═══════════════════════════════════════════════════
