@@ -6860,8 +6860,9 @@
             }
             
             // Include telegram_id so server can identify the player and assign correct seat
-            var wsUrl = API_BASE.replace('https://', 'wss://').replace('http://', 'ws://') + '/ws/game/' + sessionId + '?telegram_id=' + tgUserId;
-            addDebug('Connecting to game WS: ' + wsUrl + ' (tgUserId: ' + tgUserId + ')');
+            var tgId = telegramUserId || 0;
+            var wsUrl = API_BASE.replace('https://', 'wss://').replace('http://', 'ws://') + '/ws/game/' + sessionId + '?telegram_id=' + tgId;
+            addDebug('Connecting to game WS with telegram_id=' + tgId);
             
             try {
                 gameWebSocket = new WebSocket(wsUrl);

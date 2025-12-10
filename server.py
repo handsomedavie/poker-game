@@ -1838,6 +1838,8 @@ async def game_websocket(websocket: WebSocket, session_id: str, telegram_id: str
     """WebSocket for real-time game updates"""
     await websocket.accept()
     
+    print(f"🎮 GAME WS: Connection request for session={session_id}, telegram_id={telegram_id}")
+    
     game = get_game(session_id)
     if not game:
         await websocket.send_json({"type": "error", "message": "Game not found"})
@@ -1852,9 +1854,8 @@ async def game_websocket(websocket: WebSocket, session_id: str, telegram_id: str
     player_seat = None
     async with game_connection_locks[session_id]:
         # FIND SEAT BY TELEGRAM_ID (correct way - player gets their own seat)
-        if telegram_id:
+        if telegram_id and telegram_id != "0":
             for seat, player in game.players.items():
-                # player is a Player object, access telegram_id attribute directly
                 player_tg_id = player.telegram_id if hasattr(player, 'telegram_id') else 0
                 if str(player_tg_id) == str(telegram_id):
                     player_seat = seat
