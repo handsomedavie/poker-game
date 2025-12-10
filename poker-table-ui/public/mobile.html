@@ -5589,16 +5589,20 @@
             startSplashTimer();
         }
 
-        // Telegram WebApp - check existence, not initData value
+        // Telegram WebApp - check existence AND that it's actually inside Telegram
         var tg = window.Telegram && window.Telegram.WebApp;
-        var isTelegramApp = !!(tg && typeof tg.initData !== 'undefined');
+        // initData is empty string in browser, has value only inside real Telegram
+        var isTelegramApp = !!(tg && tg.initData && tg.initData.length > 0);
         
-        if (tg) {
+        addDebug('TG check: tg=' + !!tg + ', initData=' + (tg ? tg.initData.length : 0) + ', isTG=' + isTelegramApp);
+        
+        if (isTelegramApp) {
             try {
                 tg.ready();
                 tg.expand();
                 
                 // Mark body as Telegram WebApp for CSS selectors
+                // This hides custom close buttons (TG BackButton used instead)
                 document.body.classList.add('tg-webapp');
                 
                 // Request fullscreen mode (Telegram API v8.0+)
@@ -5635,7 +5639,10 @@
             } catch(e) {
                 addDebug('TG init error: ' + e.message);
             }
-            addDebug('TG OK');
+            addDebug('TG OK - BackButton will be used');
+        } else {
+            // Browser mode - custom close buttons will be visible
+            addDebug('Browser mode - custom close buttons enabled');
         }
 
         // Hide initial loader
@@ -5891,7 +5898,7 @@
             showScreen('lobbyScreen', ['mainMenu']);
             
             // Show TG BackButton
-            if (tg && tg.BackButton) {
+            if (isTelegramApp && tg.BackButton) {
                 if (lobbyBackButtonHandler) {
                     tg.BackButton.offClick(lobbyBackButtonHandler);
                 }
@@ -5909,7 +5916,7 @@
             showScreen('mainMenu', ['lobbyScreen']);
             
             // Hide TG BackButton
-            if (tg && tg.BackButton) {
+            if (isTelegramApp && tg.BackButton) {
                 tg.BackButton.hide();
                 if (lobbyBackButtonHandler) {
                     tg.BackButton.offClick(lobbyBackButtonHandler);
@@ -7134,7 +7141,7 @@
                 }
                 
                 // Show Telegram BackButton
-                if (tg && tg.BackButton) {
+                if (isTelegramApp && tg.BackButton) {
                     // Remove previous handler if exists
                     if (walletBackButtonHandler) {
                         tg.BackButton.offClick(walletBackButtonHandler);
@@ -7158,7 +7165,7 @@
             }
             
             // Hide Telegram BackButton
-            if (tg && tg.BackButton) {
+            if (isTelegramApp && tg.BackButton) {
                 tg.BackButton.hide();
                 if (walletBackButtonHandler) {
                     tg.BackButton.offClick(walletBackButtonHandler);
@@ -7267,7 +7274,7 @@
             document.getElementById('settingsModal').classList.remove('hidden');
             
             // Show TG BackButton
-            if (tg && tg.BackButton) {
+            if (isTelegramApp && tg.BackButton) {
                 if (settingsBackButtonHandler) {
                     tg.BackButton.offClick(settingsBackButtonHandler);
                 }
@@ -7281,7 +7288,7 @@
             document.getElementById('settingsModal').classList.add('hidden');
             
             // Hide TG BackButton
-            if (tg && tg.BackButton) {
+            if (isTelegramApp && tg.BackButton) {
                 tg.BackButton.hide();
                 if (settingsBackButtonHandler) {
                     tg.BackButton.offClick(settingsBackButtonHandler);
@@ -7408,7 +7415,7 @@
             document.getElementById('historyModal').classList.remove('hidden');
             
             // Show TG BackButton
-            if (tg && tg.BackButton) {
+            if (isTelegramApp && tg.BackButton) {
                 if (historyBackButtonHandler) {
                     tg.BackButton.offClick(historyBackButtonHandler);
                 }
@@ -7422,7 +7429,7 @@
             document.getElementById('historyModal').classList.add('hidden');
             
             // Hide TG BackButton
-            if (tg && tg.BackButton) {
+            if (isTelegramApp && tg.BackButton) {
                 tg.BackButton.hide();
                 if (historyBackButtonHandler) {
                     tg.BackButton.offClick(historyBackButtonHandler);
@@ -7504,7 +7511,7 @@
             resetPrivateGameModal();
             
             // Show TG BackButton
-            if (tg && tg.BackButton) {
+            if (isTelegramApp && tg.BackButton) {
                 if (privateGameBackButtonHandler) {
                     tg.BackButton.offClick(privateGameBackButtonHandler);
                 }
@@ -7524,7 +7531,7 @@
             document.querySelector('.private-game-tabs').style.display = 'flex';
             
             // Hide TG BackButton
-            if (tg && tg.BackButton) {
+            if (isTelegramApp && tg.BackButton) {
                 tg.BackButton.hide();
                 if (privateGameBackButtonHandler) {
                     tg.BackButton.offClick(privateGameBackButtonHandler);
