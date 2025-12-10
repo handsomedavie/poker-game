@@ -402,6 +402,52 @@
             background: linear-gradient(180deg, #0f0a1a 0%, #1a0f2e 50%, #0d0618 100%);
         }
 
+        /* Decorative background elements */
+        body.neon-theme #pokerTableScreen::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(ellipse 80% 50% at 50% 0%, rgba(168, 85, 247, 0.15) 0%, transparent 50%),
+                radial-gradient(ellipse 60% 40% at 20% 80%, rgba(212, 175, 55, 0.08) 0%, transparent 40%),
+                radial-gradient(ellipse 60% 40% at 80% 80%, rgba(212, 175, 55, 0.08) 0%, transparent 40%),
+                radial-gradient(circle at 10% 20%, rgba(168, 85, 247, 0.1) 0%, transparent 25%),
+                radial-gradient(circle at 90% 30%, rgba(232, 121, 249, 0.08) 0%, transparent 20%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* Subtle animated glow lines */
+        body.neon-theme #pokerTableScreen::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 120%;
+            height: 120%;
+            transform: translate(-50%, -50%);
+            background: 
+                conic-gradient(from 0deg at 50% 50%, 
+                    transparent 0deg, 
+                    rgba(168, 85, 247, 0.03) 60deg, 
+                    transparent 120deg,
+                    rgba(212, 175, 55, 0.02) 180deg,
+                    transparent 240deg,
+                    rgba(168, 85, 247, 0.03) 300deg,
+                    transparent 360deg);
+            pointer-events: none;
+            z-index: 0;
+            animation: rotateAmbient 30s linear infinite;
+        }
+
+        @keyframes rotateAmbient {
+            from { transform: translate(-50%, -50%) rotate(0deg); }
+            to { transform: translate(-50%, -50%) rotate(360deg); }
+        }
+
         body.neon-theme .poker-header {
             background: rgba(15, 10, 26, 0.85);
             border-bottom: 1px solid rgba(168, 85, 247, 0.4);
@@ -418,72 +464,96 @@
             text-shadow: 0 0 8px rgba(168, 85, 247, 0.6);
         }
 
-        /* Poker Table - Purple Neon */
+        /* Poker Table - Purple with GOLD border */
         body.neon-theme .poker-table {
             background: radial-gradient(ellipse at center, #2d1f4e 0%, #1a0f2e 60%, #0d0618 100%);
-            border: 4px solid #a855f7;
+            border: 5px solid #d4af37;
             box-shadow:
                 0 12px 35px rgba(0, 0, 0, 0.5),
-                0 0 30px rgba(168, 85, 247, 0.4),
-                0 0 60px rgba(168, 85, 247, 0.2),
-                inset 0 0 35px rgba(168, 85, 247, 0.1);
+                0 0 25px rgba(212, 175, 55, 0.5),
+                0 0 50px rgba(212, 175, 55, 0.25),
+                0 0 80px rgba(168, 85, 247, 0.2),
+                inset 0 0 40px rgba(168, 85, 247, 0.15);
         }
 
         body.neon-theme .table-felt {
-            border-color: rgba(168, 85, 247, 0.3);
+            border: 2px solid rgba(212, 175, 55, 0.25);
         }
 
-        /* Pot Display */
+        /* Pot Display - Gold accent */
         body.neon-theme .pot-center {
-            background: rgba(15, 10, 26, 0.9) !important;
-            border-color: #a855f7 !important;
-            box-shadow: 0 0 15px rgba(168, 85, 247, 0.5) !important;
+            background: linear-gradient(135deg, rgba(15, 10, 26, 0.95), rgba(26, 15, 46, 0.9)) !important;
+            border: 2px solid #d4af37 !important;
+            box-shadow: 
+                0 0 15px rgba(212, 175, 55, 0.4),
+                0 0 30px rgba(168, 85, 247, 0.2),
+                inset 0 0 10px rgba(212, 175, 55, 0.1) !important;
         }
 
         body.neon-theme .pot-label {
-            color: #c4b5fd;
+            color: #d4af37;
+            text-shadow: 0 0 6px rgba(212, 175, 55, 0.5);
         }
 
         body.neon-theme .pot-amount {
-            color: #e879f9;
-            text-shadow: 0 0 10px rgba(232, 121, 249, 0.6);
+            color: #fbbf24;
+            text-shadow: 0 0 12px rgba(251, 191, 36, 0.7);
+            font-weight: 800;
         }
 
-        /* Player Cards Container */
+        /* Player Cards Container - Gold trim */
         body.neon-theme .player-card-container {
-            background: rgba(26, 15, 46, 0.9);
-            border-color: rgba(168, 85, 247, 0.4);
-            box-shadow: 0 3px 15px rgba(168, 85, 247, 0.3);
+            background: linear-gradient(135deg, rgba(26, 15, 46, 0.95), rgba(15, 10, 26, 0.9));
+            border: 2px solid rgba(212, 175, 55, 0.4);
+            box-shadow: 
+                0 3px 15px rgba(168, 85, 247, 0.3),
+                0 0 8px rgba(212, 175, 55, 0.2);
         }
 
         body.neon-theme .player-avatar {
             background: linear-gradient(135deg, #a855f7, #7c3aed);
-            border-color: rgba(232, 121, 249, 0.6);
-            box-shadow: 0 0 15px rgba(168, 85, 247, 0.5);
+            border: 3px solid #d4af37;
+            box-shadow: 
+                0 0 12px rgba(212, 175, 55, 0.5),
+                0 0 20px rgba(168, 85, 247, 0.4);
         }
 
         body.neon-theme .player-avatar.active {
-            border-color: #e879f9;
-            box-shadow: 0 0 25px rgba(232, 121, 249, 0.8);
+            border-color: #fbbf24;
+            box-shadow: 
+                0 0 20px rgba(251, 191, 36, 0.8),
+                0 0 35px rgba(168, 85, 247, 0.5);
+            animation: activePlayerGlow 1.5s ease-in-out infinite;
+        }
+
+        @keyframes activePlayerGlow {
+            0%, 100% { 
+                box-shadow: 0 0 20px rgba(251, 191, 36, 0.6), 0 0 35px rgba(168, 85, 247, 0.4);
+            }
+            50% { 
+                box-shadow: 0 0 30px rgba(251, 191, 36, 0.9), 0 0 50px rgba(168, 85, 247, 0.6);
+            }
         }
 
         body.neon-theme .player-chips {
-            color: #e879f9;
-            text-shadow: 0 0 6px rgba(232, 121, 249, 0.5);
+            color: #fbbf24;
+            text-shadow: 0 0 8px rgba(251, 191, 36, 0.6);
         }
 
         body.neon-theme .table-player.current-turn {
-            box-shadow: 0 0 20px 4px #a855f7;
+            box-shadow: 0 0 25px 5px rgba(251, 191, 36, 0.7);
         }
 
         body.neon-theme .table-player .player-bet {
-            color: #e879f9;
-            background: rgba(168, 85, 247, 0.2);
+            color: #fbbf24;
+            background: rgba(212, 175, 55, 0.2);
+            border: 1px solid rgba(212, 175, 55, 0.3);
         }
 
         body.neon-theme .table-player .card-back {
             background: linear-gradient(135deg, #7c3aed, #a855f7);
-            border-color: #c4b5fd;
+            border: 1px solid #d4af37;
+            box-shadow: 0 2px 8px rgba(212, 175, 55, 0.3);
         }
 
         /* Phase Indicator */
@@ -521,56 +591,84 @@
             box-shadow: 0 0 20px rgba(236, 72, 153, 0.7);
         }
 
-        /* Hero Cards - Neon Border */
+        /* Hero Cards - Gold Border */
         body.neon-theme .hero-card {
-            border-color: #a855f7;
-            box-shadow: 0 6px 20px rgba(168, 85, 247, 0.6), 0 0 15px rgba(168, 85, 247, 0.4);
+            border: 3px solid #d4af37;
+            box-shadow: 
+                0 6px 20px rgba(212, 175, 55, 0.5),
+                0 0 15px rgba(168, 85, 247, 0.4),
+                inset 0 0 15px rgba(255, 255, 255, 0.1);
         }
 
         body.neon-theme .hero-card.combo-card {
-            border-color: #e879f9 !important;
+            border-color: #fbbf24 !important;
             box-shadow: 
-                0 0 20px rgba(232, 121, 249, 0.9),
-                0 0 40px rgba(232, 121, 249, 0.5) !important;
+                0 0 25px rgba(251, 191, 36, 1),
+                0 0 50px rgba(251, 191, 36, 0.6),
+                0 0 80px rgba(168, 85, 247, 0.3) !important;
+            animation: heroCardGoldenPulse 2s ease-in-out infinite;
         }
 
-        /* Community Cards - Neon Glow */
+        @keyframes heroCardGoldenPulse {
+            0%, 100% {
+                box-shadow: 0 0 20px rgba(251, 191, 36, 0.8), 0 0 40px rgba(251, 191, 36, 0.4);
+            }
+            50% {
+                box-shadow: 0 0 35px rgba(251, 191, 36, 1), 0 0 70px rgba(251, 191, 36, 0.6);
+            }
+        }
+
+        /* Community Cards - Purple with Gold highlight */
         body.neon-theme .community-card {
-            border-color: #7c3aed;
-            box-shadow: 0 4px 14px rgba(168, 85, 247, 0.5), 0 0 10px rgba(168, 85, 247, 0.3);
+            border: 2px solid rgba(168, 85, 247, 0.6);
+            box-shadow: 
+                0 4px 14px rgba(168, 85, 247, 0.4),
+                0 0 10px rgba(168, 85, 247, 0.2);
         }
 
         body.neon-theme .community-card.combo-card,
         body.neon-theme .community-card.golden-highlight {
-            border-color: #e879f9 !important;
+            border-color: #fbbf24 !important;
             box-shadow: 
-                0 0 18px rgba(232, 121, 249, 0.9),
-                0 0 35px rgba(232, 121, 249, 0.5) !important;
+                0 0 20px rgba(251, 191, 36, 0.9),
+                0 0 40px rgba(251, 191, 36, 0.5),
+                0 0 60px rgba(168, 85, 247, 0.2) !important;
         }
 
-        /* Winner Overlay - Neon */
+        /* Winner Overlay - Neon with Gold */
         body.neon-theme .winner-content-me {
             background: linear-gradient(135deg, #a855f7 0%, #7c3aed 50%, #6d28d9 100%);
-            border-color: #e879f9;
+            border: 4px solid #d4af37;
             box-shadow: 
-                0 0 60px rgba(168, 85, 247, 0.8),
-                0 0 120px rgba(168, 85, 247, 0.4);
+                0 0 40px rgba(212, 175, 55, 0.6),
+                0 0 80px rgba(168, 85, 247, 0.5),
+                0 0 120px rgba(168, 85, 247, 0.3);
         }
 
         body.neon-theme .winner-title {
-            color: #fff;
-            text-shadow: 0 0 20px rgba(232, 121, 249, 0.8), 2px 2px 0 #7c3aed;
+            color: #fbbf24;
+            text-shadow: 
+                0 0 20px rgba(251, 191, 36, 0.9),
+                0 0 40px rgba(251, 191, 36, 0.5),
+                2px 2px 0 #7c3aed;
         }
 
         body.neon-theme .winner-amount {
             color: #fbbf24;
-            text-shadow: 0 0 15px rgba(251, 191, 36, 0.8);
+            text-shadow: 0 0 20px rgba(251, 191, 36, 1);
+        }
+
+        body.neon-theme .winner-hand-name {
+            color: #fff;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
         }
 
         body.neon-theme .winner-content-other {
             background: linear-gradient(135deg, #1a0f2e 0%, #0d0618 100%);
-            border-color: #7c3aed;
-            box-shadow: 0 0 30px rgba(168, 85, 247, 0.4);
+            border: 2px solid #d4af37;
+            box-shadow: 
+                0 0 20px rgba(212, 175, 55, 0.3),
+                0 0 40px rgba(168, 85, 247, 0.3);
         }
         
         /* ═══════ SCREEN TRANSITION ANIMATIONS ═══════ */
