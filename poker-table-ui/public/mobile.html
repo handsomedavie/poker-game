@@ -5845,6 +5845,9 @@
                 if (splashEl) splashEl.classList.add('hidden');
                 if (menuEl) menuEl.classList.remove('hidden');
                 
+                // Set header color for main menu immediately
+                setTelegramHeaderColor('#1a0f2e');
+                
                 updateUserUI();
                 initUser(); // Register/load user from backend
                 addDebug('Menu shown');
@@ -8922,6 +8925,8 @@
                 if (fullscreen) fullscreen.classList.add('hidden');
                 if (menu) menu.classList.remove('hidden');
                 try { updateUserUI(); } catch(e) {}
+                // Set header color for main menu
+                setTelegramHeaderColor('#1a0f2e');
             }
         }
         
