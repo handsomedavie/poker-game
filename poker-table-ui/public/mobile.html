@@ -4068,52 +4068,174 @@
         }
 
         .wallet-method-icon {
-            width: 48px;
-            height: 48px;
-            border-radius: 12px;
+            position: absolute;
+            right: -10px;
+            bottom: -10px;
+            width: 80px;
+            height: 80px;
+            border-radius: 20px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 24px;
-            background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05));
-            align-self: flex-end;
+            font-size: 32px;
+            font-weight: 700;
+            color: #fff;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+            transform: rotate(-5deg);
+            transition: all 0.3s ease;
         }
 
+        .wallet-method-card:hover .wallet-method-icon {
+            transform: rotate(0deg) scale(1.05);
+        }
+
+        /* SberPay - Green with checkmark */
         .wallet-method-icon.sber {
-            background: linear-gradient(135deg, #21a038, #1a8f30);
+            background: linear-gradient(145deg, #4ade80 0%, #22c55e 50%, #16a34a 100%);
+            box-shadow: 0 8px 24px rgba(34, 197, 94, 0.4);
+        }
+        .wallet-method-icon.sber::before {
+            content: '✓';
+            font-size: 40px;
+            font-weight: 900;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
         }
 
+        /* T-Pay - Yellow/Orange gradient */
         .wallet-method-icon.tpay {
-            background: linear-gradient(135deg, #ffdd2d, #fcc521);
+            background: linear-gradient(145deg, #fde047 0%, #facc15 50%, #eab308 100%);
             color: #000;
+            box-shadow: 0 8px 24px rgba(234, 179, 8, 0.4);
+        }
+        .wallet-method-icon.tpay::before {
+            content: 'T';
+            font-size: 36px;
+            font-weight: 900;
+            font-family: Arial, sans-serif;
+        }
+        .wallet-method-icon.tpay::after {
+            content: 'PAY';
+            position: absolute;
+            bottom: 12px;
+            right: 8px;
+            font-size: 10px;
+            font-weight: 700;
+            background: #000;
+            color: #facc15;
+            padding: 2px 4px;
+            border-radius: 3px;
         }
 
+        /* Alfa-Bank - Red with A Pay */
         .wallet-method-icon.alfa {
-            background: linear-gradient(135deg, #ef3124, #d62d20);
+            background: linear-gradient(145deg, #f87171 0%, #ef4444 50%, #dc2626 100%);
+            box-shadow: 0 8px 24px rgba(239, 68, 68, 0.4);
+        }
+        .wallet-method-icon.alfa::before {
+            content: 'A';
+            font-size: 36px;
+            font-weight: 900;
+            font-family: Arial, sans-serif;
+        }
+        .wallet-method-icon.alfa::after {
+            content: 'Pay';
+            position: absolute;
+            bottom: 10px;
+            right: 6px;
+            font-size: 11px;
+            font-weight: 700;
+            background: rgba(255,255,255,0.9);
+            color: #dc2626;
+            padding: 2px 5px;
+            border-radius: 4px;
         }
 
+        /* SBP - Colorful gradient (like reference) */
         .wallet-method-icon.sbp {
-            background: linear-gradient(135deg, #5b2d8e, #8b5cf6);
+            background: linear-gradient(145deg, #22d3ee 0%, #a855f7 50%, #ec4899 100%);
+            box-shadow: 0 8px 24px rgba(168, 85, 247, 0.4);
+        }
+        .wallet-method-icon.sbp::before {
+            content: '⚡';
+            font-size: 38px;
         }
 
+        /* Card - Blue with cards visual */
         .wallet-method-icon.card {
-            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            background: linear-gradient(145deg, #fda4af 0%, #f472b6 30%, #e879f9 60%, #c084fc 100%);
+            box-shadow: 0 8px 24px rgba(244, 114, 182, 0.4);
+            overflow: visible;
+        }
+        .wallet-method-icon.card::before {
+            content: '';
+            position: absolute;
+            width: 45px;
+            height: 28px;
+            background: linear-gradient(135deg, #fff 0%, #e5e7eb 100%);
+            border-radius: 4px;
+            transform: rotate(-15deg) translateX(-8px);
+            box-shadow: 2px 2px 6px rgba(0,0,0,0.2);
+        }
+        .wallet-method-icon.card::after {
+            content: 'VISA';
+            position: absolute;
+            font-size: 8px;
+            font-weight: 700;
+            color: #1e40af;
+            transform: rotate(-15deg) translate(-12px, 2px);
         }
 
+        /* Piastrix - Pink flower */
         .wallet-method-icon.piastrix {
-            background: linear-gradient(135deg, #ff6b9d, #c44569);
+            background: linear-gradient(145deg, #f472b6 0%, #ec4899 50%, #db2777 100%);
+            box-shadow: 0 8px 24px rgba(236, 72, 153, 0.4);
+        }
+        .wallet-method-icon.piastrix::before {
+            content: '✿';
+            font-size: 42px;
         }
 
+        /* USDT - Teal/Cyan */
         .wallet-method-icon.usdt {
-            background: linear-gradient(135deg, #26a17b, #1a8f6e);
+            background: linear-gradient(145deg, #5eead4 0%, #2dd4bf 50%, #14b8a6 100%);
+            box-shadow: 0 8px 24px rgba(45, 212, 191, 0.4);
+        }
+        .wallet-method-icon.usdt::before {
+            content: '₮';
+            font-size: 44px;
+            font-weight: 900;
+        }
+        .wallet-method-icon.usdt::after {
+            content: '';
+            position: absolute;
+            bottom: 6px;
+            right: 6px;
+            width: 20px;
+            height: 20px;
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            border-radius: 50%;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
         }
 
+        /* TON - Blue diamond */
         .wallet-method-icon.ton {
-            background: linear-gradient(135deg, #0098ea, #0088d1);
+            background: linear-gradient(145deg, #38bdf8 0%, #0ea5e9 50%, #0284c7 100%);
+            box-shadow: 0 8px 24px rgba(14, 165, 233, 0.4);
+        }
+        .wallet-method-icon.ton::before {
+            content: '💎';
+            font-size: 40px;
         }
 
+        /* TRX - Red/Pink diamond */
         .wallet-method-icon.trx {
-            background: linear-gradient(135deg, #ff0013, #eb0029);
+            background: linear-gradient(145deg, #fb7185 0%, #f43f5e 50%, #e11d48 100%);
+            box-shadow: 0 8px 24px rgba(244, 63, 94, 0.4);
+        }
+        .wallet-method-icon.trx::before {
+            content: '◇';
+            font-size: 44px;
+            font-weight: 100;
         }
 
         /* Bonus Badge */
@@ -4137,6 +4259,27 @@
 
         .wallet-more-methods .wallet-method-name {
             color: #c084fc;
+        }
+
+        .wallet-more-methods .wallet-method-icon {
+            position: absolute;
+            right: 12px;
+            bottom: 50%;
+            transform: translateY(50%);
+            width: 40px;
+            height: 40px;
+            background: rgba(168, 85, 247, 0.3);
+            border-radius: 50%;
+            font-size: 20px;
+            color: #c084fc;
+        }
+
+        /* Wide card icon adjustment */
+        .wallet-method-card.wide .wallet-method-icon {
+            position: relative;
+            right: auto;
+            bottom: auto;
+            transform: none;
         }
 
         /* ═══════════════════════════════════════════════════
@@ -4844,17 +4987,17 @@
                     <div class="wallet-method-card" onclick="selectPaymentMethod('sber')">
                         <div class="wallet-method-name">SberPay</div>
                         <div class="wallet-method-min">от 200 ₽</div>
-                        <div class="wallet-method-icon sber">💳</div>
+                        <div class="wallet-method-icon sber"></div>
                     </div>
                     <div class="wallet-method-card" onclick="selectPaymentMethod('tpay')">
                         <div class="wallet-method-name">T-Pay</div>
                         <div class="wallet-method-min">от 200 ₽</div>
-                        <div class="wallet-method-icon tpay">💳</div>
+                        <div class="wallet-method-icon tpay"></div>
                     </div>
                     <div class="wallet-method-card" onclick="selectPaymentMethod('alfa')">
                         <div class="wallet-method-name">Альфа-Банк</div>
                         <div class="wallet-method-min">от 1000 ₽</div>
-                        <div class="wallet-method-icon alfa">💳</div>
+                        <div class="wallet-method-icon alfa"></div>
                     </div>
                     <div class="wallet-method-card wallet-more-methods" onclick="showMoreMethods()">
                         <div class="wallet-method-name">Ещё 5 способов</div>
@@ -4869,24 +5012,24 @@
                         <div class="wallet-method-bonus">+5%</div>
                         <div class="wallet-method-name">USDT</div>
                         <div class="wallet-method-min">(TRC20)</div>
-                        <div class="wallet-method-icon usdt">₮</div>
+                        <div class="wallet-method-icon usdt"></div>
                     </div>
                     <div class="wallet-method-card" onclick="selectPaymentMethod('ton')">
                         <div class="wallet-method-bonus">+5%</div>
                         <div class="wallet-method-name">TON</div>
                         <div class="wallet-method-min">(Toncoin)</div>
-                        <div class="wallet-method-icon ton">💎</div>
+                        <div class="wallet-method-icon ton"></div>
                     </div>
                     <div class="wallet-method-card" onclick="selectPaymentMethod('usdt-ton')">
                         <div class="wallet-method-bonus">+5%</div>
                         <div class="wallet-method-name">USDT</div>
                         <div class="wallet-method-min">(TON)</div>
-                        <div class="wallet-method-icon usdt">₮</div>
+                        <div class="wallet-method-icon usdt"></div>
                     </div>
                     <div class="wallet-method-card" onclick="selectPaymentMethod('trx')">
                         <div class="wallet-method-name">TRX</div>
                         <div class="wallet-method-min">(Tron)</div>
-                        <div class="wallet-method-icon trx">⟐</div>
+                        <div class="wallet-method-icon trx"></div>
                     </div>
                 </div>
             </div>
@@ -4925,17 +5068,17 @@
                             <div class="wallet-method-name">Перевод на карту</div>
                             <div class="wallet-method-min">от 3000 ₽</div>
                         </div>
-                        <div class="wallet-method-icon card">💳</div>
+                        <div class="wallet-method-icon card"></div>
                     </div>
                     <div class="wallet-method-card" onclick="selectWithdrawMethod('sbp')">
                         <div class="wallet-method-name">СБП</div>
                         <div class="wallet-method-min">от 3000 ₽</div>
-                        <div class="wallet-method-icon sbp">⚡</div>
+                        <div class="wallet-method-icon sbp"></div>
                     </div>
                     <div class="wallet-method-card" onclick="selectWithdrawMethod('piastrix')">
                         <div class="wallet-method-name">Piastrix</div>
                         <div class="wallet-method-min">от 2000 ₽</div>
-                        <div class="wallet-method-icon piastrix">✿</div>
+                        <div class="wallet-method-icon piastrix"></div>
                     </div>
                 </div>
 
@@ -4945,22 +5088,22 @@
                     <div class="wallet-method-card" onclick="selectWithdrawMethod('usdt-trc20')">
                         <div class="wallet-method-name">USDT</div>
                         <div class="wallet-method-min">(TRC20)</div>
-                        <div class="wallet-method-icon usdt">₮</div>
+                        <div class="wallet-method-icon usdt"></div>
                     </div>
                     <div class="wallet-method-card" onclick="selectWithdrawMethod('ton')">
                         <div class="wallet-method-name">TON</div>
                         <div class="wallet-method-min">(Toncoin)</div>
-                        <div class="wallet-method-icon ton">💎</div>
+                        <div class="wallet-method-icon ton"></div>
                     </div>
                     <div class="wallet-method-card" onclick="selectWithdrawMethod('usdt-ton')">
                         <div class="wallet-method-name">USDT</div>
                         <div class="wallet-method-min">(TON)</div>
-                        <div class="wallet-method-icon usdt">₮</div>
+                        <div class="wallet-method-icon usdt"></div>
                     </div>
                     <div class="wallet-method-card" onclick="selectWithdrawMethod('trx')">
                         <div class="wallet-method-name">TRX</div>
                         <div class="wallet-method-min">(Tron)</div>
-                        <div class="wallet-method-icon trx">⟐</div>
+                        <div class="wallet-method-icon trx"></div>
                     </div>
                 </div>
             </div>
