@@ -60,6 +60,342 @@
         }
 
         .hidden { display: none !important; }
+
+        /* ═══════════════════════════════════════════════════
+           NEON THEME STYLES
+           ═══════════════════════════════════════════════════ */
+        
+        /* Neon Theme - Main Menu Background */
+        body.neon-theme #mainMenu {
+            background: linear-gradient(180deg, #0f0a1a 0%, #1a0f2e 50%, #0d0618 100%);
+        }
+
+        /* Neon Theme - Profile Card */
+        body.neon-theme .menu-profile-card {
+            background: linear-gradient(135deg, #1a0f2e 0%, #0f0a1a 100%);
+            border-bottom: 1px solid rgba(168, 85, 247, 0.3);
+        }
+
+        body.neon-theme .menu-avatar {
+            background: linear-gradient(135deg, #a855f7, #7c3aed);
+            border: 3px solid rgba(168, 85, 247, 0.6);
+            box-shadow: 0 0 20px rgba(168, 85, 247, 0.5), 0 0 40px rgba(168, 85, 247, 0.3);
+        }
+
+        body.neon-theme .menu-player-name {
+            color: #f0abfc;
+            text-shadow: 0 0 10px rgba(240, 171, 252, 0.5);
+        }
+
+        body.neon-theme .menu-balance {
+            color: #fbbf24;
+            text-shadow: 0 0 15px rgba(251, 191, 36, 0.6), 0 0 30px rgba(251, 191, 36, 0.3);
+        }
+
+        /* Neon Theme - Action Buttons */
+        body.neon-theme .menu-action-btn.deposit {
+            background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+            box-shadow: 0 0 15px rgba(34, 197, 94, 0.5), 0 4px 16px rgba(34, 197, 94, 0.3);
+        }
+
+        body.neon-theme .menu-action-btn.withdraw,
+        body.neon-theme .menu-action-btn.history,
+        body.neon-theme .menu-action-btn.settings {
+            background: rgba(168, 85, 247, 0.15);
+            border: 1px solid rgba(168, 85, 247, 0.4);
+            color: #e9d5ff;
+        }
+
+        body.neon-theme .menu-action-btn.withdraw:active,
+        body.neon-theme .menu-action-btn.history:active,
+        body.neon-theme .menu-action-btn.settings:active {
+            background: rgba(168, 85, 247, 0.3);
+            box-shadow: 0 0 15px rgba(168, 85, 247, 0.4);
+        }
+
+        /* Neon Theme - Game Mode Tabs */
+        body.neon-theme .game-mode-tab {
+            background: rgba(168, 85, 247, 0.1);
+            border: 2px solid rgba(168, 85, 247, 0.3);
+        }
+
+        body.neon-theme .game-mode-tab .tab-title {
+            color: #c4b5fd;
+        }
+
+        body.neon-theme .game-mode-tab .tab-icon {
+            filter: drop-shadow(0 0 8px rgba(251, 191, 36, 0.6));
+        }
+
+        body.neon-theme .game-mode-tab.active {
+            background: linear-gradient(135deg, #9333ea 0%, #7c3aed 100%);
+            border-color: #a855f7;
+            box-shadow: 0 0 20px rgba(147, 51, 234, 0.6), 0 6px 20px rgba(147, 51, 234, 0.4);
+        }
+
+        body.neon-theme .game-mode-tab.active .tab-title {
+            color: #fff;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+        }
+
+        /* Neon Theme - Private Game Button */
+        body.neon-theme .private-game-btn {
+            background: linear-gradient(135deg, #ec4899 0%, #d946ef 100%);
+            border: 2px solid rgba(236, 72, 153, 0.6);
+            box-shadow: 0 0 25px rgba(236, 72, 153, 0.5), 0 6px 20px rgba(217, 70, 239, 0.4);
+        }
+
+        body.neon-theme .private-game-btn .private-text {
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+        }
+
+        /* Neon Theme - Play Button */
+        body.neon-theme .play-btn {
+            background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+            color: #0f0a1a;
+            box-shadow: 0 0 25px rgba(251, 191, 36, 0.6), 0 6px 24px rgba(245, 158, 11, 0.4);
+        }
+
+        body.neon-theme .play-btn:active {
+            box-shadow: 0 0 35px rgba(251, 191, 36, 0.8), 0 4px 16px rgba(245, 158, 11, 0.5);
+        }
+
+        /* Neon Theme - Game Mode Description */
+        body.neon-theme .game-mode-desc {
+            color: #a78bfa;
+        }
+
+        /* Neon Theme - Stats */
+        body.neon-theme .menu-stat-value {
+            color: #c084fc;
+            text-shadow: 0 0 10px rgba(192, 132, 252, 0.5);
+        }
+
+        /* Neon Theme - Settings Modal */
+        body.neon-theme .settings-modal {
+            background: rgba(15, 10, 26, 0.95);
+        }
+
+        body.neon-theme .settings-content {
+            background: linear-gradient(145deg, #1a0f2e, #0f0a1a);
+            border: 2px solid rgba(168, 85, 247, 0.4);
+            box-shadow: 0 0 40px rgba(168, 85, 247, 0.3), 0 20px 60px rgba(0, 0, 0, 0.5);
+        }
+
+        body.neon-theme .settings-title {
+            color: #c084fc;
+            text-shadow: 0 0 15px rgba(192, 132, 252, 0.5);
+        }
+
+        body.neon-theme .settings-close {
+            background: rgba(236, 72, 153, 0.2);
+            color: #ec4899;
+        }
+
+        body.neon-theme .settings-close:hover {
+            background: rgba(236, 72, 153, 0.4);
+            box-shadow: 0 0 15px rgba(236, 72, 153, 0.5);
+        }
+
+        body.neon-theme .settings-section-title {
+            color: #a78bfa;
+            text-shadow: 0 0 8px rgba(167, 139, 250, 0.4);
+        }
+
+        body.neon-theme .setting-item {
+            background: rgba(168, 85, 247, 0.1);
+            border: 1px solid rgba(168, 85, 247, 0.2);
+        }
+
+        body.neon-theme .setting-name {
+            color: #f0abfc;
+        }
+
+        body.neon-theme .setting-desc {
+            color: #a78bfa;
+        }
+
+        body.neon-theme .toggle-switch {
+            background: rgba(168, 85, 247, 0.3);
+        }
+
+        body.neon-theme .toggle-switch.active {
+            background: linear-gradient(135deg, #22c55e, #16a34a);
+            box-shadow: 0 0 15px rgba(34, 197, 94, 0.5);
+        }
+
+        /* Neon Theme - History Modal */
+        body.neon-theme .history-modal {
+            background: rgba(15, 10, 26, 0.98);
+        }
+
+        body.neon-theme .history-header {
+            background: linear-gradient(145deg, #1a0f2e, #0f0a1a);
+            border-bottom: 1px solid rgba(251, 191, 36, 0.3);
+        }
+
+        body.neon-theme .history-title {
+            color: #fbbf24;
+            text-shadow: 0 0 15px rgba(251, 191, 36, 0.5);
+        }
+
+        body.neon-theme .history-close {
+            background: rgba(236, 72, 153, 0.2);
+            color: #ec4899;
+        }
+
+        body.neon-theme .history-stats {
+            background: rgba(15, 10, 26, 0.9);
+        }
+
+        body.neon-theme .history-stat {
+            background: rgba(168, 85, 247, 0.15);
+            border: 1px solid rgba(168, 85, 247, 0.2);
+        }
+
+        body.neon-theme .history-stat-value {
+            text-shadow: 0 0 10px currentColor;
+        }
+
+        body.neon-theme .history-item {
+            background: linear-gradient(145deg, #1a0f2e, #0f0a1a);
+            border: 1px solid rgba(168, 85, 247, 0.2);
+        }
+
+        body.neon-theme .history-item.win {
+            border-left: 4px solid #22c55e;
+            box-shadow: 0 0 15px rgba(34, 197, 94, 0.2);
+        }
+
+        body.neon-theme .history-item.loss {
+            border-left: 4px solid #ec4899;
+            box-shadow: 0 0 15px rgba(236, 72, 153, 0.2);
+        }
+
+        /* Neon Theme - Private Game Modal */
+        body.neon-theme .private-game-modal {
+            background: rgba(15, 10, 26, 0.95);
+        }
+
+        body.neon-theme .private-game-content {
+            background: linear-gradient(145deg, #1a0f2e, #0f0a1a);
+            border: 2px solid rgba(168, 85, 247, 0.4);
+            box-shadow: 0 0 40px rgba(168, 85, 247, 0.3);
+        }
+
+        body.neon-theme .pg-header-title {
+            color: #fbbf24;
+            text-shadow: 0 0 15px rgba(251, 191, 36, 0.5);
+        }
+
+        body.neon-theme .pg-close {
+            background: rgba(236, 72, 153, 0.2);
+            color: #ec4899;
+        }
+
+        body.neon-theme .pg-tab {
+            background: rgba(168, 85, 247, 0.15);
+            border: 2px solid rgba(168, 85, 247, 0.3);
+            color: #c4b5fd;
+        }
+
+        body.neon-theme .pg-tab.active {
+            background: linear-gradient(135deg, #9333ea, #7c3aed);
+            border-color: #a855f7;
+            color: #fff;
+            box-shadow: 0 0 20px rgba(147, 51, 234, 0.5);
+        }
+
+        body.neon-theme .pg-label {
+            color: #a78bfa;
+        }
+
+        body.neon-theme .pg-select {
+            background: rgba(168, 85, 247, 0.1);
+            border: 1px solid rgba(168, 85, 247, 0.3);
+            color: #f0abfc;
+        }
+
+        body.neon-theme .pg-input {
+            background: rgba(168, 85, 247, 0.1);
+            border: 1px solid rgba(168, 85, 247, 0.3);
+            color: #f0abfc;
+        }
+
+        body.neon-theme .create-btn {
+            background: linear-gradient(135deg, #fbbf24, #f59e0b);
+            box-shadow: 0 0 20px rgba(251, 191, 36, 0.5);
+        }
+
+        body.neon-theme .join-btn {
+            background: linear-gradient(135deg, #9333ea, #7c3aed);
+            box-shadow: 0 0 20px rgba(147, 51, 234, 0.5);
+        }
+
+        body.neon-theme .start-game-btn {
+            background: linear-gradient(135deg, #22c55e, #16a34a);
+            box-shadow: 0 0 20px rgba(34, 197, 94, 0.5);
+        }
+
+        body.neon-theme .lobby-code-display {
+            color: #fbbf24;
+            text-shadow: 0 0 15px rgba(251, 191, 36, 0.6);
+        }
+
+        body.neon-theme .invite-btn.telegram {
+            background: linear-gradient(135deg, #9333ea, #7c3aed);
+            box-shadow: 0 0 15px rgba(147, 51, 234, 0.4);
+        }
+
+        body.neon-theme .invite-btn.copy {
+            background: rgba(168, 85, 247, 0.2);
+            border: 1px solid rgba(168, 85, 247, 0.4);
+            color: #c4b5fd;
+        }
+
+        /* Neon Theme - Waiting Room */
+        body.neon-theme #waitingRoomScreen {
+            background: linear-gradient(180deg, #0f0a1a 0%, #1a0f2e 100%);
+        }
+
+        body.neon-theme .waiting-room-header {
+            background: linear-gradient(145deg, #1a0f2e, #0f0a1a);
+            border-bottom: 1px solid rgba(168, 85, 247, 0.3);
+        }
+
+        body.neon-theme .waiting-room-title {
+            color: #fbbf24;
+            text-shadow: 0 0 15px rgba(251, 191, 36, 0.5);
+        }
+
+        body.neon-theme .waiting-code-value {
+            color: #fbbf24;
+            text-shadow: 0 0 20px rgba(251, 191, 36, 0.6);
+        }
+
+        body.neon-theme .waiting-room-info {
+            background: rgba(168, 85, 247, 0.1);
+            border: 1px solid rgba(168, 85, 247, 0.2);
+        }
+
+        body.neon-theme .waiting-player-item {
+            background: rgba(168, 85, 247, 0.1);
+            border: 1px solid rgba(168, 85, 247, 0.2);
+        }
+
+        body.neon-theme .waiting-player-name {
+            color: #f0abfc;
+        }
+
+        body.neon-theme .waiting-invite-btn {
+            background: linear-gradient(135deg, #9333ea, #7c3aed);
+            box-shadow: 0 0 15px rgba(147, 51, 234, 0.4);
+        }
+
+        body.neon-theme .waiting-start-btn {
+            background: linear-gradient(135deg, #22c55e, #16a34a);
+            box-shadow: 0 0 20px rgba(34, 197, 94, 0.5);
+        }
         
         /* ═══════ SCREEN TRANSITION ANIMATIONS ═══════ */
         .screen {
@@ -3630,17 +3966,17 @@
             </div>
 
             <div class="settings-section">
-                <div class="settings-section-title">Display</div>
+                <div class="settings-section-title">Theme</div>
                 
                 <div class="setting-item">
                     <div class="setting-info">
-                        <span class="setting-icon">🌙</span>
+                        <span class="setting-icon">✨</span>
                         <div class="setting-text">
-                            <span class="setting-name">Dark Mode</span>
-                            <span class="setting-desc">Always enabled for poker</span>
+                            <span class="setting-name">Neon Theme</span>
+                            <span class="setting-desc">Purple neon glow style</span>
                         </div>
                     </div>
-                    <div class="toggle-switch active" style="opacity: 0.5; cursor: not-allowed;">
+                    <div class="toggle-switch" id="neonToggle" onclick="toggleNeonTheme()">
                         <span class="toggle-label on">ON</span>
                         <span class="toggle-label off">OFF</span>
                     </div>
@@ -5552,7 +5888,8 @@
         // ═══════════════════════════════════════════════════
         var userSettings = {
             musicEnabled: false,
-            sfxEnabled: true
+            sfxEnabled: true,
+            neonTheme: false
         };
 
         // Load settings from localStorage
@@ -5589,6 +5926,7 @@
         function updateSettingsUI() {
             var musicToggle = document.getElementById('musicToggle');
             var sfxToggle = document.getElementById('sfxToggle');
+            var neonToggle = document.getElementById('neonToggle');
             
             if (musicToggle) {
                 if (userSettings.musicEnabled) {
@@ -5605,6 +5943,17 @@
                     sfxToggle.classList.remove('active');
                 }
             }
+            
+            if (neonToggle) {
+                if (userSettings.neonTheme) {
+                    neonToggle.classList.add('active');
+                } else {
+                    neonToggle.classList.remove('active');
+                }
+            }
+            
+            // Apply theme to body
+            applyTheme();
         }
 
         function toggleMusic() {
@@ -5626,6 +5975,20 @@
             saveSettings();
             updateSettingsUI();
             // No alert - just visual toggle feedback
+        }
+
+        function toggleNeonTheme() {
+            userSettings.neonTheme = !userSettings.neonTheme;
+            saveSettings();
+            updateSettingsUI();
+        }
+
+        function applyTheme() {
+            if (userSettings.neonTheme) {
+                document.body.classList.add('neon-theme');
+            } else {
+                document.body.classList.remove('neon-theme');
+            }
         }
 
         // ═══════════════════════════════════════════════════
@@ -7114,6 +7477,9 @@
         // Load user settings and history on startup
         loadSettings();
         loadGameHistory();
+        
+        // Apply saved theme immediately
+        applyTheme();
 
         addDebug('Ready');
     </script>

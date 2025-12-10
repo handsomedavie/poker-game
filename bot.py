@@ -29,8 +29,9 @@ BOT_USERNAME = os.environ.get("BOT_USERNAME", "pokerhouse77bot")
 # Cache headers are set in Netlify _headers file to prevent caching
 WEBAPP_URL = os.environ.get("WEBAPP_URL", "https://dapper-heliotrope-03aa40.netlify.app/mobile.html")
 
-# Banner image for welcome messages (poker-themed)
-BANNER_IMAGE_URL = "https://images.unsplash.com/photo-1511193311914-0346f16efe90?w=800&h=400&fit=crop"
+# Banner image for welcome messages (AI-style poker themed)
+# Beautiful AI poker girl image
+BANNER_IMAGE_URL = "https://i.postimg.cc/6QWDD5PV/photo-2025-12-09-15-03-53.jpg"
 
 
 def get_main_keyboard() -> InlineKeyboardMarkup:
@@ -38,14 +39,10 @@ def get_main_keyboard() -> InlineKeyboardMarkup:
     keyboard = [
         [
             InlineKeyboardButton(
-                "🎰 Играть в покер", 
+                "🃏 ИГРАТЬ СЕЙЧАС 🎰", 
                 web_app=WebAppInfo(url=WEBAPP_URL)
             )
-        ],
-        [
-            InlineKeyboardButton("📊 Рейтинг", callback_data="leaderboard"),
-            InlineKeyboardButton("❓ Помощь", callback_data="help"),
-        ],
+        ]
     ]
     return InlineKeyboardMarkup(keyboard)
 
@@ -54,7 +51,6 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Handle /start command"""
     user = update.effective_user
     name = user.first_name if user else "Player"
-    
     # Check for deep link (lobby invite)
     args = context.args
     if args and args[0].startswith("lobby_"):
@@ -94,14 +90,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         f"🎰 *POKER HOUSE*\n\n"
         f"👋 Добро пожаловать, *{name}*!\n\n"
         "🃏 *Texas Hold'em Poker* — играй с друзьями\n"
-        "прямо в Telegram без регистрации и VPN!\n\n"
-        "━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
-        "Тебя ждёт:\n"
-        "� *Бесплатные фишки* каждый день\n"
-        "🏆 *Турниры* с призами\n"
-        "� *Приватные столы* с друзьями\n"
-        "⚡ *Быстрые игры* Sit & Go\n"
-        "━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        "прямо в Telegram без регистрации и VPN!"
     )
     
     # Send photo banner with welcome message
