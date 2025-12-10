@@ -6,6 +6,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#1a0f2e">
     <title>Poker House</title>
     <!-- Critical: Show loading indicator immediately -->
     <style>
@@ -5645,6 +5646,31 @@
             addDebug('Browser mode - custom close buttons enabled');
         }
 
+        // Function to set Telegram header color (call when switching screens)
+        function setTelegramHeaderColor(color) {
+            color = color || '#1a0f2e'; // Default dark purple
+            
+            // Update meta theme-color for browser
+            var metaTheme = document.querySelector('meta[name="theme-color"]');
+            if (metaTheme) {
+                metaTheme.setAttribute('content', color);
+            }
+            
+            // Update Telegram header if inside TG
+            if (isTelegramApp && tg) {
+                try {
+                    if (tg.setHeaderColor) {
+                        tg.setHeaderColor(color);
+                    }
+                    if (tg.setBackgroundColor) {
+                        tg.setBackgroundColor(color);
+                    }
+                } catch(e) {
+                    addDebug('setHeaderColor error: ' + e.message);
+                }
+            }
+        }
+
         // Hide initial loader
         function hideInitialLoader() {
             var loader = document.getElementById('initialLoader');
@@ -5914,6 +5940,9 @@
             addDebug('Back');
             // Smooth transition back to main menu
             showScreen('mainMenu', ['lobbyScreen']);
+            
+            // Reset header color
+            setTelegramHeaderColor('#1a0f2e');
             
             // Hide TG BackButton
             if (isTelegramApp && tg.BackButton) {
@@ -7164,6 +7193,9 @@
                 modal.classList.add('hidden');
             }
             
+            // Reset header color to main menu color
+            setTelegramHeaderColor('#1a0f2e');
+            
             // Hide Telegram BackButton
             if (isTelegramApp && tg.BackButton) {
                 tg.BackButton.hide();
@@ -7286,6 +7318,9 @@
 
         function closeSettings() {
             document.getElementById('settingsModal').classList.add('hidden');
+            
+            // Reset header color
+            setTelegramHeaderColor('#1a0f2e');
             
             // Hide TG BackButton
             if (isTelegramApp && tg.BackButton) {
@@ -7428,6 +7463,9 @@
         function closeHistory() {
             document.getElementById('historyModal').classList.add('hidden');
             
+            // Reset header color
+            setTelegramHeaderColor('#1a0f2e');
+            
             // Hide TG BackButton
             if (isTelegramApp && tg.BackButton) {
                 tg.BackButton.hide();
@@ -7529,6 +7567,9 @@
             }
             // Reset tabs visibility
             document.querySelector('.private-game-tabs').style.display = 'flex';
+            
+            // Reset header color
+            setTelegramHeaderColor('#1a0f2e');
             
             // Hide TG BackButton
             if (isTelegramApp && tg.BackButton) {
