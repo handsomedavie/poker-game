@@ -1221,48 +1221,62 @@
            LOBBY SCREEN STYLES
            ═══════════════════════════════════════════════════ */
         #lobbyScreen {
-            min-height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(180deg, #1a0f2e 0%, #0f0a1a 50%, #0d0618 100%);
             display: flex;
             flex-direction: column;
+            /* Large offset for TG close button */
+            padding-top: calc(var(--safe-top) + 50px);
+            padding-bottom: var(--safe-bottom);
+            overflow: hidden;
+        }
+
+        #lobbyScreen::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: calc(var(--safe-top) + 50px);
+            background: var(--app-bg);
+            z-index: 1;
         }
 
         .lobby-header {
+            position: relative;
+            z-index: 2;
             display: flex;
             align-items: center;
             gap: 12px;
-            padding: 12px 16px;
-            background: #0a0f18;
-            border-bottom: 1px solid #1e293b;
+            padding: 16px 20px;
+            background: rgba(26, 15, 46, 0.95);
+            border-bottom: 1px solid rgba(168, 85, 247, 0.2);
+            flex-shrink: 0;
         }
 
         .back-btn {
-            width: 40px; height: 40px;
-            border-radius: 12px;
-            border: none;
-            background: #1e293b;
-            color: #e5e7eb;
-            font-size: 20px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            -webkit-tap-highlight-color: transparent;
-        }
-
-        .back-btn:active {
-            background: #334155;
+            /* Hidden - use TG BackButton */
+            display: none;
         }
 
         .lobby-title {
-            font-size: 18px;
-            font-weight: 600;
+            font-size: 20px;
+            font-weight: 700;
             color: #e5e7eb;
         }
 
         .lobby-content {
+            position: relative;
+            z-index: 2;
             flex: 1;
             display: flex;
             flex-direction: column;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
         }
 
         @media (min-width: 768px) {
@@ -2896,34 +2910,50 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: rgba(0, 0, 0, 0.9);
+            background: linear-gradient(180deg, #1a0f2e 0%, #0f0a1a 50%, #0d0618 100%);
             z-index: 1000;
             display: flex;
-            align-items: center;
-            justify-content: center;
-            /* Safe area padding */
-            padding: calc(var(--safe-top) + 20px) 20px calc(var(--safe-bottom) + 20px) 20px;
+            flex-direction: column;
+            /* Large offset for TG close button */
+            padding-top: calc(var(--safe-top) + 50px);
+            padding-bottom: var(--safe-bottom);
+            overflow: hidden;
+        }
+
+        .private-game-modal::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: calc(var(--safe-top) + 50px);
+            background: var(--app-bg);
+            z-index: 1;
         }
 
         .private-game-content {
-            background: linear-gradient(145deg, #1e293b, #0f172a);
-            border-radius: 20px;
-            padding: 24px;
-            width: 100%;
-            max-width: 380px;
-            border: 2px solid rgba(251, 191, 36, 0.3);
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            position: relative;
+            z-index: 2;
+            flex: 1;
+            padding: 0 20px 20px;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
         }
 
         .private-game-header {
+            position: relative;
+            z-index: 2;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 20px;
+            padding: 16px 20px;
+            background: rgba(26, 15, 46, 0.95);
+            border-bottom: 1px solid rgba(251, 191, 36, 0.2);
+            flex-shrink: 0;
         }
 
         .private-game-title {
-            font-size: 22px;
+            font-size: 20px;
             font-weight: 700;
             color: #fbbf24;
             display: flex;
@@ -2932,19 +2962,8 @@
         }
 
         .private-game-close {
-            background: rgba(239, 68, 68, 0.2);
-            border: none;
-            color: #ef4444;
-            font-size: 24px;
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .private-game-close:hover {
-            background: rgba(239, 68, 68, 0.4);
+            /* Hidden - use TG BackButton */
+            display: none;
         }
 
         .private-game-tabs {
@@ -3541,14 +3560,26 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: rgba(0, 0, 0, 0.9);
+            background: linear-gradient(180deg, #1a0f2e 0%, #0f0a1a 50%, #0d0618 100%);
             z-index: 1000;
             display: flex;
-            align-items: center;
-            justify-content: center;
-            /* Safe area padding */
-            padding: calc(var(--safe-top) + 20px) 20px calc(var(--safe-bottom) + 20px) 20px;
+            flex-direction: column;
+            /* Large offset for TG close button */
+            padding-top: calc(var(--safe-top) + 50px);
+            padding-bottom: var(--safe-bottom);
             animation: fadeInModal 0.3s ease forwards;
+            overflow: hidden;
+        }
+
+        .settings-modal::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: calc(var(--safe-top) + 50px);
+            background: var(--app-bg);
+            z-index: 1;
         }
 
         .settings-modal.hidden {
@@ -3556,33 +3587,38 @@
         }
 
         .settings-content {
-            background: linear-gradient(145deg, #1e293b, #0f172a);
-            border-radius: 20px;
-            padding: 24px;
-            width: 100%;
-            max-width: 380px;
-            border: 2px solid rgba(59, 130, 246, 0.3);
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
-            animation: slideInContent 0.3s ease forwards;
+            position: relative;
+            z-index: 2;
+            flex: 1;
+            padding: 0 20px 20px;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
         }
 
         .settings-header {
+            position: relative;
+            z-index: 2;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 24px;
+            padding: 16px 20px;
+            background: rgba(26, 15, 46, 0.95);
+            border-bottom: 1px solid rgba(168, 85, 247, 0.2);
+            flex-shrink: 0;
         }
 
         .settings-title {
-            font-size: 22px;
+            font-size: 20px;
             font-weight: 700;
-            color: #3b82f6;
+            color: #a855f7;
             display: flex;
             align-items: center;
             gap: 10px;
         }
 
         .settings-close {
+            /* Hidden - use TG BackButton */
+            display: none;
             background: rgba(239, 68, 68, 0.2);
             border: none;
             color: #ef4444;
@@ -3591,13 +3627,6 @@
             height: 36px;
             border-radius: 50%;
             cursor: pointer;
-            transition: all 0.2s;
-            -webkit-tap-highlight-color: transparent;
-            touch-action: manipulation;
-        }
-
-        .settings-close:hover {
-            background: rgba(239, 68, 68, 0.4);
         }
 
         .settings-section {
@@ -4119,14 +4148,26 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: rgba(0, 0, 0, 0.95);
+            background: linear-gradient(180deg, #1a0f2e 0%, #0f0a1a 50%, #0d0618 100%);
             z-index: 1000;
             display: flex;
             flex-direction: column;
-            /* Safe area padding */
-            padding-top: var(--safe-top);
+            /* Large offset for TG close button */
+            padding-top: calc(var(--safe-top) + 50px);
             padding-bottom: var(--safe-bottom);
             animation: fadeInModal 0.3s ease forwards;
+            overflow: hidden;
+        }
+
+        .history-modal::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: calc(var(--safe-top) + 50px);
+            background: var(--app-bg);
+            z-index: 1;
         }
 
         .history-modal.hidden {
@@ -4134,16 +4175,19 @@
         }
 
         .history-header {
+            position: relative;
+            z-index: 2;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 20px;
-            background: linear-gradient(145deg, #1e293b, #0f172a);
+            padding: 16px 20px;
+            background: rgba(26, 15, 46, 0.95);
             border-bottom: 1px solid rgba(251, 191, 36, 0.2);
+            flex-shrink: 0;
         }
 
         .history-title {
-            font-size: 22px;
+            font-size: 20px;
             font-weight: 700;
             color: #fbbf24;
             display: flex;
@@ -4152,6 +4196,8 @@
         }
 
         .history-close {
+            /* Hidden - use TG BackButton */
+            display: none;
             background: rgba(239, 68, 68, 0.2);
             border: none;
             color: #ef4444;
@@ -5641,6 +5687,8 @@
             if (descEl) descEl.textContent = gameModeDescriptions[mode] || '';
         }
 
+        var lobbyBackButtonHandler = null;
+        
         function openLobby(mode) {
             currentMode = mode;
             addDebug('Open: ' + mode);
@@ -5662,6 +5710,16 @@
             
             // Smooth transition to lobby
             showScreen('lobbyScreen', ['mainMenu']);
+            
+            // Show TG BackButton
+            if (tg && tg.BackButton) {
+                if (lobbyBackButtonHandler) {
+                    tg.BackButton.offClick(lobbyBackButtonHandler);
+                }
+                lobbyBackButtonHandler = function() { goBack(); };
+                tg.BackButton.onClick(lobbyBackButtonHandler);
+                tg.BackButton.show();
+            }
 
             renderTables(mode);
         }
@@ -5670,6 +5728,15 @@
             addDebug('Back');
             // Smooth transition back to main menu
             showScreen('mainMenu', ['lobbyScreen']);
+            
+            // Hide TG BackButton
+            if (tg && tg.BackButton) {
+                tg.BackButton.hide();
+                if (lobbyBackButtonHandler) {
+                    tg.BackButton.offClick(lobbyBackButtonHandler);
+                    lobbyBackButtonHandler = null;
+                }
+            }
         }
 
         function switchTab(btn, filter) {
@@ -7014,13 +7081,34 @@
             }
         }
 
+        var settingsBackButtonHandler = null;
+        
         function openSettings() {
             loadSettings();
             document.getElementById('settingsModal').classList.remove('hidden');
+            
+            // Show TG BackButton
+            if (tg && tg.BackButton) {
+                if (settingsBackButtonHandler) {
+                    tg.BackButton.offClick(settingsBackButtonHandler);
+                }
+                settingsBackButtonHandler = function() { closeSettings(); };
+                tg.BackButton.onClick(settingsBackButtonHandler);
+                tg.BackButton.show();
+            }
         }
 
         function closeSettings() {
             document.getElementById('settingsModal').classList.add('hidden');
+            
+            // Hide TG BackButton
+            if (tg && tg.BackButton) {
+                tg.BackButton.hide();
+                if (settingsBackButtonHandler) {
+                    tg.BackButton.offClick(settingsBackButtonHandler);
+                    settingsBackButtonHandler = null;
+                }
+            }
         }
 
         function updateSettingsUI() {
@@ -7133,14 +7221,35 @@
             saveGameHistory();
         }
 
+        var historyBackButtonHandler = null;
+        
         function openHistory() {
             loadGameHistory();
             renderHistory();
             document.getElementById('historyModal').classList.remove('hidden');
+            
+            // Show TG BackButton
+            if (tg && tg.BackButton) {
+                if (historyBackButtonHandler) {
+                    tg.BackButton.offClick(historyBackButtonHandler);
+                }
+                historyBackButtonHandler = function() { closeHistory(); };
+                tg.BackButton.onClick(historyBackButtonHandler);
+                tg.BackButton.show();
+            }
         }
 
         function closeHistory() {
             document.getElementById('historyModal').classList.add('hidden');
+            
+            // Hide TG BackButton
+            if (tg && tg.BackButton) {
+                tg.BackButton.hide();
+                if (historyBackButtonHandler) {
+                    tg.BackButton.offClick(historyBackButtonHandler);
+                    historyBackButtonHandler = null;
+                }
+            }
         }
 
         function renderHistory() {
@@ -7208,11 +7317,22 @@
         // PRIVATE GAME MODAL FUNCTIONS
         // ═══════════════════════════════════════════════════
         var currentPrivateLobby = null;
+        var privateGameBackButtonHandler = null;
 
         function openPrivateGameModal() {
             addDebug('Open Private Game Modal');
             document.getElementById('privateGameModal').classList.remove('hidden');
             resetPrivateGameModal();
+            
+            // Show TG BackButton
+            if (tg && tg.BackButton) {
+                if (privateGameBackButtonHandler) {
+                    tg.BackButton.offClick(privateGameBackButtonHandler);
+                }
+                privateGameBackButtonHandler = function() { closePrivateGameModal(true); };
+                tg.BackButton.onClick(privateGameBackButtonHandler);
+                tg.BackButton.show();
+            }
         }
 
         function closePrivateGameModal(resetLobby) {
@@ -7223,6 +7343,15 @@
             }
             // Reset tabs visibility
             document.querySelector('.private-game-tabs').style.display = 'flex';
+            
+            // Hide TG BackButton
+            if (tg && tg.BackButton) {
+                tg.BackButton.hide();
+                if (privateGameBackButtonHandler) {
+                    tg.BackButton.offClick(privateGameBackButtonHandler);
+                    privateGameBackButtonHandler = null;
+                }
+            }
         }
 
         function resetPrivateGameModal() {
