@@ -1259,8 +1259,24 @@
         }
 
         .back-btn {
-            /* Hidden - use TG BackButton */
+            /* Hidden by default - shown in browser via body:not(.tg-webapp) */
             display: none;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            border: none;
+            background: rgba(168, 85, 247, 0.2);
+            color: #c084fc;
+            font-size: 20px;
+            cursor: pointer;
+            transition: all 0.2s;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        .back-btn:hover {
+            background: rgba(168, 85, 247, 0.4);
         }
 
         .lobby-title {
@@ -2962,8 +2978,19 @@
         }
 
         .private-game-close {
-            /* Hidden - use TG BackButton */
+            /* Hidden by default - shown in browser via body:not(.tg-webapp) */
             display: none;
+            align-items: center;
+            justify-content: center;
+            background: rgba(239, 68, 68, 0.2);
+            border: none;
+            color: #ef4444;
+            font-size: 24px;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.2s;
         }
 
         .private-game-tabs {
@@ -3617,8 +3644,10 @@
         }
 
         .settings-close {
-            /* Hidden - use TG BackButton */
+            /* Hidden by default - shown in browser via body:not(.tg-webapp) */
             display: none;
+            align-items: center;
+            justify-content: center;
             background: rgba(239, 68, 68, 0.2);
             border: none;
             color: #ef4444;
@@ -3627,6 +3656,7 @@
             height: 36px;
             border-radius: 50%;
             cursor: pointer;
+            transition: all 0.2s;
         }
 
         .settings-section {
@@ -3816,8 +3846,12 @@
             justify-content: center;
         }
         
-        /* Show close button only when not in Telegram */
-        body:not(.tg-webapp) .wallet-close-btn {
+        /* Show close/back buttons only when not in Telegram (web browser) */
+        body:not(.tg-webapp) .wallet-close-btn,
+        body:not(.tg-webapp) .history-close,
+        body:not(.tg-webapp) .settings-close,
+        body:not(.tg-webapp) .private-game-close,
+        body:not(.tg-webapp) .back-btn {
             display: flex;
         }
 
@@ -4339,8 +4373,10 @@
         }
 
         .history-close {
-            /* Hidden - use TG BackButton */
+            /* Hidden by default - shown in browser via body:not(.tg-webapp) */
             display: none;
+            align-items: center;
+            justify-content: center;
             background: rgba(239, 68, 68, 0.2);
             border: none;
             color: #ef4444;
