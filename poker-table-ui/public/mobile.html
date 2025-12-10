@@ -1493,34 +1493,34 @@
             overflow: hidden;
         }
 
-        /* ═══════ TOP HEADER BAR - COMPACT WITH SAFE AREA + TG CLOSE BUTTON ═══════ */
+        /* ═══════ TOP HEADER BAR - BELOW TELEGRAM CLOSE BUTTON ═══════ */
         .poker-header {
             position: fixed;
-            /* Extra 12px offset to avoid Telegram close button */
-            top: calc(var(--safe-top) + 12px); 
+            /* 50px offset to place BELOW Telegram "Закрыть" button */
+            top: calc(var(--safe-top) + 50px); 
             left: var(--safe-left); 
             right: var(--safe-right);
             height: 40px;
-            background: rgba(26, 15, 46, 0.85);
+            background: rgba(26, 15, 46, 0.95);
             backdrop-filter: blur(8px);
             -webkit-backdrop-filter: blur(8px);
             display: grid;
             grid-template-columns: auto 1fr auto;
             align-items: center;
-            padding: 0 8px;
+            padding: 0 12px;
             z-index: 100;
-            border-bottom: 1px solid rgba(212, 175, 55, 0.15);
+            border-bottom: 1px solid rgba(212, 175, 55, 0.2);
         }
         
-        /* Safe area background fill above header - purple */
+        /* Safe area background fill above header - purple gradient */
         .poker-header::before {
             content: '';
             position: absolute;
-            top: calc(-1 * (var(--safe-top) + 12px));
+            top: calc(-1 * (var(--safe-top) + 50px));
             left: 0;
             right: 0;
-            height: calc(var(--safe-top) + 12px);
-            background: var(--app-bg);
+            height: calc(var(--safe-top) + 50px);
+            background: linear-gradient(180deg, var(--app-bg) 0%, rgba(26, 15, 46, 0.95) 100%);
         }
 
         .table-back-btn {
@@ -1573,8 +1573,8 @@
         /* ═══════ POKER TABLE - TALLER VERTICAL OVAL ═══════ */
         .poker-table-container {
             position: absolute;
-            /* Account for safe area + header height + TG close button offset */
-            top: calc(var(--safe-top) + 52px);
+            /* Account for: safe area + TG close button (50px) + our header (40px) */
+            top: calc(var(--safe-top) + 95px);
             left: 0;
             right: 0;
             bottom: calc(var(--safe-bottom) + 140px);
@@ -4802,13 +4802,24 @@
                 }
                 
                 // Set purple header color to match app theme
+                // Use darker purple that's visible as header
                 if (tg.setHeaderColor) {
-                    tg.setHeaderColor('#1a0f2e');
+                    try {
+                        tg.setHeaderColor('#1a0f2e');
+                    } catch(e) {
+                        // Fallback for older versions
+                        try { tg.setHeaderColor('secondary_bg_color'); } catch(e2) {}
+                    }
                 }
                 
                 // Set purple background color
                 if (tg.setBackgroundColor) {
                     tg.setBackgroundColor('#1a0f2e');
+                }
+                
+                // Also set bottom bar color if available
+                if (tg.setBottomBarColor) {
+                    tg.setBottomBarColor('#0d0618');
                 }
             } catch(e) {
                 addDebug('TG init error: ' + e.message);
