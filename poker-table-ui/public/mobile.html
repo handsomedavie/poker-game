@@ -64,9 +64,10 @@
             /* Minimum header offset (for devices without notch) */
             --header-offset: max(var(--safe-top), 10px);
             
-            /* App colors */
-            --app-bg: #0d0618;
-            --app-bg-light: #1a0f2e;
+            /* App colors - unified purple theme */
+            --app-bg: #1a0f2e;
+            --app-bg-dark: #0f0a1a;
+            --app-bg-light: #2d1f4e;
         }
         
         body {
@@ -1191,10 +1192,10 @@
             color: #64748b;
         }
 
-        /* Play Button - with safe area */
+        /* Play Button - with safe area, closer to Private Game */
         .play-section {
-            padding: 0 16px calc(var(--safe-bottom) + 24px);
-            margin-top: auto;
+            padding: 0 16px calc(var(--safe-bottom) + 16px);
+            margin-top: 16px;
         }
 
         .play-btn {
@@ -1488,18 +1489,19 @@
             top: 0; left: 0; right: 0; bottom: 0;
             width: 100vw;
             height: 100vh;
-            background: linear-gradient(180deg, #0a0e1a 0%, #1a1f35 50%, #0f1729 100%);
+            background: linear-gradient(180deg, #1a0f2e 0%, #0f0a1a 50%, #0d0618 100%);
             overflow: hidden;
         }
 
-        /* ═══════ TOP HEADER BAR - COMPACT WITH SAFE AREA ═══════ */
+        /* ═══════ TOP HEADER BAR - COMPACT WITH SAFE AREA + TG CLOSE BUTTON ═══════ */
         .poker-header {
             position: fixed;
-            top: var(--safe-top); 
+            /* Extra 12px offset to avoid Telegram close button */
+            top: calc(var(--safe-top) + 12px); 
             left: var(--safe-left); 
             right: var(--safe-right);
             height: 40px;
-            background: rgba(0, 0, 0, 0.45);
+            background: rgba(26, 15, 46, 0.85);
             backdrop-filter: blur(8px);
             -webkit-backdrop-filter: blur(8px);
             display: grid;
@@ -1510,14 +1512,14 @@
             border-bottom: 1px solid rgba(212, 175, 55, 0.15);
         }
         
-        /* Safe area background fill above header */
+        /* Safe area background fill above header - purple */
         .poker-header::before {
             content: '';
             position: absolute;
-            top: calc(-1 * var(--safe-top));
+            top: calc(-1 * (var(--safe-top) + 12px));
             left: 0;
             right: 0;
-            height: var(--safe-top);
+            height: calc(var(--safe-top) + 12px);
             background: var(--app-bg);
         }
 
@@ -1571,11 +1573,11 @@
         /* ═══════ POKER TABLE - TALLER VERTICAL OVAL ═══════ */
         .poker-table-container {
             position: absolute;
-            /* Account for safe area + header height */
-            top: calc(var(--safe-top) + 40px);
+            /* Account for safe area + header height + TG close button offset */
+            top: calc(var(--safe-top) + 52px);
             left: 0;
             right: 0;
-            bottom: calc(var(--safe-bottom) + 160px);
+            bottom: calc(var(--safe-bottom) + 140px);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -4799,14 +4801,14 @@
                     tg.disableVerticalSwipes();
                 }
                 
-                // Set dark header color to match app theme
+                // Set purple header color to match app theme
                 if (tg.setHeaderColor) {
-                    tg.setHeaderColor('#0d0618');
+                    tg.setHeaderColor('#1a0f2e');
                 }
                 
-                // Set dark background color
+                // Set purple background color
                 if (tg.setBackgroundColor) {
-                    tg.setBackgroundColor('#0d0618');
+                    tg.setBackgroundColor('#1a0f2e');
                 }
             } catch(e) {
                 addDebug('TG init error: ' + e.message);
