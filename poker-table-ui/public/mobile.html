@@ -1657,18 +1657,41 @@
             border-radius: 48% / 42%;
         }
 
-        /* ═══════ POT DISPLAY - BETWEEN PLAYER AND CARDS ═══════ */
-        .pot-center {
+        /* ═══════ POT AREA - BELOW COMMUNITY CARDS ═══════ */
+        .pot-area {
             position: absolute !important;
-            top: 28% !important;
+            top: 52% !important;
             left: 50% !important;
-            transform: translateX(-50%) scale(0.9) !important;
+            transform: translateX(-50%) !important;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            z-index: 25 !important;
+        }
+        
+        /* Pot chips container - shows stacked chips */
+        .pot-chips-display {
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            gap: 3px;
+            min-height: 35px;
+            padding: 4px 8px;
+            background: rgba(0,0,0,0.3);
+            border-radius: 8px;
+        }
+        
+        .pot-chips-display:empty {
+            display: none;
+        }
+        
+        .pot-center {
             background: rgba(0,0,0,0.85) !important;
-            padding: 5px 14px !important;
-            border-radius: 16px !important;
+            padding: 4px 12px !important;
+            border-radius: 14px !important;
             border: 2px solid #fbbf24 !important;
             box-shadow: 0 3px 12px rgba(0,0,0,0.6) !important;
-            z-index: 25 !important;
             text-align: center;
         }
 
@@ -1677,11 +1700,11 @@
             color: #94a3b8;
             text-transform: uppercase;
             letter-spacing: 0.5px;
-            margin-bottom: 2px;
+            margin-bottom: 1px;
         }
 
         .pot-amount {
-            font-size: 15px !important;
+            font-size: 14px !important;
             font-weight: 700;
             color: #fbbf24;
             text-shadow: 0 2px 4px rgba(0,0,0,0.5);
@@ -3075,32 +3098,38 @@
             pointer-events: none;
         }
         
-        /* Chip fly animation - smooth easing */
+        /* Chip fly animation - ultra smooth arc motion */
         @keyframes chipFlyToPot {
             0% {
                 opacity: 1;
-                transform: translate(0, 0) scale(1) rotate(0deg);
+                transform: translate(0, 0) scale(1);
             }
-            50% {
-                transform: translate(calc(var(--fly-x) * 0.5), calc(var(--fly-y) * 0.3)) scale(0.9) rotate(180deg);
+            30% {
+                transform: translate(calc(var(--fly-x) * 0.3), calc(var(--fly-y) * 0.15 - 20px)) scale(0.95);
+            }
+            70% {
+                transform: translate(calc(var(--fly-x) * 0.7), calc(var(--fly-y) * 0.6 - 10px)) scale(0.88);
             }
             100% {
                 opacity: 1;
-                transform: translate(var(--fly-x), var(--fly-y)) scale(0.8) rotate(360deg);
+                transform: translate(var(--fly-x), var(--fly-y)) scale(0.85);
             }
         }
         
         @keyframes chipFlyToWinner {
             0% {
                 opacity: 1;
-                transform: translate(0, 0) scale(0.8) rotate(0deg);
+                transform: translate(0, 0) scale(0.85);
             }
-            50% {
-                transform: translate(calc(var(--fly-x) * 0.5), calc(var(--fly-y) * 0.3)) scale(0.9) rotate(-180deg);
+            30% {
+                transform: translate(calc(var(--fly-x) * 0.3), calc(var(--fly-y) * 0.15 - 25px)) scale(0.9);
+            }
+            70% {
+                transform: translate(calc(var(--fly-x) * 0.7), calc(var(--fly-y) * 0.6 - 15px)) scale(0.95);
             }
             100% {
                 opacity: 1;
-                transform: translate(var(--fly-x), var(--fly-y)) scale(1) rotate(-360deg);
+                transform: translate(var(--fly-x), var(--fly-y)) scale(1);
             }
         }
         
@@ -3294,6 +3323,41 @@
 
         .pg-tab:hover:not(.active) {
             background: rgba(59, 130, 246, 0.2);
+        }
+        
+        /* Buy-in Amount Buttons */
+        .buyin-buttons {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        
+        .buyin-btn {
+            flex: 1;
+            min-width: 55px;
+            padding: 10px 8px;
+            background: rgba(30, 41, 59, 0.8);
+            border: 2px solid rgba(71, 85, 105, 0.5);
+            border-radius: 10px;
+            color: #94a3b8;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            touch-action: manipulation;
+        }
+        
+        .buyin-btn:hover:not(.active) {
+            background: rgba(59, 130, 246, 0.2);
+            border-color: #3b82f6;
+            color: #60a5fa;
+        }
+        
+        .buyin-btn.active {
+            background: linear-gradient(135deg, rgba(251, 191, 36, 0.25), rgba(245, 158, 11, 0.15));
+            border-color: #fbbf24;
+            color: #fbbf24;
+            box-shadow: 0 0 12px rgba(251, 191, 36, 0.3);
         }
 
         /* Private Game View Animations */
@@ -5008,13 +5072,14 @@
                 <div class="create-lobby-form">
                     <div class="form-group">
                         <label class="form-label">Buy-in Amount</label>
-                        <select class="form-select" id="buyInSelect">
-                            <option value="100">$100</option>
-                            <option value="500">$500</option>
-                            <option value="1000" selected>$100.00</option>
-                            <option value="5000">$5,000</option>
-                            <option value="10000">$10,000</option>
-                        </select>
+                        <div class="buyin-buttons" id="buyInButtons">
+                            <button class="buyin-btn" data-value="5" onclick="selectBuyIn(5)">$5</button>
+                            <button class="buyin-btn" data-value="10" onclick="selectBuyIn(10)">$10</button>
+                            <button class="buyin-btn" data-value="50" onclick="selectBuyIn(50)">$50</button>
+                            <button class="buyin-btn active" data-value="100" onclick="selectBuyIn(100)">$100</button>
+                            <button class="buyin-btn" data-value="500" onclick="selectBuyIn(500)">$500</button>
+                        </div>
+                        <input type="hidden" id="buyInSelect" value="100">
                     </div>
 
                     <div class="form-group">
@@ -5459,15 +5524,20 @@
             <div class="poker-table">
                 <div class="table-felt"></div>
                 
-                <!-- POT Display -->
-                <div class="pot-center">
-                    <div class="pot-label">POT</div>
-                    <div class="pot-amount" id="potAmount">$0</div>
-                </div>
-                
                 <!-- Community Cards -->
                 <div class="community-cards" id="communityCards">
                     <!-- Cards rendered here -->
+                </div>
+                
+                <!-- POT Display with Chips (below community cards) -->
+                <div class="pot-area">
+                    <div class="pot-chips-display" id="potChipsDisplay">
+                        <!-- Chip stacks rendered here -->
+                    </div>
+                    <div class="pot-center">
+                        <div class="pot-label">POT</div>
+                        <div class="pot-amount" id="potAmount">$0</div>
+                    </div>
                 </div>
 
                 <!-- Player Seats (6-max portrait layout) -->
@@ -7020,14 +7090,14 @@
             '</div>';
         }
         
-        // Animate chips flying to pot
+        // Animate chips flying to pot with smooth arc motion
         function animateChipsToPot(fromElement, amount, callback) {
             if (!fromElement) {
                 if (callback) callback();
                 return;
             }
             
-            var potEl = document.querySelector('.pot-center');
+            var potEl = document.getElementById('potChipsDisplay') || document.querySelector('.pot-area');
             if (!potEl) {
                 if (callback) callback();
                 return;
@@ -7039,30 +7109,31 @@
             var flyX = toRect.left + toRect.width/2 - fromRect.left - fromRect.width/2;
             var flyY = toRect.top + toRect.height/2 - fromRect.top - fromRect.height/2;
             
-            // Create flying chip
+            // Create flying chip with multiple chips for visual effect
             var chip = document.createElement('div');
             chip.className = 'bet-chip-animation';
-            chip.innerHTML = renderChipRow(Math.min(amount, 500), 3);
-            chip.style.left = fromRect.left + 'px';
-            chip.style.top = fromRect.top + 'px';
+            chip.innerHTML = renderChipRow(Math.min(amount, 500), 4);
+            chip.style.left = (fromRect.left + fromRect.width/2 - 30) + 'px';
+            chip.style.top = (fromRect.top + fromRect.height/2 - 10) + 'px';
             chip.style.setProperty('--fly-x', flyX + 'px');
             chip.style.setProperty('--fly-y', flyY + 'px');
             document.body.appendChild(chip);
             
-            chip.style.animation = 'chipFlyToPot 0.6s ease-out forwards';
+            // Smoother animation with cubic-bezier
+            chip.style.animation = 'chipFlyToPot 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards';
             
-            // Play chip sound
-            playChipSound();
+            // Play chip slide sound
+            playChipSlideSound();
             
             setTimeout(function() {
                 chip.remove();
                 if (callback) callback();
-            }, 600);
+            }, 700);
         }
         
-        // Animate chips to winner
+        // Animate chips to winner with smooth arc motion
         function animateChipsToWinner(winnerElement, amount, callback) {
-            var potEl = document.querySelector('.pot-center');
+            var potEl = document.getElementById('potChipsDisplay') || document.querySelector('.pot-area');
             if (!potEl || !winnerElement) {
                 if (callback) callback();
                 return;
@@ -7074,17 +7145,18 @@
             var flyX = toRect.left + toRect.width/2 - fromRect.left - fromRect.width/2;
             var flyY = toRect.top + toRect.height/2 - fromRect.top - fromRect.height/2;
             
-            // Create flying chips
+            // Create multiple flying chips for better visual
             var chip = document.createElement('div');
             chip.className = 'bet-chip-animation';
             chip.innerHTML = renderChipRow(Math.min(amount, 1000), 5);
-            chip.style.left = fromRect.left + 'px';
-            chip.style.top = fromRect.top + 'px';
+            chip.style.left = (fromRect.left + fromRect.width/2 - 40) + 'px';
+            chip.style.top = (fromRect.top + fromRect.height/2 - 10) + 'px';
             chip.style.setProperty('--fly-x', flyX + 'px');
             chip.style.setProperty('--fly-y', flyY + 'px');
             document.body.appendChild(chip);
             
-            chip.style.animation = 'chipFlyToWinner 0.8s ease-out forwards';
+            // Smoother animation
+            chip.style.animation = 'chipFlyToWinner 0.9s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards';
             
             // Play collect sound
             playCollectSound();
@@ -7095,7 +7167,7 @@
             }, 800);
         }
         
-        // Chip sound effect
+        // Chip click sound effect
         function playChipSound() {
             if (!isSoundEnabled || !audioContext) return;
             try {
@@ -7109,6 +7181,31 @@
                 gain.gain.exponentialDecayTo && gain.gain.exponentialDecayTo(0.01, audioContext.currentTime + 0.1);
                 osc.start();
                 osc.stop(audioContext.currentTime + 0.1);
+            } catch(e) {}
+        }
+        
+        // Chip slide/move sound - smooth cascading tones
+        function playChipSlideSound() {
+            if (!isSoundEnabled || !audioContext) return;
+            try {
+                // Multiple quick clicks simulating chips sliding
+                var frequencies = [400, 500, 600, 700];
+                for (var i = 0; i < frequencies.length; i++) {
+                    (function(freq, delay) {
+                        setTimeout(function() {
+                            var osc = audioContext.createOscillator();
+                            var gain = audioContext.createGain();
+                            osc.connect(gain);
+                            gain.connect(audioContext.destination);
+                            osc.frequency.value = freq;
+                            osc.type = 'triangle';
+                            gain.gain.setValueAtTime(0.06, audioContext.currentTime);
+                            gain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.08);
+                            osc.start();
+                            osc.stop(audioContext.currentTime + 0.08);
+                        }, delay);
+                    })(frequencies[i], i * 40);
+                }
             } catch(e) {}
         }
         
@@ -7134,16 +7231,8 @@
         
         // Update pot chips visual display (local bot games)
         function updatePotChipsDisplay() {
-            var potCenter = document.querySelector('.pot-center');
-            if (!potCenter) return;
-            
-            // Check if chips container exists, if not create it
-            var chipsContainer = potCenter.querySelector('.pot-chips');
-            if (!chipsContainer) {
-                chipsContainer = document.createElement('div');
-                chipsContainer.className = 'pot-chips';
-                potCenter.insertBefore(chipsContainer, potCenter.firstChild);
-            }
+            var chipsContainer = document.getElementById('potChipsDisplay');
+            if (!chipsContainer) return;
             
             // Update chips based on pot amount
             var pot = gameState.pot || 0;
@@ -7158,16 +7247,8 @@
         
         // Update pot chips for multiplayer (takes pot amount as parameter)
         function updatePotChipsDisplayMultiplayer(potAmount) {
-            var potCenter = document.querySelector('.pot-center');
-            if (!potCenter) return;
-            
-            // Check if chips container exists, if not create it
-            var chipsContainer = potCenter.querySelector('.pot-chips');
-            if (!chipsContainer) {
-                chipsContainer = document.createElement('div');
-                chipsContainer.className = 'pot-chips';
-                potCenter.insertBefore(chipsContainer, potCenter.firstChild);
-            }
+            var chipsContainer = document.getElementById('potChipsDisplay');
+            if (!chipsContainer) return;
             
             // Update chips based on pot amount
             var pot = potAmount || 0;
@@ -8222,6 +8303,25 @@
                 document.getElementById('joinLobbyView').classList.remove('hidden');
                 document.getElementById('lobbyCreatedView').classList.add('hidden');
             }
+        }
+        
+        // Select buy-in amount from buttons
+        function selectBuyIn(amount) {
+            // Update hidden input
+            document.getElementById('buyInSelect').value = amount;
+            
+            // Update button states
+            var buttons = document.querySelectorAll('.buyin-btn');
+            buttons.forEach(function(btn) {
+                if (parseInt(btn.getAttribute('data-value')) === amount) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            });
+            
+            // Play click sound
+            playButtonSound();
         }
 
         function generateLobbyCode() {
