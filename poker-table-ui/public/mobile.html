@@ -1699,8 +1699,7 @@
             gap: 2px;
             min-height: 25px;
             padding: 3px 6px;
-            background: rgba(0,0,0,0.4);
-            border-radius: 6px;
+            background: transparent;
             z-index: 20 !important;
         }
         
@@ -1875,12 +1874,12 @@
         /* ═══════ COMMUNITY CARDS - CENTER (LARGER) ═══════ */
         .community-cards {
             position: absolute;
-            top: 52% !important;
+            top: 44% !important;
             left: 50% !important;
             transform: translate(-50%, -50%) !important;
             display: flex;
             gap: 6px !important;
-            z-index: 20 !important;
+            z-index: 22 !important;
             padding: 0;
         }
 
@@ -5071,7 +5070,6 @@
                     <div class="form-group">
                         <label class="form-label">Buy-in Amount</label>
                         <div class="buyin-buttons" id="buyInButtons">
-                            <button class="buyin-btn" data-value="5" onclick="selectBuyIn(5)">$5</button>
                             <button class="buyin-btn" data-value="10" onclick="selectBuyIn(10)">$10</button>
                             <button class="buyin-btn" data-value="50" onclick="selectBuyIn(50)">$50</button>
                             <button class="buyin-btn active" data-value="100" onclick="selectBuyIn(100)">$100</button>
