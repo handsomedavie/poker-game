@@ -5982,6 +5982,13 @@
                 if (tg.setBottomBarColor) {
                     tg.setBottomBarColor('#0d0618');
                 }
+                
+                // Enable closing confirmation dialog
+                // Shows "Внесённые изменения могут быть потеряны" when user taps X
+                if (tg.enableClosingConfirmation) {
+                    tg.enableClosingConfirmation();
+                    addDebug('TG closing confirmation enabled');
+                }
             } catch(e) {
                 addDebug('TG init error: ' + e.message);
             }
@@ -8894,13 +8901,14 @@
                 }
             }
             
-            // Find my player by seat
+            // Find my player by seat (use parseInt for proper comparison)
             var myPlayer = null;
             if (mySeat && gameState.players) {
+                var mySeatNum = parseInt(mySeat);
                 myPlayer = gameState.players.find(function(p) {
-                    return p.seat === mySeat;
+                    return parseInt(p.seat) === mySeatNum;
                 });
-                addDebug('My player: ' + (myPlayer ? myPlayer.name : 'not found') + ', cards: ' + (myPlayer && myPlayer.cards ? myPlayer.cards.length : 0));
+                addDebug('My player: ' + (myPlayer ? myPlayer.name : 'not found') + ', seat: ' + mySeatNum + ', cards: ' + (myPlayer && myPlayer.cards ? myPlayer.cards.length : 0));
             }
             
             // Update hero cards at bottom with highlighting
