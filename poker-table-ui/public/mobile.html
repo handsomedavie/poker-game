@@ -962,11 +962,24 @@
            MAIN MENU STYLES
            ═══════════════════════════════════════════════════ */
         #mainMenu {
+            position: relative;
             min-height: 100vh;
             padding: 0;
             display: flex;
             flex-direction: column;
-            background: linear-gradient(180deg, #0a0f18 0%, #0d1520 100%);
+            background: linear-gradient(180deg, #1a0f2e 0%, #0d0618 100%);
+        }
+        
+        /* Purple fill for top area (Telegram header area) */
+        #mainMenu::before {
+            content: '';
+            position: absolute;
+            top: -100px;
+            left: 0;
+            right: 0;
+            height: 150px;
+            background: #1a0f2e;
+            z-index: 0;
         }
 
         /* Profile Card - with safe area padding */
@@ -1227,6 +1240,7 @@
             left: 0;
             right: 0;
             bottom: 0;
+            z-index: 100;
             background: linear-gradient(180deg, #1a0f2e 0%, #0f0a1a 50%, #0d0618 100%);
             display: flex;
             flex-direction: column;
@@ -3346,11 +3360,18 @@
            PRIVATE LOBBY WAITING ROOM
            ═══════════════════════════════════════════════════ */
         #waitingRoomScreen {
-            min-height: 100vh;
-            background: linear-gradient(180deg, #0f172a 0%, #1e293b 100%);
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 100;
+            background: linear-gradient(180deg, #1a0f2e 0%, #0f0a1a 100%);
             display: flex;
             flex-direction: column;
             padding: 20px;
+            padding-top: calc(var(--safe-top) + 20px);
+            overflow-y: auto;
         }
 
         .waiting-room-header {
@@ -3361,14 +3382,19 @@
         }
 
         .waiting-room-back {
-            background: rgba(239, 68, 68, 0.2);
+            /* Hidden by default in TG - shown in browser via body:not(.tg-webapp) */
+            display: none;
+            align-items: center;
+            justify-content: center;
+            background: rgba(168, 85, 247, 0.2);
             border: none;
-            color: #ef4444;
+            color: #c084fc;
             font-size: 20px;
             width: 40px;
             height: 40px;
-            border-radius: 50%;
+            border-radius: 12px;
             cursor: pointer;
+            transition: all 0.2s;
         }
 
         .waiting-room-title {
@@ -3852,7 +3878,8 @@
         body:not(.tg-webapp) .history-close,
         body:not(.tg-webapp) .settings-close,
         body:not(.tg-webapp) .private-game-close,
-        body:not(.tg-webapp) .back-btn {
+        body:not(.tg-webapp) .back-btn,
+        body:not(.tg-webapp) .waiting-room-back {
             display: flex;
         }
 
@@ -7769,6 +7796,7 @@
                 // Show waiting room with smooth transition
                 updateWaitingRoomUI();
                 showScreen('waitingRoomScreen', ['mainMenu', 'lobbyScreen']);
+                showWaitingRoomWithBackButton();
                 
             } catch (err) {
                 addDebug('Join lobby error: ' + err.message);
@@ -7886,6 +7914,7 @@
             
             // Show waiting room with smooth transition
             showScreen('waitingRoomScreen', ['mainMenu', 'lobbyScreen']);
+            showWaitingRoomWithBackButton();
         }
 
         function updateWaitingRoomUI() {
@@ -7959,10 +7988,36 @@
             }
         }
 
+        var waitingRoomBackButtonHandler = null;
+        
+        function showWaitingRoomWithBackButton() {
+            // Show TG BackButton for waiting room
+            if (isTelegramApp && tg.BackButton) {
+                if (waitingRoomBackButtonHandler) {
+                    tg.BackButton.offClick(waitingRoomBackButtonHandler);
+                }
+                waitingRoomBackButtonHandler = function() { leaveWaitingRoom(); };
+                tg.BackButton.onClick(waitingRoomBackButtonHandler);
+                tg.BackButton.show();
+            }
+        }
+        
         function leaveWaitingRoom() {
             // Smooth transition back to main menu
             showScreen('mainMenu', ['waitingRoomScreen']);
             currentPrivateLobby = null;
+            
+            // Reset header color
+            setTelegramHeaderColor('#1a0f2e');
+            
+            // Hide TG BackButton
+            if (isTelegramApp && tg.BackButton) {
+                tg.BackButton.hide();
+                if (waitingRoomBackButtonHandler) {
+                    tg.BackButton.offClick(waitingRoomBackButtonHandler);
+                    waitingRoomBackButtonHandler = null;
+                }
+            }
         }
 
         async function startGameFromWaitingRoom() {
@@ -8773,6 +8828,7 @@
                 // Show waiting room with smooth transition
                 updateWaitingRoomUI();
                 showScreen('waitingRoomScreen', ['mainMenu', 'lobbyScreen']);
+                showWaitingRoomWithBackButton();
                 
             } catch (err) {
                 addDebug('Join lobby error: ' + err.message);
