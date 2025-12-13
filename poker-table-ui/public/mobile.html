@@ -1516,16 +1516,10 @@
             color: #64748b;
         }
 
-        /* Debug */
+        /* Debug - hidden from users */
         .debug {
-            position: fixed;
-            bottom: 6px;
-            left: 6px;
-            right: 6px;
-            font-size: 9px;
-            color: #475569;
-            text-align: center;
-            pointer-events: none;
+            display: none !important;
+            visibility: hidden !important;
         }
 
         /* ═══════════════════════════════════════════════════
@@ -1587,16 +1581,17 @@
         }
 
         .table-info-name {
-            font-size: 12px;
-            font-weight: 700;
+            font-size: 13px;
+            font-weight: 600;
             color: #fff;
             white-space: nowrap;
         }
 
         .table-info-blinds {
-            font-size: 9px;
+            font-size: 10px;
             color: #22c55e;
-            letter-spacing: 0.5px;
+            font-weight: 500;
+            letter-spacing: 0.3px;
         }
 
         .header-spacer {
@@ -1660,9 +1655,9 @@
         /* ═══════ POT DISPLAY - ABOVE COMMUNITY CARDS ═══════ */
         .pot-center {
             position: absolute !important;
-            top: 28% !important;
+            top: 22% !important;
             left: 50% !important;
-            transform: translateX(-50%) scale(0.9) !important;
+            transform: translateX(-50%) scale(0.85) !important;
             background: rgba(0,0,0,0.85) !important;
             padding: 5px 14px !important;
             border-radius: 16px !important;
@@ -2578,16 +2573,16 @@
         /* ═══════ GAME PHASE INDICATOR - RIGHT SIDE (ABOVE USER CARDS) ═══════ */
         .game-phase-indicator {
             position: fixed !important;
-            bottom: 200px !important;
-            right: 10px !important;
+            bottom: 210px !important;
+            right: 8px !important;
             background: linear-gradient(135deg, rgba(34, 197, 94, 0.95), rgba(22, 163, 74, 0.95));
-            padding: 6px 12px !important;
-            border-radius: 8px !important;
-            font-size: 10px !important;
-            font-weight: 700;
+            padding: 5px 10px !important;
+            border-radius: 6px !important;
+            font-size: 9px !important;
+            font-weight: 600;
             color: white;
-            letter-spacing: 0.5px;
-            box-shadow: 0 4px 14px rgba(34, 197, 94, 0.7) !important;
+            letter-spacing: 0.3px;
+            box-shadow: 0 3px 10px rgba(34, 197, 94, 0.5) !important;
             z-index: 90 !important;
         }
 
@@ -7641,18 +7636,15 @@
                 var isComboCard = comboCardKeys.indexOf(cardKey) !== -1;
                 var comboClass = isComboCard ? ' combo-card' : '';
                 
-                // Add flip animation class for new cards
-                var animClass = 'card-container';
-                html += '<div class="' + animClass + '">' +
-                    '<div class="card ' + (isRed(card.suit) ? 'red' : 'black') + comboClass + '">' +
-                        '<span class="card-rank">' + card.rank + '</span>' +
-                        '<span class="card-suit">' + card.suit + '</span>' +
-                    '</div>' +
+                // Use community-card class for proper styling
+                var isRedCard = (card.suit === '♥' || card.suit === '♦' || card.suit === 'hearts' || card.suit === 'diamonds');
+                var colorClass = isRedCard ? 'red' : 'black';
+                
+                html += '<div class="community-card ' + colorClass + comboClass + '">' +
+                    '<span class="card-rank">' + card.rank + '</span>' +
+                    '<span class="card-suit">' + card.suit + '</span>' +
                 '</div>';
             });
-            
-            // NO hidden placeholders - only show actual dealt cards
-            // This fixes the PRE-FLOP bug where 5 cards were shown
             
             container.innerHTML = html;
             
