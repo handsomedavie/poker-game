@@ -6,7 +6,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="theme-color" content="#1a0f2e">
+    <meta name="theme-color" content="#0d0618">
     <title>Poker House</title>
     <!-- Critical: Show loading indicator immediately -->
     <style>
@@ -967,7 +967,7 @@
             padding: 0;
             display: flex;
             flex-direction: column;
-            background: linear-gradient(180deg, #1a0f2e 0%, #0d0618 100%);
+            background: linear-gradient(180deg, #0d0618 0%, #0d0618 100%);
         }
         
         /* Purple fill for top area (Telegram header area) */
@@ -978,7 +978,7 @@
             left: 0;
             right: 0;
             height: 150px;
-            background: #1a0f2e;
+            background: #0d0618;
             z-index: 0;
         }
 
@@ -1408,8 +1408,9 @@
 
         .join-btn:active { opacity: 0.9; }
 
-        /* Lobby Sidebar */
+        /* Lobby Sidebar - hidden on mobile, shown only on desktop */
         .lobby-sidebar {
+            display: none;
             background: #0b1220;
             border-top: 1px solid #1e293b;
             padding: 16px;
@@ -1417,6 +1418,7 @@
 
         @media (min-width: 768px) {
             .lobby-sidebar {
+                display: block;
                 border-top: none;
                 border-left: 1px solid #1e293b;
             }
@@ -5675,7 +5677,7 @@
 
         // Function to set Telegram header color (call when switching screens)
         function setTelegramHeaderColor(color) {
-            color = color || '#1a0f2e'; // Default dark purple
+            color = color || '#0d0618'; // Default dark purple
             
             // Update meta theme-color for browser
             var metaTheme = document.querySelector('meta[name="theme-color"]');
@@ -5873,7 +5875,7 @@
                 if (menuEl) menuEl.classList.remove('hidden');
                 
                 // Set header color for main menu immediately
-                setTelegramHeaderColor('#1a0f2e');
+                setTelegramHeaderColor('#0d0618');
                 
                 updateUserUI();
                 initUser(); // Register/load user from backend
@@ -5972,7 +5974,7 @@
             showScreen('mainMenu', ['lobbyScreen']);
             
             // Reset header color
-            setTelegramHeaderColor('#1a0f2e');
+            setTelegramHeaderColor('#0d0618');
             
             // Hide TG BackButton
             if (isTelegramApp && tg.BackButton) {
@@ -7224,7 +7226,7 @@
             }
             
             // Reset header color to main menu color
-            setTelegramHeaderColor('#1a0f2e');
+            setTelegramHeaderColor('#0d0618');
             
             // Hide Telegram BackButton
             if (isTelegramApp && tg.BackButton) {
@@ -7350,7 +7352,7 @@
             document.getElementById('settingsModal').classList.add('hidden');
             
             // Reset header color
-            setTelegramHeaderColor('#1a0f2e');
+            setTelegramHeaderColor('#0d0618');
             
             // Hide TG BackButton
             if (isTelegramApp && tg.BackButton) {
@@ -7494,7 +7496,7 @@
             document.getElementById('historyModal').classList.add('hidden');
             
             // Reset header color
-            setTelegramHeaderColor('#1a0f2e');
+            setTelegramHeaderColor('#0d0618');
             
             // Hide TG BackButton
             if (isTelegramApp && tg.BackButton) {
@@ -7599,7 +7601,7 @@
             document.querySelector('.private-game-tabs').style.display = 'flex';
             
             // Reset header color
-            setTelegramHeaderColor('#1a0f2e');
+            setTelegramHeaderColor('#0d0618');
             
             // Hide TG BackButton
             if (isTelegramApp && tg.BackButton) {
@@ -8008,7 +8010,7 @@
             currentPrivateLobby = null;
             
             // Reset header color
-            setTelegramHeaderColor('#1a0f2e');
+            setTelegramHeaderColor('#0d0618');
             
             // Hide TG BackButton
             if (isTelegramApp && tg.BackButton) {
@@ -8982,7 +8984,7 @@
                 if (menu) menu.classList.remove('hidden');
                 try { updateUserUI(); } catch(e) {}
                 // Set header color for main menu
-                setTelegramHeaderColor('#1a0f2e');
+                setTelegramHeaderColor('#0d0618');
             }
         }
         
