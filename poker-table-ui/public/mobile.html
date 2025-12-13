@@ -1657,41 +1657,18 @@
             border-radius: 48% / 42%;
         }
 
-        /* ═══════ POT AREA - BELOW COMMUNITY CARDS ═══════ */
-        .pot-area {
-            position: absolute !important;
-            top: 52% !important;
-            left: 50% !important;
-            transform: translateX(-50%) !important;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 6px;
-            z-index: 25 !important;
-        }
-        
-        /* Pot chips container - shows stacked chips */
-        .pot-chips-display {
-            display: flex;
-            justify-content: center;
-            align-items: flex-end;
-            gap: 3px;
-            min-height: 35px;
-            padding: 4px 8px;
-            background: rgba(0,0,0,0.3);
-            border-radius: 8px;
-        }
-        
-        .pot-chips-display:empty {
-            display: none;
-        }
-        
+        /* ═══════ POT DISPLAY - ABOVE COMMUNITY CARDS ═══════ */
         .pot-center {
+            position: absolute !important;
+            top: 28% !important;
+            left: 50% !important;
+            transform: translateX(-50%) scale(0.9) !important;
             background: rgba(0,0,0,0.85) !important;
-            padding: 4px 12px !important;
-            border-radius: 14px !important;
+            padding: 5px 14px !important;
+            border-radius: 16px !important;
             border: 2px solid #fbbf24 !important;
             box-shadow: 0 3px 12px rgba(0,0,0,0.6) !important;
+            z-index: 25 !important;
             text-align: center;
         }
 
@@ -1700,14 +1677,35 @@
             color: #94a3b8;
             text-transform: uppercase;
             letter-spacing: 0.5px;
-            margin-bottom: 1px;
+            margin-bottom: 2px;
         }
 
         .pot-amount {
-            font-size: 14px !important;
+            font-size: 15px !important;
             font-weight: 700;
             color: #fbbf24;
             text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+        }
+        
+        /* Pot chips container - below community cards, compact */
+        .pot-chips-display {
+            position: absolute !important;
+            top: 58% !important;
+            left: 50% !important;
+            transform: translateX(-50%) scale(0.7) !important;
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            gap: 2px;
+            min-height: 25px;
+            padding: 3px 6px;
+            background: rgba(0,0,0,0.4);
+            border-radius: 6px;
+            z-index: 20 !important;
+        }
+        
+        .pot-chips-display:empty {
+            display: none;
         }
 
         /* ═══════ PLAYER SEATS - DYNAMIC ═══════ */
@@ -5524,20 +5522,20 @@
             <div class="poker-table">
                 <div class="table-felt"></div>
                 
+                <!-- POT Display (above community cards) -->
+                <div class="pot-center">
+                    <div class="pot-label">POT</div>
+                    <div class="pot-amount" id="potAmount">$0</div>
+                </div>
+                
                 <!-- Community Cards -->
                 <div class="community-cards" id="communityCards">
                     <!-- Cards rendered here -->
                 </div>
                 
-                <!-- POT Display with Chips (below community cards) -->
-                <div class="pot-area">
-                    <div class="pot-chips-display" id="potChipsDisplay">
-                        <!-- Chip stacks rendered here -->
-                    </div>
-                    <div class="pot-center">
-                        <div class="pot-label">POT</div>
-                        <div class="pot-amount" id="potAmount">$0</div>
-                    </div>
+                <!-- Pot Chips Display (below community cards, small) -->
+                <div class="pot-chips-display" id="potChipsDisplay">
+                    <!-- Chip stacks rendered here -->
                 </div>
 
                 <!-- Player Seats (6-max portrait layout) -->
@@ -7812,10 +7810,21 @@
             addDebug('Leave table');
             clearInterval(gameState.timerInterval);
             gameState.phase = 'waiting';
+            
+            // Close multiplayer connection if active
+            if (gameWebSocket) {
+                try {
+                    gameWebSocket.close();
+                } catch(e) {}
+                gameWebSocket = null;
+            }
+            currentGameSession = null;
+            
             // Resume background music when leaving game
             startBgMusic();
-            // Smooth transition back to lobby
-            showScreen('lobbyScreen', ['pokerTableScreen']);
+            
+            // Go directly to main menu (not lobby screen)
+            showScreen('mainMenu', ['pokerTableScreen', 'lobbyScreen']);
         }
 
         // ═══════════════════════════════════════════════════
