@@ -3209,6 +3209,42 @@
             padding: 14px 28px;
             font-size: 16px;
         }
+        
+        /* ═══════ BROWSER MODE (non-Telegram) FIXES ═══════ */
+        /* Remove Telegram header offset for browser */
+        body:not(.tg-webapp) .poker-header {
+            top: 0 !important;
+        }
+        
+        body:not(.tg-webapp) .poker-header::before {
+            display: none !important;
+        }
+        
+        body:not(.tg-webapp) #pokerTableScreen {
+            padding-top: 45px !important;
+        }
+        
+        body:not(.tg-webapp) .poker-table-container {
+            top: 45px !important;
+            height: calc(100vh - 45px - 180px) !important;
+        }
+        
+        body:not(.tg-webapp) .game-controls {
+            bottom: 0 !important;
+            padding-bottom: 10px !important;
+        }
+        
+        body:not(.tg-webapp) .hero-cards-area {
+            bottom: 155px !important;
+        }
+        
+        body:not(.tg-webapp) .game-phase-indicator {
+            bottom: 190px !important;
+        }
+        
+        body:not(.tg-webapp) .hand-hud {
+            bottom: 190px !important;
+        }
 
         /* ═══════════════════════════════════════════════════
            PRIVATE GAME MODAL STYLES
@@ -6115,12 +6151,27 @@
         // User info
         var user = tg && tg.initDataUnsafe && tg.initDataUnsafe.user;
         var telegramUserId = user ? user.id : null;
+        
+        // Generate unique browser ID for non-Telegram users
+        if (!telegramUserId) {
+            // Check localStorage for existing browser ID
+            var storedBrowserId = localStorage.getItem('poker_browser_id');
+            if (storedBrowserId) {
+                telegramUserId = parseInt(storedBrowserId);
+            } else {
+                // Generate random negative ID (to distinguish from real Telegram IDs)
+                telegramUserId = -Math.floor(Math.random() * 900000000) - 100000000;
+                localStorage.setItem('poker_browser_id', telegramUserId.toString());
+            }
+            addDebug('Browser mode - generated ID: ' + telegramUserId);
+        }
+        
         var userName = user ? user.first_name : 'Guest';
         var userHandle = user && user.username ? '@' + user.username : '';
         var userInitial = userName ? userName.charAt(0).toUpperCase() : 'P';
         var userBalance = 1000; // Default balance, will be updated from server
 
-        addDebug('User: ' + userName + (telegramUserId ? ' #' + telegramUserId : ''));
+        addDebug('User: ' + userName + ' #' + telegramUserId);
 
         // ═══════════════════════════════════════════════════
         // USER REGISTRATION / INIT
