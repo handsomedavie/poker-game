@@ -2905,6 +2905,151 @@
             color: #fbbf24;
             font-weight: 600;
             margin-top: 2px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        /* ═══════════════════════════════════════════════════
+           POKER CHIPS SYSTEM
+           ═══════════════════════════════════════════════════ */
+        
+        /* Single Chip */
+        .poker-chip {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 8px;
+            font-weight: 700;
+            color: #fff;
+            position: relative;
+            box-shadow: 
+                0 2px 4px rgba(0,0,0,0.4),
+                inset 0 2px 4px rgba(255,255,255,0.2),
+                inset 0 -2px 4px rgba(0,0,0,0.2);
+            border: 2px dashed rgba(255,255,255,0.3);
+            text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+            flex-shrink: 0;
+        }
+        
+        /* Chip Colors by Denomination */
+        .poker-chip.chip-1 { background: linear-gradient(145deg, #ffffff, #e0e0e0); color: #333; border-color: rgba(0,0,0,0.2); }
+        .poker-chip.chip-5 { background: linear-gradient(145deg, #ef4444, #dc2626); }
+        .poker-chip.chip-10 { background: linear-gradient(145deg, #f97316, #ea580c); }
+        .poker-chip.chip-25 { background: linear-gradient(145deg, #22c55e, #16a34a); }
+        .poker-chip.chip-100 { background: linear-gradient(145deg, #1f2937, #111827); }
+        .poker-chip.chip-500 { background: linear-gradient(145deg, #a855f7, #9333ea); }
+        .poker-chip.chip-1000 { background: linear-gradient(145deg, #eab308, #ca8a04); }
+        
+        /* Small chip variant for stacks */
+        .poker-chip.chip-small {
+            width: 18px;
+            height: 18px;
+            font-size: 6px;
+            border-width: 1.5px;
+        }
+        
+        /* Chip Stack (vertical pile) */
+        .chip-stack {
+            display: flex;
+            flex-direction: column-reverse;
+            align-items: center;
+            position: relative;
+        }
+        
+        .chip-stack .poker-chip {
+            margin-top: -14px;
+        }
+        
+        .chip-stack .poker-chip:first-child {
+            margin-top: 0;
+        }
+        
+        /* Horizontal chip row for bets */
+        .chip-row {
+            display: flex;
+            align-items: center;
+            gap: 2px;
+        }
+        
+        .chip-row .poker-chip {
+            width: 16px;
+            height: 16px;
+            font-size: 0;
+            border-width: 1px;
+        }
+        
+        /* Pot chips area */
+        .pot-chips {
+            display: flex;
+            justify-content: center;
+            gap: 3px;
+            margin-bottom: 4px;
+        }
+        
+        .pot-chips .chip-stack {
+            transform: scale(0.8);
+        }
+        
+        /* Bet chip animation container */
+        .bet-chip-animation {
+            position: absolute;
+            z-index: 100;
+            pointer-events: none;
+        }
+        
+        /* Chip fly animation */
+        @keyframes chipFlyToPot {
+            0% {
+                opacity: 1;
+                transform: translate(0, 0) scale(1);
+            }
+            100% {
+                opacity: 1;
+                transform: translate(var(--fly-x), var(--fly-y)) scale(0.8);
+            }
+        }
+        
+        @keyframes chipFlyToWinner {
+            0% {
+                opacity: 1;
+                transform: translate(0, 0) scale(0.8);
+            }
+            100% {
+                opacity: 1;
+                transform: translate(var(--fly-x), var(--fly-y)) scale(1);
+            }
+        }
+        
+        @keyframes chipShake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-2px) rotate(-2deg); }
+            75% { transform: translateX(2px) rotate(2deg); }
+        }
+        
+        .chip-shake {
+            animation: chipShake 0.3s ease-in-out;
+        }
+        
+        /* Player bet with chips */
+        .player-bet-chips {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            margin-top: 2px;
+        }
+        
+        .player-bet-chips .chip-row {
+            margin-right: 4px;
+        }
+        
+        .player-bet-chips .bet-amount {
+            font-size: 10px;
+            color: #fbbf24;
+            font-weight: 600;
         }
 
         /* Disabled buttons */
@@ -6544,15 +6689,23 @@
         function declareWinner(winner, handName) {
             addDebug('Winner: ' + winner.name + ' - ' + handName);
             
-            // Award pot
-            winner.chips += gameState.pot;
+            var potWon = gameState.pot;
+            
+            // Animate chips to winner
+            var winnerEl = winner.isHero ? document.querySelector('.hero-cards') : document.querySelector('[data-seat="' + winner.seat + '"]');
+            animateChipsToWinner(winnerEl, potWon, function() {
+                // Award pot
+                winner.chips += potWon;
+                gameState.pot = 0;
+                updateGameUI();
+            });
             
             // Show winner animation
-            showWinnerPopup(winner, handName, gameState.pot);
+            showWinnerPopup(winner, handName, potWon);
             
             // Record game result to history
             if (winner.isHero) {
-                addGameToHistory('win', gameState.pot, handName, 'Bot Game');
+                addGameToHistory('win', potWon, handName, 'Bot Game');
                 userBalance = winner.chips;
                 updateBalanceUI();
             } else {
@@ -6642,6 +6795,254 @@
             // Re-render UI
             if (lastGameState) {
                 updateGameUI(lastGameState);
+            }
+        }
+
+        // ═══════════════════════════════════════════════════
+        // POKER CHIPS VISUALIZATION SYSTEM
+        // ═══════════════════════════════════════════════════
+        
+        // Chip denominations and colors
+        var CHIP_DENOMINATIONS = [
+            { value: 1000, class: 'chip-1000', label: '1K' },
+            { value: 500, class: 'chip-500', label: '500' },
+            { value: 100, class: 'chip-100', label: '100' },
+            { value: 25, class: 'chip-25', label: '25' },
+            { value: 10, class: 'chip-10', label: '10' },
+            { value: 5, class: 'chip-5', label: '5' },
+            { value: 1, class: 'chip-1', label: '1' }
+        ];
+        
+        // Convert amount to chip breakdown
+        function getChipBreakdown(amount) {
+            var chips = [];
+            var remaining = Math.floor(amount);
+            
+            CHIP_DENOMINATIONS.forEach(function(denom) {
+                var count = Math.floor(remaining / denom.value);
+                if (count > 0) {
+                    chips.push({ denom: denom, count: count });
+                    remaining -= count * denom.value;
+                }
+            });
+            
+            return chips;
+        }
+        
+        // Render a single chip HTML
+        function renderChip(denomClass, small) {
+            var sizeClass = small ? ' chip-small' : '';
+            return '<div class="poker-chip ' + denomClass + sizeClass + '"></div>';
+        }
+        
+        // Render chip row (horizontal, for bets)
+        function renderChipRow(amount, maxChips) {
+            maxChips = maxChips || 5;
+            var breakdown = getChipBreakdown(amount);
+            var html = '<div class="chip-row">';
+            var chipCount = 0;
+            
+            for (var i = 0; i < breakdown.length && chipCount < maxChips; i++) {
+                var item = breakdown[i];
+                var toShow = Math.min(item.count, maxChips - chipCount);
+                for (var j = 0; j < toShow; j++) {
+                    html += renderChip(item.denom.class, true);
+                    chipCount++;
+                }
+            }
+            
+            html += '</div>';
+            return html;
+        }
+        
+        // Render chip stack (vertical, for pot)
+        function renderChipStack(amount, maxHeight) {
+            maxHeight = maxHeight || 8;
+            var breakdown = getChipBreakdown(amount);
+            var html = '<div class="chip-stack">';
+            var chipCount = 0;
+            
+            // Show chips from bottom (largest) to top (smallest)
+            for (var i = breakdown.length - 1; i >= 0 && chipCount < maxHeight; i--) {
+                var item = breakdown[i];
+                var toShow = Math.min(item.count, maxHeight - chipCount);
+                for (var j = 0; j < toShow; j++) {
+                    html += renderChip(item.denom.class, true);
+                    chipCount++;
+                }
+            }
+            
+            html += '</div>';
+            return html;
+        }
+        
+        // Render pot chips display
+        function renderPotChips(amount) {
+            if (amount <= 0) return '';
+            
+            var breakdown = getChipBreakdown(amount);
+            var html = '<div class="pot-chips">';
+            
+            // Show up to 3 stacks of different denominations
+            var stackCount = 0;
+            for (var i = 0; i < breakdown.length && stackCount < 3; i++) {
+                var item = breakdown[i];
+                var stackHeight = Math.min(item.count, 5);
+                
+                html += '<div class="chip-stack">';
+                for (var j = 0; j < stackHeight; j++) {
+                    html += renderChip(item.denom.class, true);
+                }
+                html += '</div>';
+                stackCount++;
+            }
+            
+            html += '</div>';
+            return html;
+        }
+        
+        // Render player bet with chips
+        function renderPlayerBetWithChips(amount) {
+            if (amount <= 0) return '';
+            return '<div class="player-bet-chips">' +
+                renderChipRow(amount, 4) +
+                '<span class="bet-amount">' + formatChips(amount) + '</span>' +
+            '</div>';
+        }
+        
+        // Animate chips flying to pot
+        function animateChipsToPot(fromElement, amount, callback) {
+            if (!fromElement) {
+                if (callback) callback();
+                return;
+            }
+            
+            var potEl = document.querySelector('.pot-center');
+            if (!potEl) {
+                if (callback) callback();
+                return;
+            }
+            
+            var fromRect = fromElement.getBoundingClientRect();
+            var toRect = potEl.getBoundingClientRect();
+            
+            var flyX = toRect.left + toRect.width/2 - fromRect.left - fromRect.width/2;
+            var flyY = toRect.top + toRect.height/2 - fromRect.top - fromRect.height/2;
+            
+            // Create flying chip
+            var chip = document.createElement('div');
+            chip.className = 'bet-chip-animation';
+            chip.innerHTML = renderChipRow(Math.min(amount, 500), 3);
+            chip.style.left = fromRect.left + 'px';
+            chip.style.top = fromRect.top + 'px';
+            chip.style.setProperty('--fly-x', flyX + 'px');
+            chip.style.setProperty('--fly-y', flyY + 'px');
+            document.body.appendChild(chip);
+            
+            chip.style.animation = 'chipFlyToPot 0.6s ease-out forwards';
+            
+            // Play chip sound
+            playChipSound();
+            
+            setTimeout(function() {
+                chip.remove();
+                if (callback) callback();
+            }, 600);
+        }
+        
+        // Animate chips to winner
+        function animateChipsToWinner(winnerElement, amount, callback) {
+            var potEl = document.querySelector('.pot-center');
+            if (!potEl || !winnerElement) {
+                if (callback) callback();
+                return;
+            }
+            
+            var fromRect = potEl.getBoundingClientRect();
+            var toRect = winnerElement.getBoundingClientRect();
+            
+            var flyX = toRect.left + toRect.width/2 - fromRect.left - fromRect.width/2;
+            var flyY = toRect.top + toRect.height/2 - fromRect.top - fromRect.height/2;
+            
+            // Create flying chips
+            var chip = document.createElement('div');
+            chip.className = 'bet-chip-animation';
+            chip.innerHTML = renderChipRow(Math.min(amount, 1000), 5);
+            chip.style.left = fromRect.left + 'px';
+            chip.style.top = fromRect.top + 'px';
+            chip.style.setProperty('--fly-x', flyX + 'px');
+            chip.style.setProperty('--fly-y', flyY + 'px');
+            document.body.appendChild(chip);
+            
+            chip.style.animation = 'chipFlyToWinner 0.8s ease-out forwards';
+            
+            // Play collect sound
+            playCollectSound();
+            
+            setTimeout(function() {
+                chip.remove();
+                if (callback) callback();
+            }, 800);
+        }
+        
+        // Chip sound effect
+        function playChipSound() {
+            if (!isSoundEnabled || !audioContext) return;
+            try {
+                var osc = audioContext.createOscillator();
+                var gain = audioContext.createGain();
+                osc.connect(gain);
+                gain.connect(audioContext.destination);
+                osc.frequency.value = 800;
+                osc.type = 'sine';
+                gain.gain.setValueAtTime(0.1, audioContext.currentTime);
+                gain.gain.exponentialDecayTo && gain.gain.exponentialDecayTo(0.01, audioContext.currentTime + 0.1);
+                osc.start();
+                osc.stop(audioContext.currentTime + 0.1);
+            } catch(e) {}
+        }
+        
+        // Collect chips sound
+        function playCollectSound() {
+            if (!isSoundEnabled || !audioContext) return;
+            try {
+                for (var i = 0; i < 3; i++) {
+                    setTimeout(function() {
+                        var osc = audioContext.createOscillator();
+                        var gain = audioContext.createGain();
+                        osc.connect(gain);
+                        gain.connect(audioContext.destination);
+                        osc.frequency.value = 600 + Math.random() * 400;
+                        osc.type = 'sine';
+                        gain.gain.setValueAtTime(0.08, audioContext.currentTime);
+                        osc.start();
+                        osc.stop(audioContext.currentTime + 0.05);
+                    }, i * 50);
+                }
+            } catch(e) {}
+        }
+        
+        // Update pot chips visual display
+        function updatePotChipsDisplay() {
+            var potCenter = document.querySelector('.pot-center');
+            if (!potCenter) return;
+            
+            // Check if chips container exists, if not create it
+            var chipsContainer = potCenter.querySelector('.pot-chips');
+            if (!chipsContainer) {
+                chipsContainer = document.createElement('div');
+                chipsContainer.className = 'pot-chips';
+                potCenter.insertBefore(chipsContainer, potCenter.firstChild);
+            }
+            
+            // Update chips based on pot amount
+            var pot = gameState.pot || 0;
+            if (pot > 0) {
+                chipsContainer.innerHTML = renderPotChips(pot).replace('<div class="pot-chips">', '').replace('</div>', '');
+                chipsContainer.style.display = 'flex';
+            } else {
+                chipsContainer.innerHTML = '';
+                chipsContainer.style.display = 'none';
             }
         }
 
@@ -6856,29 +7257,38 @@
             
             if (callAmount === 0) {
                 addDebug(player.name + ' checks');
+                updateGameUI();
+                advanceToNextPlayer();
             } else {
-                player.chips -= callAmount;
-                player.bet += callAmount;
-                gameState.pot += callAmount;
-                addDebug(player.name + ' calls $' + callAmount);
+                // Animate chips to pot
+                var playerEl = player.isHero ? document.querySelector('.hero-cards') : document.querySelector('[data-seat="' + player.seat + '"]');
+                animateChipsToPot(playerEl, callAmount, function() {
+                    player.chips -= callAmount;
+                    player.bet += callAmount;
+                    gameState.pot += callAmount;
+                    addDebug(player.name + ' calls $' + callAmount);
+                    updateGameUI();
+                    advanceToNextPlayer();
+                });
             }
-            
-            updateGameUI();
-            advanceToNextPlayer();
         }
 
         function doPlayerRaise(player, totalBet) {
             var raiseAmount = Math.min(totalBet - player.bet, player.chips);
             
-            player.chips -= raiseAmount;
-            player.bet += raiseAmount;
-            gameState.pot += raiseAmount;
-            gameState.currentBet = player.bet;
-            
-            addDebug(player.name + ' raises to $' + player.bet);
-            
-            updateGameUI();
-            advanceToNextPlayer();
+            // Animate chips to pot
+            var playerEl = player.isHero ? document.querySelector('.hero-cards') : document.querySelector('[data-seat="' + player.seat + '"]');
+            animateChipsToPot(playerEl, raiseAmount, function() {
+                player.chips -= raiseAmount;
+                player.bet += raiseAmount;
+                gameState.pot += raiseAmount;
+                gameState.currentBet = player.bet;
+                
+                addDebug(player.name + ' raises to $' + player.bet);
+                
+                updateGameUI();
+                advanceToNextPlayer();
+            });
         }
 
         function advanceToNextPlayer() {
@@ -6914,8 +7324,12 @@
         // UI UPDATES
         // ═══════════════════════════════════════════════════
         function updateGameUI() {
-            // Update pot (center)
-            document.getElementById('potAmount').textContent = '$' + gameState.pot;
+            // Update pot (center) with chips visual
+            var potEl = document.getElementById('potAmount');
+            potEl.textContent = '$' + gameState.pot;
+            
+            // Add pot chips visual
+            updatePotChipsDisplay();
             
             // Update players
             renderPlayersOnTable();
@@ -7116,12 +7530,18 @@
                 var positionClass = positions[(playerIndex % 5) + 1];
                 playerIndex++;
                 
-                html += '<div class="player-seat ' + positionClass + '">' +
+                // Render bet with chips visual
+                var betHtml = '';
+                if (player.bet > 0) {
+                    betHtml = renderPlayerBetWithChips(player.bet);
+                }
+                
+                html += '<div class="player-seat ' + positionClass + '" data-seat="' + player.seat + '">' +
                     '<div class="player-card-container">' +
                         '<div class="' + avatarClass + '">' + player.name.charAt(0) + timerHtml + '</div>' +
                         '<div class="player-name">' + player.name + '</div>' +
                         '<div class="player-chips" onclick="toggleStackDisplay()">' + formatChips(player.chips) + '</div>' +
-                        (player.bet > 0 ? '<div class="player-bet">' + formatChips(player.bet) + '</div>' : '') +
+                        betHtml +
                         '<div class="player-cards"><div class="player-card"></div><div class="player-card"></div></div>' +
                     '</div>' +
                 '</div>';
