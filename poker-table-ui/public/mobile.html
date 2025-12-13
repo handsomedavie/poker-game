@@ -3245,6 +3245,24 @@
         body:not(.tg-webapp) .hand-hud {
             bottom: 190px !important;
         }
+        
+        /* Browser mode - main menu fixes */
+        body:not(.tg-webapp) .menu-profile-card {
+            padding-top: 20px !important;
+        }
+        
+        body:not(.tg-webapp) #mainMenu {
+            padding-top: 0 !important;
+        }
+        
+        /* Browser mode - lobby/waiting room fixes */
+        body:not(.tg-webapp) .waiting-room-screen {
+            padding-top: 10px !important;
+        }
+        
+        body:not(.tg-webapp) .waiting-room-header {
+            padding-top: 10px !important;
+        }
 
         /* ═══════════════════════════════════════════════════
            PRIVATE GAME MODAL STYLES
@@ -8406,7 +8424,10 @@
                     body: JSON.stringify({
                         buyIn: parseInt(buyIn),
                         maxPlayers: parseInt(maxPlayers),
-                        initData: tg ? tg.initData : ''
+                        initData: tg ? tg.initData : '',
+                        telegramId: telegramUserId,
+                        firstName: userName,
+                        username: userHandle ? userHandle.replace('@', '') : null
                     })
                 });
                 
@@ -8474,16 +8495,14 @@
                 var lobbyData = await lobbyResponse.json();
                 addDebug('Found lobby on server');
                 
-                // Join the lobby - send initData and fallback user info
+                // Join the lobby - send initData and user info
                 var joinBody = {
                     initData: tg ? tg.initData : ''
                 };
-                // Add fallback user info if available from Telegram WebApp
-                if (tg && tg.initDataUnsafe && tg.initDataUnsafe.user) {
-                    joinBody.telegramId = tg.initDataUnsafe.user.id;
-                    joinBody.firstName = tg.initDataUnsafe.user.first_name;
-                    joinBody.username = tg.initDataUnsafe.user.username;
-                }
+                // Add user info - use telegramUserId (works for both TG and browser)
+                joinBody.telegramId = telegramUserId;
+                joinBody.firstName = userName;
+                joinBody.username = userHandle ? userHandle.replace('@', '') : null;
                 
                 var joinResponse = await fetch(API_BASE + '/api/lobby/' + code + '/join', {
                     method: 'POST',
@@ -8926,29 +8945,39 @@
                 headerPhase.textContent = gameState.phase.toUpperCase().replace('_', '-');
             }
             
-            // Update community cards - only add NEW cards to avoid re-animation
+            // Update community cards - sync with server state
             var communityEl = document.getElementById('communityCards');
             if (communityEl && gameState.communityCards) {
                 var currentCardCount = communityEl.children.length;
                 var newCardCount = gameState.communityCards.length;
                 
-                // Only update if new cards were dealt
-                if (newCardCount > currentCardCount) {
-                    // Play card sound for each new community card with delays matching animation
-                    for (var i = currentCardCount; i < newCardCount; i++) {
-                        (function(cardIndex) {
-                            setTimeout(function() {
-                                playCommunityCardSound();
-                            }, (cardIndex - currentCardCount) * 350); // 350ms to match CSS animation delay
-                        })(i);
-                        
-                        var cardEl = document.createElement('div');
-                        cardEl.innerHTML = createCardHTML(gameState.communityCards[i]);
-                        communityEl.appendChild(cardEl.firstChild);
+                // If card counts don't match, rebuild completely (handles reconnection)
+                if (newCardCount !== currentCardCount) {
+                    if (newCardCount === 0) {
+                        // Clear cards for new hand
+                        communityEl.innerHTML = '';
+                    } else if (newCardCount > currentCardCount) {
+                        // Add new cards with animation
+                        for (var i = currentCardCount; i < newCardCount; i++) {
+                            (function(cardIndex) {
+                                setTimeout(function() {
+                                    playCommunityCardSound();
+                                }, (cardIndex - currentCardCount) * 350);
+                            })(i);
+                            
+                            var cardEl = document.createElement('div');
+                            cardEl.innerHTML = createCardHTML(gameState.communityCards[i]);
+                            communityEl.appendChild(cardEl.firstChild);
+                        }
+                    } else {
+                        // Card count decreased (new hand) - rebuild all
+                        communityEl.innerHTML = '';
+                        gameState.communityCards.forEach(function(card) {
+                            var cardEl = document.createElement('div');
+                            cardEl.innerHTML = createCardHTML(card);
+                            communityEl.appendChild(cardEl.firstChild);
+                        });
                     }
-                } else if (newCardCount === 0 && currentCardCount > 0) {
-                    // Clear cards for new hand
-                    communityEl.innerHTML = '';
                 }
             }
             

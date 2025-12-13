@@ -1362,6 +1362,10 @@ class CreateLobbyRequest(BaseModel):
     buyIn: int = 100
     maxPlayers: int = 6
     initData: str = ""
+    # Fallback user info for browser mode
+    telegramId: Optional[int] = None
+    firstName: Optional[str] = None
+    username: Optional[str] = None
 
 class JoinLobbyRequest(BaseModel):
     initData: str = ""
@@ -1385,13 +1389,22 @@ async def api_create_lobby(request: CreateLobbyRequest):
     # Extract user from initData
     user = _extract_telegram_user(initData)
     if not user:
-        # For development: create guest user
-        user = {
-            "id": random.randint(100000, 999999),
-            "first_name": "Guest",
-            "username": f"guest_{random.randint(1000, 9999)}"
-        }
-        print(f"⚠️ API: No Telegram user, using guest: {user}")
+        # Use fallback user info from request (browser mode)
+        if request.telegramId:
+            user = {
+                "id": request.telegramId,
+                "first_name": request.firstName or "Guest",
+                "username": request.username or f"guest_{abs(request.telegramId) % 10000}"
+            }
+            print(f"⚠️ API: Using browser user from request: {user}")
+        else:
+            # Last resort: create random guest
+            user = {
+                "id": random.randint(100000, 999999),
+                "first_name": "Guest",
+                "username": f"guest_{random.randint(1000, 9999)}"
+            }
+            print(f"⚠️ API: No user info, using random guest: {user}")
     
     telegram_id = user.get("id")
     username = user.get("username")
