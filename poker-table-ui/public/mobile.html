@@ -3248,11 +3248,16 @@
         
         /* Browser mode - main menu fixes */
         body:not(.tg-webapp) .menu-profile-card {
-            padding-top: 20px !important;
+            padding-top: 40px !important;
         }
         
         body:not(.tg-webapp) #mainMenu {
             padding-top: 0 !important;
+            margin-top: 0 !important;
+        }
+        
+        body:not(.tg-webapp) .menu-avatar {
+            margin-top: 10px !important;
         }
         
         /* Browser mode - lobby/waiting room fixes */
@@ -6347,7 +6352,7 @@
             // Smooth transition to lobby
             showScreen('lobbyScreen', ['mainMenu']);
             
-            // Show TG BackButton
+            // Show TG BackButton (replaces "Close" button with "Back" arrow)
             if (isTelegramApp && tg.BackButton) {
                 if (lobbyBackButtonHandler) {
                     tg.BackButton.offClick(lobbyBackButtonHandler);
@@ -6355,6 +6360,9 @@
                 lobbyBackButtonHandler = function() { goBack(); };
                 tg.BackButton.onClick(lobbyBackButtonHandler);
                 tg.BackButton.show();
+                addDebug('TG BackButton shown for lobby');
+            } else {
+                addDebug('BackButton not available: isTelegramApp=' + isTelegramApp);
             }
 
             renderTables(mode);
