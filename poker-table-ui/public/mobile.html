@@ -72,7 +72,8 @@
         }
         
         body {
-            background: radial-gradient(ellipse at top, #1a2332 0%, #0a0f18 50%, #050810 100%);
+            /* Unified purple background - matches mainMenu */
+            background: #0d0618;
             color: #e2e8f0;
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
             min-height: 100vh;
@@ -82,6 +83,11 @@
             padding-bottom: var(--safe-bottom);
             padding-left: var(--safe-left);
             padding-right: var(--safe-right);
+        }
+        
+        /* Browser mode - ensure no black bar at top */
+        html {
+            background: #0d0618;
         }
         
         /* Safe area spacer for top of screens */
@@ -2318,6 +2324,66 @@
         .player-avatar.folded {
             opacity: 0.4;
             filter: grayscale(1);
+        }
+        
+        /* ═══════════════════════════════════════════════════
+           PLAYER TURN TIMER (20 seconds countdown)
+           ═══════════════════════════════════════════════════ */
+        .player-timer-ring {
+            position: absolute;
+            top: -4px;
+            left: -4px;
+            width: calc(100% + 8px);
+            height: calc(100% + 8px);
+            pointer-events: none;
+        }
+        
+        .player-timer-ring svg {
+            width: 100%;
+            height: 100%;
+            transform: rotate(-90deg);
+        }
+        
+        .player-timer-ring circle {
+            fill: none;
+            stroke-width: 3;
+            stroke-linecap: round;
+        }
+        
+        .player-timer-ring .timer-bg {
+            stroke: rgba(255, 255, 255, 0.1);
+        }
+        
+        .player-timer-ring .timer-progress {
+            stroke: #22c55e;
+            stroke-dasharray: 150;
+            stroke-dashoffset: 0;
+            transition: stroke 0.3s ease;
+            animation: timerCountdown 20s linear forwards;
+        }
+        
+        @keyframes timerCountdown {
+            from { stroke-dashoffset: 0; }
+            to { stroke-dashoffset: 150; }
+        }
+        
+        .player-timer-ring.warning .timer-progress {
+            stroke: #ef4444;
+            filter: drop-shadow(0 0 6px rgba(239, 68, 68, 0.8));
+            animation: timerCountdown 20s linear forwards, timerPulse 0.6s ease-in-out infinite;
+        }
+        
+        @keyframes timerPulse {
+            0%, 100% { filter: drop-shadow(0 0 6px rgba(239, 68, 68, 0.8)); }
+            50% { filter: drop-shadow(0 0 15px rgba(239, 68, 68, 1)); }
+        }
+        
+        .player-avatar.active .player-timer-ring {
+            display: block;
+        }
+        
+        .player-avatar:not(.active) .player-timer-ring {
+            display: none;
         }
 
         .player-name {
@@ -4717,6 +4783,212 @@
         }
 
         /* ═══════════════════════════════════════════════════
+           DEPOSIT PROMO MODAL STYLES
+           ═══════════════════════════════════════════════════ */
+        .deposit-promo-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 2000;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+        }
+        
+        .deposit-promo-modal.hidden {
+            display: none !important;
+        }
+        
+        .deposit-promo-backdrop {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(4px);
+            animation: fadeIn 0.3s ease forwards;
+        }
+        
+        .deposit-promo-content {
+            position: relative;
+            width: 100%;
+            max-width: 420px;
+            height: 85vh;
+            display: flex;
+            flex-direction: column;
+            animation: slideUp 0.4s ease-out forwards;
+        }
+        
+        @keyframes slideUp {
+            from { transform: translateY(100%); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        @keyframes slideDown {
+            from { transform: translateY(0); opacity: 1; }
+            to { transform: translateY(100%); opacity: 0; }
+        }
+        
+        .deposit-promo-modal.closing .deposit-promo-content {
+            animation: slideDown 0.3s ease-in forwards;
+        }
+        
+        .deposit-promo-modal.closing .deposit-promo-backdrop {
+            animation: fadeOut 0.3s ease-in forwards;
+        }
+        
+        @keyframes fadeOut {
+            from { opacity: 1; }
+            to { opacity: 0; }
+        }
+        
+        .deposit-promo-image {
+            position: relative;
+            flex: 1;
+            overflow: hidden;
+            border-radius: 20px 20px 0 0;
+        }
+        
+        .deposit-promo-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: center top;
+        }
+        
+        .deposit-promo-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(
+                to bottom,
+                rgba(168, 85, 247, 0.3) 0%,
+                rgba(139, 92, 246, 0.2) 30%,
+                rgba(13, 6, 24, 0.9) 85%,
+                rgba(13, 6, 24, 1) 100%
+            );
+        }
+        
+        .deposit-promo-panel {
+            position: relative;
+            background: linear-gradient(180deg, rgba(13, 6, 24, 0.98) 0%, #0d0618 100%);
+            padding: 24px 20px 30px;
+            border-radius: 0 0 20px 20px;
+        }
+        
+        .deposit-promo-close-btn {
+            position: absolute;
+            top: -50px;
+            right: 16px;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: #fff;
+            font-size: 16px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+        
+        .deposit-promo-close-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+        
+        .deposit-promo-text {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        .deposit-promo-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #a855f7, #ec4899);
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 12px;
+            text-shadow: 0 0 10px rgba(236, 72, 153, 0.5);
+        }
+        
+        .deposit-promo-text h2 {
+            font-size: 20px;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 8px;
+            line-height: 1.3;
+        }
+        
+        .deposit-promo-text p {
+            font-size: 15px;
+            color: #94a3b8;
+            line-height: 1.4;
+        }
+        
+        .deposit-promo-text .highlight {
+            color: #22c55e;
+            font-weight: 700;
+            text-shadow: 0 0 10px rgba(34, 197, 94, 0.5);
+        }
+        
+        .deposit-promo-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        .deposit-promo-continue-btn {
+            width: 100%;
+            padding: 16px 24px;
+            background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 700;
+            color: #fff;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 15px rgba(34, 197, 94, 0.4);
+        }
+        
+        .deposit-promo-continue-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(34, 197, 94, 0.5);
+        }
+        
+        .deposit-promo-close-link {
+            width: 100%;
+            padding: 14px 24px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 500;
+            color: #94a3b8;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .deposit-promo-close-link:hover {
+            background: rgba(255, 255, 255, 0.15);
+            color: #fff;
+        }
+
+        /* ═══════════════════════════════════════════════════
            HISTORY MODAL STYLES
            ═══════════════════════════════════════════════════ */
         .history-modal {
@@ -5550,6 +5822,38 @@
                     <div style="font-size: 48px; margin-bottom: 16px;">📋</div>
                     <div style="font-size: 16px; margin-bottom: 8px;">История транзакций</div>
                     <div style="font-size: 14px;">Пока нет операций</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════
+         DEPOSIT PROMO MODAL
+         ═══════════════════════════════════════════════════ -->
+    <div id="depositPromoModal" class="deposit-promo-modal hidden">
+        <div class="deposit-promo-backdrop"></div>
+        <div class="deposit-promo-content">
+            <!-- Background image with gradient overlay -->
+            <div class="deposit-promo-image">
+                <img src="https://i.postimg.cc/6QWDD5PV/photo-2025-12-09-15-03-53.jpg" alt="Promo">
+                <div class="deposit-promo-overlay"></div>
+            </div>
+            
+            <!-- Bottom panel with text and buttons -->
+            <div class="deposit-promo-panel">
+                <div class="deposit-promo-close-btn" onclick="closeDepositPromo(true)">✕</div>
+                <div class="deposit-promo-text">
+                    <div class="deposit-promo-badge">🎁 БОНУС</div>
+                    <h2>Ты уверен, что хочешь отказаться от бонуса?</h2>
+                    <p>Сделай депозит от <span class="highlight">$5</span> и участвуй в розыгрыше <span class="highlight">$1000</span></p>
+                </div>
+                <div class="deposit-promo-buttons">
+                    <button class="deposit-promo-continue-btn" onclick="closeDepositPromo(false)">
+                        💰 Продолжить пополнение
+                    </button>
+                    <button class="deposit-promo-close-link" onclick="closeDepositPromo(true)">
+                        Закрыть
+                    </button>
                 </div>
             </div>
         </div>
@@ -7960,12 +8264,29 @@
             }
         }
 
+        var depositMade = false; // Track if deposit was made in current session
+        
         function closeWalletModal() {
             addDebug('Closing Wallet Modal');
+            
+            // If on deposit tab and no deposit made, show promo modal
+            if (currentWalletTab === 'deposit' && !depositMade) {
+                showDepositPromo();
+                return;
+            }
+            
+            // Otherwise close normally
+            actuallyCloseWalletModal();
+        }
+        
+        function actuallyCloseWalletModal() {
             var modal = document.getElementById('walletModal');
             if (modal) {
                 modal.classList.add('hidden');
             }
+            
+            // Reset deposit flag
+            depositMade = false;
             
             // Reset header color to main menu color
             setTelegramHeaderColor('#0d0618');
@@ -7978,6 +8299,36 @@
                     walletBackButtonHandler = null;
                 }
                 addDebug('TG BackButton hidden');
+            }
+        }
+        
+        function showDepositPromo() {
+            addDebug('Showing Deposit Promo Modal');
+            var promoModal = document.getElementById('depositPromoModal');
+            if (promoModal) {
+                promoModal.classList.remove('hidden');
+                promoModal.classList.remove('closing');
+            }
+        }
+        
+        function closeDepositPromo(shouldCloseWallet) {
+            addDebug('Closing Deposit Promo: closeWallet=' + shouldCloseWallet);
+            var promoModal = document.getElementById('depositPromoModal');
+            if (promoModal) {
+                // Add closing animation class
+                promoModal.classList.add('closing');
+                
+                // Wait for animation to complete
+                setTimeout(function() {
+                    promoModal.classList.add('hidden');
+                    promoModal.classList.remove('closing');
+                    
+                    if (shouldCloseWallet) {
+                        // User chose to close - actually close wallet
+                        actuallyCloseWalletModal();
+                    }
+                    // If not closing, user stays in deposit window
+                }, 300);
             }
         }
 
@@ -8823,6 +9174,74 @@
         var mySeat = null;  // My seat number (1-based)
         var lastGameState = null;  // Store last game state for action calculations
         
+        // Turn timer variables
+        var turnTimerId = null;
+        var turnWarningTimerId = null;
+        var turnTimeRemaining = 20;
+        var TURN_TIME_LIMIT = 20; // seconds
+        var TURN_WARNING_TIME = 5; // seconds before timeout to show warning
+        
+        function startTurnTimer() {
+            // Clear any existing timer
+            stopTurnTimer();
+            
+            turnTimeRemaining = TURN_TIME_LIMIT;
+            addDebug('Turn timer started: ' + TURN_TIME_LIMIT + 's');
+            
+            // Start countdown
+            turnTimerId = setInterval(function() {
+                turnTimeRemaining--;
+                
+                // Add warning class when time is low
+                if (turnTimeRemaining <= TURN_WARNING_TIME) {
+                    var timerRings = document.querySelectorAll('.player-timer-ring');
+                    timerRings.forEach(function(ring) {
+                        ring.classList.add('warning');
+                    });
+                }
+                
+                // Auto-fold when time runs out
+                if (turnTimeRemaining <= 0) {
+                    stopTurnTimer();
+                    autoFoldOnTimeout();
+                }
+            }, 1000);
+        }
+        
+        function stopTurnTimer() {
+            if (turnTimerId) {
+                clearInterval(turnTimerId);
+                turnTimerId = null;
+            }
+            if (turnWarningTimerId) {
+                clearTimeout(turnWarningTimerId);
+                turnWarningTimerId = null;
+            }
+            turnTimeRemaining = TURN_TIME_LIMIT;
+            
+            // Remove warning class
+            var timerRings = document.querySelectorAll('.player-timer-ring');
+            timerRings.forEach(function(ring) {
+                ring.classList.remove('warning');
+            });
+        }
+        
+        function autoFoldOnTimeout() {
+            addDebug('Auto-fold due to timeout');
+            
+            // Show notification
+            showAlert('⏱️ Время истекло — автоматический сброс карт');
+            
+            // Send fold action to server
+            if (gameWebSocket && gameWebSocket.readyState === WebSocket.OPEN) {
+                gameWebSocket.send(JSON.stringify({
+                    type: 'action',
+                    action: 'fold',
+                    reason: 'timeout'
+                }));
+            }
+        }
+        
         function startMultiplayerGame(gameSessionId) {
             addDebug('Starting multiplayer game: ' + gameSessionId);
             currentGameSession = gameSessionId;
@@ -9051,6 +9470,17 @@
             // Update action buttons based on whose turn it is (using seat)
             var isMyTurn = parseInt(gameState.currentPlayerSeat) === parseInt(mySeat);
             addDebug('Current seat: ' + gameState.currentPlayerSeat + ', my seat: ' + mySeat + ', my turn: ' + isMyTurn);
+            
+            // Manage turn timer
+            if (isMyTurn && gameState.phase !== 'showdown' && gameState.phase !== 'finished') {
+                // Start timer only if not already running (avoid reset on every update)
+                if (!turnTimerId) {
+                    startTurnTimer();
+                }
+            } else {
+                // Stop timer when not my turn
+                stopTurnTimer();
+            }
             
             var actionBtns = document.querySelectorAll('.action-btn');
             actionBtns.forEach(function(btn) {
@@ -9303,8 +9733,19 @@
                     betHtml = renderPlayerBetWithChips(betAmount);
                 }
                 
+                // Timer ring HTML for active player
+                var timerRingHtml = '';
+                if (isCurrentTurn) {
+                    timerRingHtml = '<div class="player-timer-ring" id="timer-ring-' + player.seat + '">' +
+                        '<svg viewBox="0 0 50 50">' +
+                            '<circle class="timer-bg" cx="25" cy="25" r="23"></circle>' +
+                            '<circle class="timer-progress" cx="25" cy="25" r="23"></circle>' +
+                        '</svg>' +
+                    '</div>';
+                }
+                
                 html += '<div class="table-player ' + positionClass + foldedClass + isCurrentTurn + '" data-seat="' + player.seat + '">' +
-                    '<div class="player-avatar">' + (player.name ? player.name.charAt(0).toUpperCase() : '?') + '</div>' +
+                    '<div class="player-avatar">' + timerRingHtml + (player.name ? player.name.charAt(0).toUpperCase() : '?') + '</div>' +
                     '<div class="player-info">' +
                         '<div class="player-name">' + (player.name || 'Player') + '</div>' +
                         '<div class="player-chips" onclick="toggleStackDisplay()">' + formatChips(player.chips || 0) + '</div>' +
@@ -9426,6 +9867,9 @@
                 addDebug('No game session for action!');
                 return;
             }
+            
+            // Stop turn timer when player makes an action
+            stopTurnTimer();
             
             addDebug('sendGameAction: ' + action + ', amount: ' + amount + ', WS state: ' + (gameWebSocket ? gameWebSocket.readyState : 'null'));
             
