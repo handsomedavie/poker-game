@@ -13,7 +13,7 @@
         .initial-loader {
             position: fixed;
             top: 0; left: 0; right: 0; bottom: 0;
-            background: #0a0f18;
+            background: #0d0618;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -771,7 +771,7 @@
             position: fixed;
             top: 0; left: 0; right: 0; bottom: 0;
             z-index: 9999;
-            background: radial-gradient(ellipse at center, #1a2840 0%, #0d1520 40%, #050810 100%);
+            background: #0d0618;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -894,7 +894,7 @@
             top: 0; left: 0; right: 0; bottom: 0;
             width: 100vw;
             height: 100vh;
-            background: linear-gradient(135deg, #0a0e1a 0%, #1a1f35 100%);
+            background: #0d0618;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -990,14 +990,17 @@
 
         /* Profile Card - with safe area padding */
         .menu-profile-card {
-            background: linear-gradient(135deg, #111827 0%, #0a0f18 100%);
-            border-bottom: 1px solid #1e293b;
+            /* Unified background - same as main menu */
+            background: transparent;
+            border-bottom: none;
             /* Add safe area to top padding */
-            padding: calc(var(--safe-top) + 16px) 16px 24px 16px;
+            padding: calc(var(--safe-top) + 20px) 16px 24px 16px;
             display: flex;
             flex-direction: column;
             align-items: center;
             text-align: center;
+            position: relative;
+            z-index: 1;
         }
 
         .menu-avatar {
@@ -2356,7 +2359,7 @@
         
         .player-timer-ring .timer-progress {
             stroke: #22c55e;
-            stroke-dasharray: 150;
+            stroke-dasharray: 145; /* 2 * PI * 23 ≈ 144.5 */
             stroke-dashoffset: 0;
             transition: stroke 0.3s ease;
             animation: timerCountdown 20s linear forwards;
@@ -2364,7 +2367,7 @@
         
         @keyframes timerCountdown {
             from { stroke-dashoffset: 0; }
-            to { stroke-dashoffset: 150; }
+            to { stroke-dashoffset: 145; }
         }
         
         .player-timer-ring.warning .timer-progress {
@@ -4233,6 +4236,36 @@
         .toggle-switch.active .toggle-label.off {
             opacity: 0;
         }
+        
+        /* Language Selector */
+        .language-selector {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .lang-btn {
+            padding: 8px 16px;
+            border-radius: 8px;
+            border: 1px solid rgba(168, 85, 247, 0.3);
+            background: rgba(168, 85, 247, 0.1);
+            color: #94a3b8;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .lang-btn:hover {
+            background: rgba(168, 85, 247, 0.2);
+            color: #fff;
+        }
+        
+        .lang-btn.active {
+            background: linear-gradient(135deg, #a855f7, #7c3aed);
+            border-color: #a855f7;
+            color: #fff;
+            box-shadow: 0 0 10px rgba(168, 85, 247, 0.4);
+        }
 
         /* ═══════════════════════════════════════════════════
            WALLET MODAL STYLES (Deposit/Withdraw)
@@ -5592,19 +5625,37 @@
             </div>
 
             <div class="settings-section">
-                <div class="settings-section-title">Theme</div>
+                <div class="settings-section-title" data-i18n="settings_theme">Theme</div>
                 
                 <div class="setting-item">
                     <div class="setting-info">
                         <span class="setting-icon">✨</span>
                         <div class="setting-text">
-                            <span class="setting-name">Neon Theme</span>
-                            <span class="setting-desc">Purple neon glow style</span>
+                            <span class="setting-name" data-i18n="neon_theme">Neon Theme</span>
+                            <span class="setting-desc" data-i18n="neon_theme_desc">Purple neon glow style</span>
                         </div>
                     </div>
                     <div class="toggle-switch" id="neonToggle" onclick="toggleNeonTheme()">
                         <span class="toggle-label on">ON</span>
                         <span class="toggle-label off">OFF</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="settings-section">
+                <div class="settings-section-title" data-i18n="settings_language">Language</div>
+                
+                <div class="setting-item">
+                    <div class="setting-info">
+                        <span class="setting-icon">🌐</span>
+                        <div class="setting-text">
+                            <span class="setting-name" data-i18n="language">Language</span>
+                            <span class="setting-desc" data-i18n="language_desc">Interface language</span>
+                        </div>
+                    </div>
+                    <div class="language-selector">
+                        <button class="lang-btn active" id="langRU" onclick="setLanguage('ru')">🇷🇺 RU</button>
+                        <button class="lang-btn" id="langEN" onclick="setLanguage('en')">🇬🇧 EN</button>
                     </div>
                 </div>
             </div>
@@ -6247,6 +6298,245 @@
         });
 
         // ═══════════════════════════════════════════════════
+        // LOCALIZATION / LANGUAGE SYSTEM
+        // ═══════════════════════════════════════════════════
+        var currentLang = localStorage.getItem('poker_language') || 'ru';
+        
+        var translations = {
+            ru: {
+                // Main Menu
+                balance: 'Баланс',
+                deposit: 'Депозит',
+                withdraw: 'Вывод',
+                history: 'История',
+                settings: 'Настройки',
+                games: 'Игры',
+                win_rate: 'Винрейт',
+                tournament: 'Турнир',
+                bounty_hunter: 'Bounty Hunter',
+                sit_go: 'Sit & Go',
+                private_game: 'Приватная игра',
+                create_join_private: 'Создать или присоединиться',
+                multi_table_tournaments: 'Многостоловые турниры с призами',
+                play_now: 'Играть',
+                
+                // Settings
+                settings_title: '⚙️ Настройки',
+                settings_audio: 'Аудио',
+                bg_music: 'Фоновая музыка',
+                bg_music_desc: 'Музыка во время игры',
+                sound_effects: 'Звуковые эффекты',
+                sound_effects_desc: 'Звуки карт и уведомления',
+                settings_theme: 'Тема',
+                neon_theme: 'Неон тема',
+                neon_theme_desc: 'Фиолетовое неоновое свечение',
+                settings_language: 'Язык',
+                language: 'Язык',
+                language_desc: 'Язык интерфейса',
+                
+                // Wallet
+                wallet_title: '💰 Кошелек',
+                tab_deposit: 'Депозит',
+                tab_withdraw: 'Вывод',
+                tab_history: 'История',
+                first_deposit_bonus: '+5% на первое крипто-пополнение',
+                payment_region: 'Регион оплаты',
+                bank_payment: 'Банковский платеж',
+                crypto_payment: 'Криптовалюта',
+                your_balance: 'Ваш баланс',
+                withdraw_amount: 'Сумма вывода',
+                enter_amount: 'Введите сумму',
+                card_transfer: 'Перевод на карту',
+                fast_withdraw: 'Быстрый вывод',
+                fast_withdraw_desc: 'Средства поступят в течение 24 часов',
+                no_transactions: 'Пока нет операций',
+                transaction_history: 'История транзакций',
+                
+                // Lobby
+                create_lobby: 'Создать лобби',
+                join_lobby: 'Присоединиться',
+                lobby_code: 'Код лобби',
+                enter_code: 'Введите код',
+                buy_in: 'Бай-ин',
+                players: 'Игроки',
+                waiting_players: 'Ожидание игроков',
+                start_game: 'Начать игру',
+                invite_friends: 'Пригласить друзей',
+                leave_lobby: 'Выйти',
+                
+                // Promo
+                promo_title: 'Ты уверен, что хочешь отказаться от бонуса?',
+                promo_text: 'Сделай депозит от $5 и участвуй в розыгрыше $1000',
+                continue_deposit: '💰 Продолжить пополнение',
+                close: 'Закрыть',
+                
+                // Game
+                timeout_autofold: '⏱️ Время истекло — автоматический сброс карт'
+            },
+            en: {
+                // Main Menu
+                balance: 'Balance',
+                deposit: 'Deposit',
+                withdraw: 'Withdraw',
+                history: 'History',
+                settings: 'Settings',
+                games: 'Games',
+                win_rate: 'Win Rate',
+                tournament: 'Tournament',
+                bounty_hunter: 'Bounty Hunter',
+                sit_go: 'Sit & Go',
+                private_game: 'Private Game',
+                create_join_private: 'Create or join private tables',
+                multi_table_tournaments: 'Multi-table tournaments with prize pools',
+                play_now: 'Play Now',
+                
+                // Settings
+                settings_title: '⚙️ Settings',
+                settings_audio: 'Audio',
+                bg_music: 'Background Music',
+                bg_music_desc: 'Play music during gameplay',
+                sound_effects: 'Sound Effects',
+                sound_effects_desc: 'Card sounds and notifications',
+                settings_theme: 'Theme',
+                neon_theme: 'Neon Theme',
+                neon_theme_desc: 'Purple neon glow style',
+                settings_language: 'Language',
+                language: 'Language',
+                language_desc: 'Interface language',
+                
+                // Wallet
+                wallet_title: '💰 Wallet',
+                tab_deposit: 'Deposit',
+                tab_withdraw: 'Withdraw',
+                tab_history: 'History',
+                first_deposit_bonus: '+5% on first crypto deposit',
+                payment_region: 'Payment region',
+                bank_payment: 'Bank Payment',
+                crypto_payment: 'Cryptocurrency',
+                your_balance: 'Your balance',
+                withdraw_amount: 'Withdraw amount',
+                enter_amount: 'Enter amount',
+                card_transfer: 'Card transfer',
+                fast_withdraw: 'Fast withdrawal',
+                fast_withdraw_desc: 'Funds arrive within 24 hours',
+                no_transactions: 'No transactions yet',
+                transaction_history: 'Transaction History',
+                
+                // Lobby
+                create_lobby: 'Create Lobby',
+                join_lobby: 'Join Lobby',
+                lobby_code: 'Lobby Code',
+                enter_code: 'Enter code',
+                buy_in: 'Buy-in',
+                players: 'Players',
+                waiting_players: 'Waiting for players',
+                start_game: 'Start Game',
+                invite_friends: 'Invite Friends',
+                leave_lobby: 'Leave',
+                
+                // Promo
+                promo_title: 'Are you sure you want to skip the bonus?',
+                promo_text: 'Make a deposit from $5 and participate in $1000 giveaway',
+                continue_deposit: '💰 Continue Deposit',
+                close: 'Close',
+                
+                // Game
+                timeout_autofold: '⏱️ Time expired — auto-fold'
+            }
+        };
+        
+        function t(key) {
+            return translations[currentLang][key] || translations['en'][key] || key;
+        }
+        
+        function setLanguage(lang) {
+            currentLang = lang;
+            localStorage.setItem('poker_language', lang);
+            
+            // Update language buttons
+            document.getElementById('langRU').classList.toggle('active', lang === 'ru');
+            document.getElementById('langEN').classList.toggle('active', lang === 'en');
+            
+            // Apply translations to all elements with data-i18n
+            applyTranslations();
+            
+            addDebug('Language set to: ' + lang);
+        }
+        
+        function applyTranslations() {
+            // Main Menu
+            var balanceLabel = document.querySelector('.menu-balance-label');
+            if (balanceLabel) balanceLabel.textContent = t('balance');
+            
+            var depositBtn = document.querySelector('.menu-action-btn.deposit .menu-action-text');
+            if (depositBtn) depositBtn.textContent = t('deposit');
+            
+            var withdrawBtn = document.querySelector('.menu-action-btn.withdraw .menu-action-text');
+            if (withdrawBtn) withdrawBtn.textContent = t('withdraw');
+            
+            var historyBtn = document.querySelector('.menu-action-btn.history .menu-action-text');
+            if (historyBtn) historyBtn.textContent = t('history');
+            
+            var settingsBtn = document.querySelector('.menu-action-btn.settings .menu-action-text');
+            if (settingsBtn) settingsBtn.textContent = t('settings');
+            
+            var gamesLabel = document.querySelector('.menu-stat:first-child .menu-stat-label');
+            if (gamesLabel) gamesLabel.textContent = t('games');
+            
+            var winRateLabel = document.querySelector('.menu-stat:last-child .menu-stat-label');
+            if (winRateLabel) winRateLabel.textContent = t('win_rate');
+            
+            // Game mode cards
+            var tournamentCard = document.querySelector('.game-mode-card.tournament .game-mode-name');
+            if (tournamentCard) tournamentCard.textContent = t('tournament');
+            
+            var bountyCard = document.querySelector('.game-mode-card.bounty .game-mode-name');
+            if (bountyCard) bountyCard.textContent = t('bounty_hunter');
+            
+            var sitgoCard = document.querySelector('.game-mode-card.sitgo .game-mode-name');
+            if (sitgoCard) sitgoCard.textContent = t('sit_go');
+            
+            // Private game card
+            var privateTitle = document.querySelector('.private-game-card .private-game-title');
+            if (privateTitle) privateTitle.textContent = t('private_game');
+            
+            var privateDesc = document.querySelector('.private-game-card .private-game-desc');
+            if (privateDesc) privateDesc.textContent = t('create_join_private');
+            
+            // Tournament description
+            var tournamentDesc = document.querySelector('.tournament-description');
+            if (tournamentDesc) tournamentDesc.textContent = t('multi_table_tournaments');
+            
+            // Play button
+            var playBtn = document.querySelector('.play-btn');
+            if (playBtn) playBtn.textContent = t('play_now');
+            
+            // Settings modal
+            var settingsTitle = document.querySelector('.settings-title');
+            if (settingsTitle) settingsTitle.textContent = t('settings_title');
+            
+            // Wallet modal
+            var walletTitle = document.querySelector('.wallet-title');
+            if (walletTitle) walletTitle.innerHTML = '<span class="wallet-title-icon">💰</span> ' + (currentLang === 'ru' ? 'Кошелек' : 'Wallet');
+            
+            // Promo modal
+            var promoTitle = document.querySelector('.deposit-promo-text h2');
+            if (promoTitle) promoTitle.textContent = t('promo_title');
+            
+            var promoContinue = document.querySelector('.deposit-promo-continue-btn');
+            if (promoContinue) promoContinue.textContent = t('continue_deposit');
+            
+            var promoClose = document.querySelector('.deposit-promo-close-link');
+            if (promoClose) promoClose.textContent = t('close');
+        }
+        
+        // Initialize language on load
+        function initLanguage() {
+            var savedLang = localStorage.getItem('poker_language') || 'ru';
+            setLanguage(savedLang);
+        }
+
+        // ═══════════════════════════════════════════════════
         // FULLSCREEN REQUEST FUNCTIONS
         // ═══════════════════════════════════════════════════
         function requestFullscreen() {
@@ -6443,6 +6733,9 @@
             hideInitialLoader();
             
             try {
+                // Initialize language
+                initLanguage();
+                
                 // In Telegram: skip all intermediate screens
                 if (isTelegramApp) {
                     addDebug('Telegram app - fast load');
@@ -9733,9 +10026,9 @@
                     betHtml = renderPlayerBetWithChips(betAmount);
                 }
                 
-                // Timer ring HTML for active player
+                // Timer ring HTML for active player (use player.isCurrentTurn boolean)
                 var timerRingHtml = '';
-                if (isCurrentTurn) {
+                if (player.isCurrentTurn) {
                     timerRingHtml = '<div class="player-timer-ring" id="timer-ring-' + player.seat + '">' +
                         '<svg viewBox="0 0 50 50">' +
                             '<circle class="timer-bg" cx="25" cy="25" r="23"></circle>' +
