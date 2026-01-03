@@ -885,6 +885,135 @@ tournament_manager = TournamentManager()
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
+# GAME ENGINE INTEGRATION
+# ═══════════════════════════════════════════════════════════════════════════════
+
+async def create_game_session_for_table(tournament_id: str, table_id: str) -> Optional[str]:
+    """Create a game_engine session for a tournament table"""
+    from game_engine import create_game, GameState, Player
+    
+    tournament = tournament_manager.get_tournament(tournament_id)
+    if not tournament:
+        return None
+    
+    table = tournament.tables.get(table_id)
+    if not table:
+        return None
+    
+    # Get current blinds
+    blinds = tournament.get_current_blinds()
+    
+    # Create game session
+    session_id = f"tourney_{table_id}"
+    
+    # Build players dict
+    players = {}
+    for seat, telegram_id in table.seats.items():
+        if telegram_id and telegram_id in tournament.players:
+            tp = tournament.players[telegram_id]
+            players[seat] = Player(
+                telegram_id=telegram_id,
+                name=tp.first_name,
+                seat=seat,
+                chips=tp.chips,
+            )
+    
+    # Create game state
+    game = GameState(
+        session_id=session_id,
+        lobby_code=table_id,
+        players=players,
+        small_blind=blinds["sb"],
+        big_blind=blinds["bb"],
+        max_players=table.max_seats,
+        rake_percentage=0,  # No rake in tournaments
+        rake_cap=0,
+    )
+    
+    # Register game
+    from game_engine import active_games
+    active_games[session_id] = game
+    table.game_session_id = session_id
+    
+    print(f"🏆 TOURNAMENT: Created game session {session_id} for table {table_id}")
+    return session_id
+
+
+async def sync_tournament_blinds(tournament_id: str):
+    """Update blinds in all active game sessions for a tournament"""
+    from game_engine import active_games
+    
+    tournament = tournament_manager.get_tournament(tournament_id)
+    if not tournament:
+        return
+    
+    blinds = tournament.get_current_blinds()
+    
+    for table in tournament.tables.values():
+        if table.game_session_id and table.game_session_id in active_games:
+            game = active_games[table.game_session_id]
+            game.small_blind = blinds["sb"]
+            game.big_blind = blinds["bb"]
+            print(f"🏆 TOURNAMENT: Updated blinds for {table.table_id}: {blinds['sb']}/{blinds['bb']}")
+
+
+async def handle_hand_result(tournament_id: str, table_id: str, session_id: str):
+    """Called after each hand to sync chips and check for eliminations"""
+    from game_engine import get_game
+    
+    tournament = tournament_manager.get_tournament(tournament_id)
+    if not tournament:
+        return
+    
+    game = get_game(session_id)
+    if not game:
+        return
+    
+    table = tournament.tables.get(table_id)
+    if not table:
+        return
+    
+    eliminations = []
+    winner_seat = game.winner_seat
+    
+    # Update tournament player chips from game state
+    for seat, player in game.players.items():
+        if player.telegram_id in tournament.players:
+            tp = tournament.players[player.telegram_id]
+            tp.chips = player.chips
+            
+            # Check for elimination (0 chips)
+            if player.chips <= 0 and not tp.is_eliminated():
+                # Find eliminator (the winner of this hand)
+                eliminator_id = None
+                if winner_seat and winner_seat in game.players:
+                    eliminator_id = game.players[winner_seat].telegram_id
+                
+                eliminations.append((player.telegram_id, eliminator_id))
+    
+    # Process eliminations
+    for eliminated_id, eliminator_id in eliminations:
+        if eliminator_id:
+            await tournament_manager.eliminate_player(tournament_id, eliminated_id, eliminator_id)
+
+
+async def get_tournament_for_session(session_id: str) -> Optional[Tuple[str, str]]:
+    """Get tournament_id and table_id for a game session"""
+    if not session_id.startswith("tourney_"):
+        return None
+    
+    # Extract table_id from session_id
+    table_id = session_id.replace("tourney_", "")
+    
+    # Find tournament
+    for tournament in tournament_manager.tournaments.values():
+        if table_id in tournament.tables:
+            return tournament.tournament_id, table_id
+    
+    return None
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
 # HELPER FUNCTIONS FOR INTEGRATION
 # ═══════════════════════════════════════════════════════════════════════════════
 

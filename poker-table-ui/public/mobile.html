@@ -2423,6 +2423,159 @@
         @keyframes reconnectSpin {
             to { transform: rotate(360deg); }
         }
+        
+        /* ═══════════════════════════════════════════════════
+           QUICK CHAT SYSTEM
+           ═══════════════════════════════════════════════════ */
+        .chat-btn {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #6366f1, #4f46e5);
+            border: none;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+            cursor: pointer;
+            transition: transform 0.15s, box-shadow 0.15s;
+        }
+        
+        .chat-btn:active {
+            transform: scale(0.9);
+        }
+        
+        .chat-btn.active {
+            background: linear-gradient(135deg, #818cf8, #6366f1);
+            box-shadow: 0 0 20px rgba(99, 102, 241, 0.6);
+        }
+        
+        .quick-chat-panel {
+            position: fixed;
+            bottom: 180px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(15, 10, 30, 0.95);
+            border: 1px solid rgba(99, 102, 241, 0.4);
+            border-radius: 16px;
+            padding: 12px;
+            z-index: 1000;
+            width: calc(100% - 32px);
+            max-width: 360px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+        }
+        
+        .chat-phrases {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+        
+        .chat-phrase {
+            background: rgba(99, 102, 241, 0.2);
+            border: 1px solid rgba(99, 102, 241, 0.4);
+            border-radius: 20px;
+            padding: 6px 12px;
+            font-size: 12px;
+            font-weight: 600;
+            color: #e0e7ff;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+        
+        .chat-phrase:active {
+            background: rgba(99, 102, 241, 0.5);
+            transform: scale(0.95);
+        }
+        
+        .chat-emojis {
+            display: flex;
+            justify-content: space-between;
+            gap: 4px;
+        }
+        
+        .chat-emoji {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+        
+        .chat-emoji:active {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(0.9);
+        }
+        
+        .chat-message-display {
+            position: fixed;
+            top: 120px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.85);
+            border: 1px solid rgba(99, 102, 241, 0.5);
+            border-radius: 12px;
+            padding: 8px 16px;
+            z-index: 900;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            animation: chatFadeIn 0.3s ease-out;
+            max-width: 280px;
+        }
+        
+        @keyframes chatFadeIn {
+            from { opacity: 0; transform: translateX(-50%) translateY(-10px); }
+            to { opacity: 1; transform: translateX(-50%) translateY(0); }
+        }
+        
+        .chat-sender {
+            font-size: 11px;
+            font-weight: 700;
+            color: #a5b4fc;
+        }
+        
+        .chat-text {
+            font-size: 14px;
+            color: #fff;
+        }
+        
+        /* ═══════════════════════════════════════════════════
+           TOURNAMENT NOTIFICATIONS
+           ═══════════════════════════════════════════════════ */
+        .tournament-notification {
+            position: fixed;
+            top: 60px;
+            left: 50%;
+            transform: translateX(-50%) translateY(-20px);
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.95), rgba(99, 102, 241, 0.95));
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 12px;
+            padding: 12px 24px;
+            z-index: 950;
+            color: #fff;
+            font-size: 14px;
+            font-weight: 600;
+            text-align: center;
+            box-shadow: 0 10px 40px rgba(139, 92, 246, 0.4);
+            opacity: 0;
+            transition: opacity 0.3s, transform 0.3s;
+            max-width: 320px;
+        }
+        
+        .tournament-notification.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
 
         .player-name {
             font-size: 9px;
@@ -6017,6 +6170,37 @@
                 <button class="action-btn call" onclick="playerAction('call')" id="callBtn">Check</button>
                 <button class="action-btn raise" onclick="playerAction('raise')" id="raiseBtn">Bet</button>
                 <button class="action-btn allin" onclick="playerAction('allin')">All In</button>
+                <button class="chat-btn" onclick="toggleChatPanel()" id="chatBtn">💬</button>
+            </div>
+            
+            <!-- Quick Chat Panel -->
+            <div class="quick-chat-panel hidden" id="quickChatPanel">
+                <div class="chat-phrases">
+                    <button class="chat-phrase" onclick="sendQuickChat('gg')">👍 GG</button>
+                    <button class="chat-phrase" onclick="sendQuickChat('nh')">🎯 NH</button>
+                    <button class="chat-phrase" onclick="sendQuickChat('wp')">👏 WP</button>
+                    <button class="chat-phrase" onclick="sendQuickChat('gl')">🍀 GL</button>
+                    <button class="chat-phrase" onclick="sendQuickChat('ty')">🙏 TY</button>
+                    <button class="chat-phrase" onclick="sendQuickChat('lol')">😂 LOL</button>
+                    <button class="chat-phrase" onclick="sendQuickChat('wow')">😮 WOW</button>
+                    <button class="chat-phrase" onclick="sendQuickChat('bluff')">🃏 BLUFF?</button>
+                </div>
+                <div class="chat-emojis">
+                    <button class="chat-emoji" onclick="sendQuickChat('👍')">👍</button>
+                    <button class="chat-emoji" onclick="sendQuickChat('👎')">👎</button>
+                    <button class="chat-emoji" onclick="sendQuickChat('🔥')">🔥</button>
+                    <button class="chat-emoji" onclick="sendQuickChat('💀')">💀</button>
+                    <button class="chat-emoji" onclick="sendQuickChat('🤔')">🤔</button>
+                    <button class="chat-emoji" onclick="sendQuickChat('😎')">😎</button>
+                    <button class="chat-emoji" onclick="sendQuickChat('🎰')">🎰</button>
+                    <button class="chat-emoji" onclick="sendQuickChat('💰')">💰</button>
+                </div>
+            </div>
+            
+            <!-- Chat Message Display -->
+            <div class="chat-message-display hidden" id="chatMessageDisplay">
+                <span class="chat-sender"></span>
+                <span class="chat-text"></span>
             </div>
             
             <!-- Bet Slider Row -->
@@ -9714,6 +9898,132 @@
             });
         }
         
+        // ═══════════════════════════════════════════════════
+        // QUICK CHAT SYSTEM
+        // ═══════════════════════════════════════════════════
+        var chatPanelOpen = false;
+        var chatMessageTimeout = null;
+        
+        function toggleChatPanel() {
+            var panel = document.getElementById('quickChatPanel');
+            var btn = document.getElementById('chatBtn');
+            if (!panel) return;
+            
+            chatPanelOpen = !chatPanelOpen;
+            panel.classList.toggle('hidden', !chatPanelOpen);
+            if (btn) btn.classList.toggle('active', chatPanelOpen);
+        }
+        
+        function sendQuickChat(message) {
+            // Close panel
+            toggleChatPanel();
+            
+            // Send to server via WebSocket
+            if (gameWebSocket && gameWebSocket.readyState === WebSocket.OPEN) {
+                gameWebSocket.send(JSON.stringify({
+                    type: 'chat',
+                    message: message,
+                    senderName: userName || 'Player'
+                }));
+            }
+            
+            // Show own message locally
+            showChatMessage(userName || 'You', message);
+            addDebug('Chat sent: ' + message);
+        }
+        
+        function showChatMessage(sender, message) {
+            var display = document.getElementById('chatMessageDisplay');
+            if (!display) return;
+            
+            // Clear previous timeout
+            if (chatMessageTimeout) {
+                clearTimeout(chatMessageTimeout);
+            }
+            
+            // Update content
+            var senderEl = display.querySelector('.chat-sender');
+            var textEl = display.querySelector('.chat-text');
+            if (senderEl) senderEl.textContent = sender + ':';
+            if (textEl) textEl.textContent = message;
+            
+            // Show message
+            display.classList.remove('hidden');
+            
+            // Auto-hide after 3 seconds
+            chatMessageTimeout = setTimeout(function() {
+                display.classList.add('hidden');
+            }, 3000);
+        }
+        
+        function handleChatMessage(data) {
+            // Don't show own messages again
+            if (data.senderSeat === mySeat) return;
+            
+            showChatMessage(data.senderName || 'Player', data.message);
+        }
+        
+        function handleBlindIncrease(data) {
+            addDebug('Blind increase: level ' + data.level);
+            
+            // Show notification
+            var blinds = data.blinds;
+            var msg = '🔔 Уровень ' + data.level + ': Блайнды ' + blinds.sb + '/' + blinds.bb;
+            if (blinds.ante > 0) {
+                msg += ' (Анте: ' + blinds.ante + ')';
+            }
+            
+            showTournamentNotification(msg);
+            
+            // Update blinds display if exists
+            var blindsDisplay = document.getElementById('blindsDisplay');
+            if (blindsDisplay) {
+                blindsDisplay.textContent = blinds.sb + '/' + blinds.bb;
+            }
+        }
+        
+        function handleElimination(data) {
+            addDebug('Player eliminated: ' + data.playerName);
+            
+            var msg = '💀 ' + data.playerName + ' выбывает! Место #' + data.position;
+            if (data.bounty) {
+                msg += ' | Баунти: $' + data.bounty.toFixed(2);
+            }
+            
+            showTournamentNotification(msg);
+        }
+        
+        var tournamentNotificationTimeout = null;
+        
+        function showTournamentNotification(message) {
+            var notif = document.getElementById('tournamentNotification');
+            if (!notif) {
+                // Create notification element
+                notif = document.createElement('div');
+                notif.id = 'tournamentNotification';
+                notif.className = 'tournament-notification';
+                document.body.appendChild(notif);
+            }
+            
+            // Clear previous timeout
+            if (tournamentNotificationTimeout) {
+                clearTimeout(tournamentNotificationTimeout);
+            }
+            
+            // Show notification
+            notif.textContent = message;
+            notif.classList.remove('hidden');
+            notif.classList.add('show');
+            
+            // Auto-hide after 4 seconds
+            tournamentNotificationTimeout = setTimeout(function() {
+                notif.classList.remove('show');
+                setTimeout(function() {
+                    notif.classList.add('hidden');
+                }, 300);
+            }, 4000);
+        }
+        
         function autoFoldOnTimeout() {
             addDebug('Auto-fold due to timeout');
             
@@ -9883,6 +10193,15 @@
                 // Clear session cache when game ends
                 clearSessionCache();
                 addDebug('Game ended, cache cleared');
+            } else if (data.type === 'chat') {
+                // Handle incoming chat message
+                handleChatMessage(data);
+            } else if (data.type === 'blindIncrease') {
+                // Handle tournament blind increase
+                handleBlindIncrease(data);
+            } else if (data.type === 'elimination') {
+                // Handle player elimination in tournament
+                handleElimination(data);
             } else {
                 addDebug('Unknown game event: ' + data.type);
             }

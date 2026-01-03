@@ -1850,6 +1850,56 @@ async def _broadcast_game_state(session_id: str, game: GameState):
         connections.pop(seat, None)
 
 
+async def _broadcast_chat_message(session_id: str, sender_seat: int, sender_name: str, message: str):
+    """Broadcast chat message to all connected players"""
+    connections = game_connections.get(session_id, {})
+    stale = []
+    
+    for seat, ws in connections.items():
+        try:
+            await ws.send_json({
+                "type": "chat",
+                "senderSeat": sender_seat,
+                "senderName": sender_name,
+                "message": message,
+            })
+        except Exception:
+            stale.append(seat)
+    
+    for seat in stale:
+        connections.pop(seat, None)
+
+
+async def _handle_tournament_hand_result(session_id: str, game):
+    """Handle hand result for tournament integration"""
+    try:
+        from tournament_engine import get_tournament_for_session, handle_hand_result
+        
+        # Check if this is a tournament session
+        result = await get_tournament_for_session(session_id)
+        if result:
+            tournament_id, table_id = result
+            await handle_hand_result(tournament_id, table_id, session_id)
+            print(f"🏆 TOURNAMENT: Processed hand result for {table_id}")
+    except Exception as e:
+        print(f"❌ Tournament hand result error: {e}")
+
+
+async def _broadcast_tournament_update(session_id: str, data: dict):
+    """Broadcast tournament-specific update to all connected players"""
+    connections = game_connections.get(session_id, {})
+    stale = []
+    
+    for seat, ws in connections.items():
+        try:
+            await ws.send_json(data)
+        except Exception:
+            stale.append(seat)
+    
+    for seat in stale:
+        connections.pop(seat, None)
+
+
 @app.websocket("/ws/game/{session_id}")
 async def game_websocket(websocket: WebSocket, session_id: str, telegram_id: str = None):
     """WebSocket for real-time game updates"""
@@ -1931,6 +1981,10 @@ async def game_websocket(websocket: WebSocket, session_id: str, telegram_id: str
                 if success and updated_game:
                     # Broadcast to all players
                     await _broadcast_game_state(session_id, updated_game)
+                    
+                    # Check if hand finished (showdown/finished) - handle tournament integration
+                    if updated_game.phase.value in ["showdown", "finished"]:
+                        await _handle_tournament_hand_result(session_id, updated_game)
                 else:
                     await websocket.send_json({
                         "type": "error",
@@ -1944,6 +1998,15 @@ async def game_websocket(websocket: WebSocket, session_id: str, telegram_id: str
                 if updated_game:
                     print(f"🎮 GAME: New hand requested by seat {player_seat}")
                     await _broadcast_game_state(session_id, updated_game)
+                    
+            elif msg_type == "chat":
+                # Broadcast chat message to all players in the game
+                chat_message = data.get("message", "")
+                sender_name = data.get("senderName", "Player")
+                
+                # Validate message (prevent spam/abuse)
+                if len(chat_message) <= 20:  # Quick phrases are short
+                    await _broadcast_chat_message(session_id, player_seat, sender_name, chat_message)
                     
     except WebSocketDisconnect:
         print(f"🎮 GAME WS: Seat {player_seat} disconnected from game {session_id}")
@@ -2236,6 +2299,26 @@ tournament_manager.on_event("tournament_finished", lambda tid, data: asyncio.cre
 async def startup_event():
     """Initialize default tournaments on server start"""
     await create_default_tournaments()
+    
+    # Register tournament callbacks for blind increases
+    from tournament_engine import tournament_manager, sync_tournament_blinds
+    
+    async def on_blind_increase(tournament_id: str, blinds: dict):
+        """Handle blind level increase"""
+        await sync_tournament_blinds(tournament_id)
+        # Broadcast blind update to all connected clients
+        tournament = tournament_manager.get_tournament(tournament_id)
+        if tournament:
+            for table in tournament.tables.values():
+                if table.game_session_id:
+                    await _broadcast_tournament_update(table.game_session_id, {
+                        "type": "blindIncrease",
+                        "level": tournament.current_level,
+                        "blinds": blinds,
+                        "timeToNext": tournament.get_time_to_next_level(),
+                    })
+    
+    tournament_manager.on_event("blind_increase", on_blind_increase)
     print("✅ Server started with default tournaments")
 
 

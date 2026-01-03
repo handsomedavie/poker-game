@@ -92,6 +92,10 @@ class GameState:
     # Turn timer
     turn_start_time: Optional[float] = None  # When current turn started (time.time())
     turn_timeout_seconds: int = 20  # Seconds allowed per turn
+    # Rake system (casino commission)
+    rake_percentage: float = 0.05  # 5% rake
+    rake_cap: int = 50  # Maximum rake per hand
+    total_rake_collected: int = 0  # Rake collected this hand
     # Tournament configuration
     buy_in_usd: float = 1.0  # Entry fee in USD
     starting_chips: int = 1000  # Chips given for buy-in
@@ -146,6 +150,9 @@ class GameState:
             "turnStartTime": self.turn_start_time,
             "turnTimeoutSeconds": self.turn_timeout_seconds,
             "turnTimeRemaining": self._get_turn_time_remaining(),
+            # Rake info
+            "rakeCollected": self.total_rake_collected,
+            "rakePercentage": self.rake_percentage,
             # Tournament config
             "buyInUsd": self.buy_in_usd,
             "startingChips": self.starting_chips,
@@ -622,6 +629,21 @@ def evaluate_hand(cards: List[Card]) -> Tuple[int, List[int], str]:
     return (1, ranks[:5], "High Card")
 
 
+def _calculate_rake(game: GameState, pot: int) -> int:
+    """Calculate rake (casino commission) from the pot"""
+    # Calculate base rake
+    rake = int(pot * game.rake_percentage)
+    
+    # Apply rake cap
+    rake = min(rake, game.rake_cap)
+    
+    # No rake if pot is too small (less than 2x big blind)
+    if pot < game.big_blind * 2:
+        rake = 0
+    
+    return rake
+
+
 def _determine_winner(game: GameState):
     """Determine winner using proper hand evaluation"""
     active = get_active_players(game)
@@ -652,10 +674,18 @@ def _determine_winner(game: GameState):
         winner = best_player
         hand_name = best_hand[2]
     
-    winner.chips += game.pot
+    # Calculate and apply rake
+    rake = _calculate_rake(game, game.pot)
+    game.total_rake_collected = rake
+    pot_after_rake = game.pot - rake
+    
+    winner.chips += pot_after_rake
     game.winner_seat = winner.seat
     game.winner_hand = hand_name
-    print(f"🎮 GAME: {winner.name} wins ${game.pot} with {hand_name}!")
+    
+    if rake > 0:
+        print(f"🎮 RAKE: Collected ${rake} ({game.rake_percentage*100:.0f}% of ${game.pot})")
+    print(f"🎮 GAME: {winner.name} wins ${pot_after_rake} with {hand_name}!")
     
     game.pot = 0
     game.phase = GamePhase.FINISHED
@@ -677,6 +707,7 @@ def start_new_hand(session_id: str) -> Optional[GameState]:
     game.winner_hand = None
     game.last_raiser_seat = None
     game.players_acted_this_round = set()
+    game.total_rake_collected = 0  # Reset rake for new hand
     
     # Reset players
     for player in game.players.values():
