@@ -53,9 +53,10 @@ const MODE_INFO: Record<GameMode, { title: string; icon: string; description: st
 interface MainMenuProps {
   onJoinTable: (tableId: string) => void;
   onCreatePrivate: () => void;
+  onGameModes?: () => void;
 }
 
-export const MainMenu: React.FC<MainMenuProps> = ({ onJoinTable, onCreatePrivate }) => {
+export const MainMenu: React.FC<MainMenuProps> = ({ onJoinTable, onCreatePrivate, onGameModes }) => {
   const [activeMode, setActiveMode] = useState<GameMode>('tournament');
   const [tables, setTables] = useState<TableInfo[]>(MOCK_TABLES.tournament);
   const [user, setUser] = useState<UserProfile>({
@@ -162,10 +163,15 @@ export const MainMenu: React.FC<MainMenuProps> = ({ onJoinTable, onCreatePrivate
           ))}
         </div>
 
-        {/* Private Game Button */}
-        <button className={styles.privateGameButton} onClick={onCreatePrivate}>
-          🎰 Create Private Game
-        </button>
+        {/* Game Mode Buttons */}
+        <div className={styles.gameModesSection}>
+          <button className={styles.gameModesButton} onClick={onGameModes}>
+            🎮 Play Tournaments
+          </button>
+          <button className={styles.privateGameButton} onClick={onCreatePrivate}>
+            🔐 Private Game
+          </button>
+        </div>
       </div>
 
       {/* Right Sidebar */}

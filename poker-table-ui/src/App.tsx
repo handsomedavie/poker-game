@@ -3,11 +3,12 @@ import { useState, useEffect, useCallback, Suspense, lazy } from 'react';
 // Lazy load heavy components - they will be loaded on demand
 const PokerTable = lazy(() => import('./components/PokerTable/PokerTable').then(m => ({ default: m.PokerTable })));
 const LobbyPage = lazy(() => import('./components/Lobby').then(m => ({ default: m.LobbyPage })));
+const GameModesScreen = lazy(() => import('./components/Tournament/GameModesScreen').then(m => ({ default: m.GameModesScreen })));
 
 // MainMenu loads immediately as it's the first screen
 import { MainMenu } from './components/MainMenu';
 
-type AppView = 'menu' | 'table' | 'private-lobby';
+type AppView = 'menu' | 'table' | 'private-lobby' | 'game-modes';
 
 // Loading fallback for lazy components
 const LoadingFallback = () => (
@@ -72,6 +73,18 @@ function App() {
     setView('private-lobby');
   }, []);
 
+  // Handle switching to game modes screen
+  const handleGameModes = useCallback(() => {
+    setView('game-modes');
+  }, []);
+
+  // Handle joining tournament table
+  const handleJoinTournamentTable = useCallback((tournamentId: string, tableIdFromTournament: string) => {
+    console.log('🏆 Joining tournament table:', tournamentId, tableIdFromTournament);
+    setTableId(`${tournamentId}_${tableIdFromTournament}`);
+    setView('table');
+  }, []);
+
   // Handle going back to menu
   const handleBackToMenu = useCallback(() => {
     setView('menu');
@@ -126,7 +139,28 @@ function App() {
       <MainMenu
         onJoinTable={handleJoinTable}
         onCreatePrivate={handleCreatePrivate}
+        onGameModes={handleGameModes}
       />
+    );
+  }
+
+  // Game Modes Screen (lazy loaded)
+  if (view === 'game-modes') {
+    // Get telegram user info
+    const tg = (window as any).Telegram?.WebApp;
+    const user = tg?.initDataUnsafe?.user;
+    
+    return (
+      <Suspense fallback={<LoadingFallback />}>
+        <GameModesScreen
+          telegramId={user?.id || 0}
+          username={user?.username}
+          firstName={user?.first_name || 'Player'}
+          onBack={handleBackToMenu}
+          onJoinTable={handleJoinTournamentTable}
+          onPrivateGame={handleCreatePrivate}
+        />
+      </Suspense>
     );
   }
 

@@ -34,6 +34,10 @@ from game_engine import (
     create_game, start_hand, process_action, get_game,
     end_game, GameState, get_active_players
 )
+from tournament_engine import (
+    tournament_manager, TournamentMode, TournamentStatus, SnGFormat,
+    create_default_tournaments
+)
 import json
 
 # ═══════════════════════════════════════════════════
@@ -1952,6 +1956,287 @@ async def game_websocket(websocket: WebSocket, session_id: str, telegram_id: str
             game = get_game(session_id)
             if game:
                 game.connected_count = len(game_connections.get(session_id, {}))
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# TOURNAMENT API ENDPOINTS
+# ═══════════════════════════════════════════════════════════════════════════════
+
+class TournamentRegisterRequest(BaseModel):
+    tournament_id: str
+    telegram_id: int
+    username: Optional[str] = None
+    first_name: str = "Player"
+
+
+class TournamentCreateRequest(BaseModel):
+    name: str
+    mode: str  # "tournament", "bounty", "sitgo"
+    buy_in: float
+    starting_chips: int = 10000
+    min_players: int = 18
+    max_players: int = 100
+    blind_structure: str = "standard"
+    bounty_percent: float = 50.0
+    sng_format: str = "top_3"
+    players_per_table: int = 9
+
+
+@app.get("/api/tournaments")
+async def get_tournaments(mode: Optional[str] = None, status: Optional[str] = None):
+    """Get list of tournaments with optional filters"""
+    try:
+        mode_enum = TournamentMode(mode) if mode else None
+    except ValueError:
+        mode_enum = None
+    
+    if status == "registering":
+        tournaments = tournament_manager.get_registering_tournaments(mode_enum)
+    else:
+        tournaments = tournament_manager.get_active_tournaments(mode_enum)
+    
+    return {
+        "success": True,
+        "tournaments": [t.to_dict(include_players=False) for t in tournaments],
+        "count": len(tournaments),
+    }
+
+
+@app.get("/api/tournaments/{tournament_id}")
+async def get_tournament(tournament_id: str):
+    """Get tournament details"""
+    tournament = tournament_manager.get_tournament(tournament_id)
+    if not tournament:
+        raise HTTPException(status_code=404, detail="Tournament not found")
+    
+    return {
+        "success": True,
+        "tournament": tournament.to_dict(include_players=True),
+    }
+
+
+@app.get("/api/tournaments/{tournament_id}/leaderboard")
+async def get_tournament_leaderboard(tournament_id: str, limit: int = 10):
+    """Get tournament leaderboard"""
+    leaderboard = tournament_manager.get_leaderboard(tournament_id, limit)
+    return {
+        "success": True,
+        "leaderboard": leaderboard,
+    }
+
+
+@app.post("/api/tournaments/{tournament_id}/register")
+async def register_for_tournament(tournament_id: str, request: TournamentRegisterRequest):
+    """Register for a tournament"""
+    success, message, tournament = await tournament_manager.register_player(
+        tournament_id=tournament_id,
+        telegram_id=request.telegram_id,
+        username=request.username,
+        first_name=request.first_name,
+    )
+    
+    if not success:
+        raise HTTPException(status_code=400, detail=message)
+    
+    return {
+        "success": True,
+        "message": message,
+        "tournament": tournament.to_dict(include_players=False) if tournament else None,
+    }
+
+
+@app.post("/api/tournaments/{tournament_id}/unregister")
+async def unregister_from_tournament(tournament_id: str, telegram_id: int):
+    """Unregister from a tournament"""
+    success, message = await tournament_manager.unregister_player(tournament_id, telegram_id)
+    
+    if not success:
+        raise HTTPException(status_code=400, detail=message)
+    
+    return {
+        "success": True,
+        "message": message,
+    }
+
+
+@app.post("/api/tournaments/create")
+async def create_tournament(request: TournamentCreateRequest):
+    """Create a new tournament (admin only in production)"""
+    try:
+        mode_enum = TournamentMode(request.mode)
+    except ValueError:
+        raise HTTPException(status_code=400, detail=f"Invalid mode: {request.mode}")
+    
+    sng_format = SnGFormat.TOP_3_PAID
+    if request.sng_format:
+        try:
+            sng_format = SnGFormat(request.sng_format)
+        except ValueError:
+            pass
+    
+    if mode_enum == TournamentMode.SIT_AND_GO:
+        tournament = tournament_manager.create_sit_and_go(
+            buy_in=request.buy_in,
+            players_per_table=request.players_per_table,
+            sng_format=sng_format,
+            blind_structure=request.blind_structure,
+            starting_chips=request.starting_chips,
+        )
+    elif mode_enum == TournamentMode.BOUNTY_HUNTER:
+        tournament = tournament_manager.create_bounty_tournament(
+            name=request.name,
+            buy_in=request.buy_in,
+            bounty_percent=request.bounty_percent,
+            starting_chips=request.starting_chips,
+            min_players=request.min_players,
+            max_players=request.max_players,
+            blind_structure=request.blind_structure,
+        )
+    else:
+        tournament = tournament_manager.create_tournament(
+            name=request.name,
+            mode=mode_enum,
+            buy_in=request.buy_in,
+            starting_chips=request.starting_chips,
+            min_players=request.min_players,
+            max_players=request.max_players,
+            blind_structure=request.blind_structure,
+        )
+    
+    return {
+        "success": True,
+        "tournament": tournament.to_dict(include_players=False),
+    }
+
+
+@app.post("/api/tournaments/{tournament_id}/start")
+async def start_tournament(tournament_id: str):
+    """Start a tournament (admin only)"""
+    success, message = await tournament_manager.start_tournament(tournament_id)
+    
+    if not success:
+        raise HTTPException(status_code=400, detail=message)
+    
+    return {
+        "success": True,
+        "message": message,
+    }
+
+
+@app.get("/api/tournaments/player/{telegram_id}")
+async def get_player_tournaments_api(telegram_id: int):
+    """Get tournaments a player is registered in"""
+    tournaments = tournament_manager.get_player_tournaments(telegram_id)
+    
+    return {
+        "success": True,
+        "tournaments": [t.to_dict(include_players=False) for t in tournaments],
+        "count": len(tournaments),
+    }
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# TOURNAMENT WEBSOCKET
+# ═══════════════════════════════════════════════════════════════════════════════
+
+tournament_connections: Dict[str, Dict[int, WebSocket]] = {}  # tournament_id -> {telegram_id: ws}
+
+
+@app.websocket("/ws/tournament/{tournament_id}")
+async def tournament_websocket(websocket: WebSocket, tournament_id: str, telegram_id: str = None):
+    """WebSocket for real-time tournament updates"""
+    await websocket.accept()
+    
+    tournament = tournament_manager.get_tournament(tournament_id)
+    if not tournament:
+        await websocket.send_json({"type": "error", "message": "Tournament not found"})
+        await websocket.close()
+        return
+    
+    tg_id = int(telegram_id) if telegram_id else 0
+    
+    # Register connection
+    if tournament_id not in tournament_connections:
+        tournament_connections[tournament_id] = {}
+    tournament_connections[tournament_id][tg_id] = websocket
+    
+    print(f"🏆 TOURNAMENT WS: Player {tg_id} connected to tournament {tournament_id}")
+    
+    try:
+        # Send initial tournament state
+        player = tournament.players.get(tg_id)
+        await websocket.send_json({
+            "type": "tournamentState",
+            "tournament": tournament.to_dict(include_players=True),
+            "yourPlayer": player.to_dict() if player else None,
+        })
+        
+        while True:
+            data = await websocket.receive_json()
+            msg_type = data.get("type")
+            
+            if msg_type == "ping":
+                await websocket.send_json({"type": "pong"})
+            
+            elif msg_type == "getLeaderboard":
+                leaderboard = tournament_manager.get_leaderboard(tournament_id, 20)
+                await websocket.send_json({
+                    "type": "leaderboard",
+                    "leaderboard": leaderboard,
+                })
+            
+            elif msg_type == "getState":
+                await websocket.send_json({
+                    "type": "tournamentState",
+                    "tournament": tournament.to_dict(include_players=True),
+                    "yourPlayer": player.to_dict() if player else None,
+                })
+                
+    except WebSocketDisconnect:
+        print(f"🏆 TOURNAMENT WS: Player {tg_id} disconnected from tournament {tournament_id}")
+    except Exception as e:
+        print(f"❌ TOURNAMENT WS: Error: {e}")
+    finally:
+        if tournament_id in tournament_connections:
+            tournament_connections[tournament_id].pop(tg_id, None)
+
+
+async def broadcast_tournament_update(tournament_id: str, event_type: str, data: Any):
+    """Broadcast update to all connected tournament players"""
+    connections = tournament_connections.get(tournament_id, {})
+    tournament = tournament_manager.get_tournament(tournament_id)
+    
+    message = {
+        "type": event_type,
+        "data": data,
+        "tournament": tournament.to_dict(include_players=False) if tournament else None,
+    }
+    
+    for tg_id, ws in list(connections.items()):
+        try:
+            await ws.send_json(message)
+        except Exception:
+            connections.pop(tg_id, None)
+
+
+# Register tournament event callbacks
+tournament_manager.on_event("blind_increase", lambda tid, data: asyncio.create_task(
+    broadcast_tournament_update(tid, "blindIncrease", data)
+))
+tournament_manager.on_event("tournament_finished", lambda tid, data: asyncio.create_task(
+    broadcast_tournament_update(tid, "tournamentFinished", data)
+))
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# STARTUP EVENT - Create default tournaments
+# ═══════════════════════════════════════════════════════════════════════════════
+
+@app.on_event("startup")
+async def startup_event():
+    """Initialize default tournaments on server start"""
+    await create_default_tournaments()
+    print("✅ Server started with default tournaments")
 
 
 # Run server

@@ -214,6 +214,39 @@
   box-shadow: 0 6px 20px rgba(245, 158, 11, 0.4);
 }
 
+/* Game Modes Section */
+.gameModesSection {
+  display: flex;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.gameModesButton {
+  flex: 1;
+  padding: 16px 20px;
+  background: linear-gradient(135deg, #a855f7, #7c3aed);
+  border: none;
+  border-radius: 14px;
+  color: #fff;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 4px 15px rgba(168, 85, 247, 0.3);
+}
+
+.gameModesButton:hover {
+  background: linear-gradient(135deg, #c084fc, #a855f7);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(168, 85, 247, 0.4);
+}
+
+.gameModesSection .privateGameButton {
+  flex: 1;
+  padding: 16px 20px;
+  font-size: 16px;
+}
+
 /* Right Sidebar */
 .sidebar {
   width: 140px;
