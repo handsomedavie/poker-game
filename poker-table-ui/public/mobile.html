@@ -2388,6 +2388,41 @@
         .player-avatar:not(.active) .player-timer-ring {
             display: none;
         }
+        
+        /* ═══════════════════════════════════════════════════
+           RECONNECTION INDICATOR
+           ═══════════════════════════════════════════════════ */
+        .reconnect-indicator {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.9);
+            border: 2px solid #f59e0b;
+            border-radius: 16px;
+            padding: 20px 30px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            z-index: 10000;
+            color: #fff;
+            font-size: 14px;
+            font-weight: 600;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+        }
+        
+        .reconnect-spinner {
+            width: 24px;
+            height: 24px;
+            border: 3px solid rgba(245, 158, 11, 0.3);
+            border-top-color: #f59e0b;
+            border-radius: 50%;
+            animation: reconnectSpin 1s linear infinite;
+        }
+        
+        @keyframes reconnectSpin {
+            to { transform: rotate(360deg); }
+        }
 
         .player-name {
             font-size: 9px;
@@ -8493,6 +8528,10 @@
                 gameWebSocket = null;
             }
             currentGameSession = null;
+            mySeat = null;
+            
+            // Clear session cache when intentionally leaving
+            clearSessionCache();
             
             // Resume background music when leaving game (only if enabled in settings)
             if (isMusicEnabled) {
@@ -9477,10 +9516,121 @@
         var mySeat = null;  // My seat number (1-based)
         var lastGameState = null;  // Store last game state for action calculations
         
+        // WebSocket reconnection settings
+        var wsReconnectAttempts = 0;
+        var wsMaxReconnectAttempts = 5;
+        var wsReconnectDelay = 1000; // Start with 1 second
+        var wsReconnectTimerId = null;
+        var wsIsReconnecting = false;
+        
+        // Session caching for state recovery
+        var SESSION_CACHE_KEY = 'poker_game_session';
+        var STATE_CACHE_KEY = 'poker_game_state';
+        var CACHE_EXPIRY_MS = 30 * 60 * 1000; // 30 minutes
+        
+        function saveSessionToCache() {
+            if (!currentGameSession || !mySeat) return;
+            try {
+                var sessionData = {
+                    sessionId: currentGameSession,
+                    mySeat: mySeat,
+                    lobbyCode: currentPrivateLobby ? currentPrivateLobby.code : null,
+                    timestamp: Date.now()
+                };
+                localStorage.setItem(SESSION_CACHE_KEY, JSON.stringify(sessionData));
+                addDebug('Session cached: ' + currentGameSession);
+            } catch (e) {
+                addDebug('Error caching session: ' + e.message);
+            }
+        }
+        
+        function saveGameStateToCache(gameState) {
+            if (!gameState) return;
+            try {
+                var stateData = {
+                    state: gameState,
+                    timestamp: Date.now()
+                };
+                localStorage.setItem(STATE_CACHE_KEY, JSON.stringify(stateData));
+            } catch (e) {
+                // Ignore cache errors
+            }
+        }
+        
+        function loadCachedSession() {
+            try {
+                var cached = localStorage.getItem(SESSION_CACHE_KEY);
+                if (!cached) return null;
+                
+                var sessionData = JSON.parse(cached);
+                // Check if cache is expired
+                if (Date.now() - sessionData.timestamp > CACHE_EXPIRY_MS) {
+                    clearSessionCache();
+                    return null;
+                }
+                return sessionData;
+            } catch (e) {
+                return null;
+            }
+        }
+        
+        function loadCachedGameState() {
+            try {
+                var cached = localStorage.getItem(STATE_CACHE_KEY);
+                if (!cached) return null;
+                
+                var stateData = JSON.parse(cached);
+                // Check if cache is expired (5 minutes for game state)
+                if (Date.now() - stateData.timestamp > 5 * 60 * 1000) {
+                    localStorage.removeItem(STATE_CACHE_KEY);
+                    return null;
+                }
+                return stateData.state;
+            } catch (e) {
+                return null;
+            }
+        }
+        
+        function clearSessionCache() {
+            try {
+                localStorage.removeItem(SESSION_CACHE_KEY);
+                localStorage.removeItem(STATE_CACHE_KEY);
+            } catch (e) {}
+        }
+        
+        function checkAndRestoreSession() {
+            var cachedSession = loadCachedSession();
+            if (cachedSession && cachedSession.sessionId) {
+                addDebug('Found cached session: ' + cachedSession.sessionId);
+                
+                // Ask user if they want to rejoin
+                if (confirm('У вас есть активная игровая сессия. Хотите вернуться?')) {
+                    currentGameSession = cachedSession.sessionId;
+                    mySeat = cachedSession.mySeat;
+                    
+                    // Restore cached game state for immediate display
+                    var cachedState = loadCachedGameState();
+                    if (cachedState) {
+                        lastGameState = cachedState;
+                        addDebug('Restored cached game state');
+                    }
+                    
+                    // Show game screen and reconnect
+                    showScreen('pokerTableScreen', ['mainMenu', 'lobbyScreen']);
+                    connectToGameWebSocket(currentGameSession, true);
+                    return true;
+                } else {
+                    clearSessionCache();
+                }
+            }
+            return false;
+        }
+        
         // Turn timer variables
         var turnTimerId = null;
         var turnWarningTimerId = null;
         var turnTimeRemaining = 20;
+        var serverTurnTimeRemaining = null; // From server
         var TURN_TIME_LIMIT = 20; // seconds
         var TURN_WARNING_TIME = 5; // seconds before timeout to show warning
         
@@ -9488,12 +9638,19 @@
             // Clear any existing timer
             stopTurnTimer();
             
-            turnTimeRemaining = TURN_TIME_LIMIT;
-            addDebug('Turn timer started: ' + TURN_TIME_LIMIT + 's');
+            // Use server time if available, otherwise default
+            turnTimeRemaining = serverTurnTimeRemaining !== null ? Math.ceil(serverTurnTimeRemaining) : TURN_TIME_LIMIT;
+            addDebug('Turn timer started: ' + turnTimeRemaining + 's');
+            
+            // Update timer display immediately
+            updateTimerProgress(turnTimeRemaining, TURN_TIME_LIMIT);
             
             // Start countdown
             turnTimerId = setInterval(function() {
                 turnTimeRemaining--;
+                
+                // Update SVG timer progress
+                updateTimerProgress(turnTimeRemaining, TURN_TIME_LIMIT);
                 
                 // Add warning class when time is low
                 if (turnTimeRemaining <= TURN_WARNING_TIME) {
@@ -9511,6 +9668,26 @@
             }, 1000);
         }
         
+        function updateTimerProgress(remaining, total) {
+            // Update SVG stroke-dashoffset based on remaining time
+            // stroke-dasharray is 145 (circumference of circle)
+            var circumference = 145;
+            var progress = remaining / total;
+            var dashoffset = circumference * (1 - progress);
+            
+            var progressCircles = document.querySelectorAll('.player-timer-ring .timer-progress');
+            progressCircles.forEach(function(circle) {
+                circle.style.strokeDashoffset = dashoffset;
+                
+                // Change color based on remaining time
+                if (remaining <= TURN_WARNING_TIME) {
+                    circle.style.stroke = '#ef4444'; // Red
+                } else {
+                    circle.style.stroke = '#22c55e'; // Green
+                }
+            });
+        }
+        
         function stopTurnTimer() {
             if (turnTimerId) {
                 clearInterval(turnTimerId);
@@ -9521,11 +9698,19 @@
                 turnWarningTimerId = null;
             }
             turnTimeRemaining = TURN_TIME_LIMIT;
+            serverTurnTimeRemaining = null;
             
-            // Remove warning class
+            // Remove warning class and reset progress
             var timerRings = document.querySelectorAll('.player-timer-ring');
             timerRings.forEach(function(ring) {
                 ring.classList.remove('warning');
+            });
+            
+            // Reset progress circles
+            var progressCircles = document.querySelectorAll('.player-timer-ring .timer-progress');
+            progressCircles.forEach(function(circle) {
+                circle.style.strokeDashoffset = 0;
+                circle.style.stroke = '#22c55e';
             });
         }
         
@@ -9574,21 +9759,39 @@
             addDebug('Multiplayer game screen shown');
         }
         
-        function connectToGameWebSocket(sessionId) {
+        function connectToGameWebSocket(sessionId, isReconnect) {
+            // Clear any pending reconnect timer
+            if (wsReconnectTimerId) {
+                clearTimeout(wsReconnectTimerId);
+                wsReconnectTimerId = null;
+            }
+            
             if (gameWebSocket) {
-                gameWebSocket.close();
+                try {
+                    gameWebSocket.close();
+                } catch(e) {}
             }
             
             // Include telegram_id so server can identify the player and assign correct seat
             var tgId = telegramUserId || 0;
             var wsUrl = API_BASE.replace('https://', 'wss://').replace('http://', 'ws://') + '/ws/game/' + sessionId + '?telegram_id=' + tgId;
-            addDebug('Connecting to game WS with telegram_id=' + tgId);
+            addDebug('Connecting to game WS' + (isReconnect ? ' (reconnect #' + wsReconnectAttempts + ')' : '') + ' with telegram_id=' + tgId);
+            
+            // Show reconnecting indicator
+            if (isReconnect) {
+                showReconnectingIndicator(true);
+            }
             
             try {
                 gameWebSocket = new WebSocket(wsUrl);
                 
                 gameWebSocket.onopen = function() {
                     addDebug('Game WebSocket connected, waiting for seat assignment');
+                    // Reset reconnect state on successful connection
+                    wsReconnectAttempts = 0;
+                    wsReconnectDelay = 1000;
+                    wsIsReconnecting = false;
+                    showReconnectingIndicator(false);
                 };
                 
                 gameWebSocket.onmessage = function(event) {
@@ -9601,8 +9804,12 @@
                     }
                 };
                 
-                gameWebSocket.onclose = function() {
-                    addDebug('Game WebSocket closed');
+                gameWebSocket.onclose = function(event) {
+                    addDebug('Game WebSocket closed, code: ' + event.code);
+                    // Attempt reconnect if we have an active game session
+                    if (currentGameSession && !event.wasClean) {
+                        attemptReconnect(sessionId);
+                    }
                 };
                 
                 gameWebSocket.onerror = function(err) {
@@ -9610,6 +9817,47 @@
                 };
             } catch (e) {
                 addDebug('Game WS connection failed: ' + e.message);
+                attemptReconnect(sessionId);
+            }
+        }
+        
+        function attemptReconnect(sessionId) {
+            if (wsReconnectAttempts >= wsMaxReconnectAttempts) {
+                addDebug('Max reconnect attempts reached, giving up');
+                wsIsReconnecting = false;
+                showReconnectingIndicator(false);
+                showAlert('⚠️ Не удалось восстановить соединение. Попробуйте перезайти в игру.');
+                return;
+            }
+            
+            wsIsReconnecting = true;
+            wsReconnectAttempts++;
+            
+            // Exponential backoff: 1s, 2s, 4s, 8s, 16s
+            var delay = wsReconnectDelay * Math.pow(2, wsReconnectAttempts - 1);
+            delay = Math.min(delay, 16000); // Max 16 seconds
+            
+            addDebug('Will attempt reconnect in ' + delay + 'ms (attempt ' + wsReconnectAttempts + '/' + wsMaxReconnectAttempts + ')');
+            
+            wsReconnectTimerId = setTimeout(function() {
+                if (currentGameSession === sessionId) {
+                    connectToGameWebSocket(sessionId, true);
+                }
+            }, delay);
+        }
+        
+        function showReconnectingIndicator(show) {
+            var indicator = document.getElementById('reconnectIndicator');
+            if (!indicator && show) {
+                // Create indicator if doesn't exist
+                indicator = document.createElement('div');
+                indicator.id = 'reconnectIndicator';
+                indicator.className = 'reconnect-indicator';
+                indicator.innerHTML = '<div class="reconnect-spinner"></div><span>Переподключение...</span>';
+                document.body.appendChild(indicator);
+            }
+            if (indicator) {
+                indicator.style.display = show ? 'flex' : 'none';
             }
         }
         
@@ -9620,13 +9868,21 @@
                 if (data.yourSeat) {
                     mySeat = data.yourSeat;
                     addDebug('My seat assigned: ' + mySeat);
+                    // Cache session on first seat assignment
+                    saveSessionToCache();
                 }
                 updateGameUI(data.game);
+                // Cache game state for recovery
+                saveGameStateToCache(data.game);
             } else if (data.type === 'error') {
                 addDebug('Game error: ' + data.message);
                 showAlert('⚠️ ' + data.message);
             } else if (data.type === 'pong') {
                 // Heartbeat response, ignore
+            } else if (data.type === 'gameEnded') {
+                // Clear session cache when game ends
+                clearSessionCache();
+                addDebug('Game ended, cache cleared');
             } else {
                 addDebug('Unknown game event: ' + data.type);
             }
@@ -9778,11 +10034,19 @@
             var isMyTurn = parseInt(gameState.currentPlayerSeat) === parseInt(mySeat);
             addDebug('Current seat: ' + gameState.currentPlayerSeat + ', my seat: ' + mySeat + ', my turn: ' + isMyTurn);
             
+            // Sync turn timer with server data
+            if (gameState.turnTimeRemaining !== undefined && gameState.turnTimeRemaining !== null) {
+                serverTurnTimeRemaining = gameState.turnTimeRemaining;
+            }
+            
             // Manage turn timer
             if (isMyTurn && gameState.phase !== 'showdown' && gameState.phase !== 'finished') {
                 // Start timer only if not already running (avoid reset on every update)
                 if (!turnTimerId) {
                     startTurnTimer();
+                } else {
+                    // Update progress without restarting timer
+                    updateTimerProgress(turnTimeRemaining, TURN_TIME_LIMIT);
                 }
             } else {
                 // Stop timer when not my turn
@@ -10544,6 +10808,11 @@
         
         // Apply saved theme immediately
         applyTheme();
+        
+        // Check for active session to restore (after short delay for UI to load)
+        setTimeout(function() {
+            checkAndRestoreSession();
+        }, 1500);
 
         addDebug('Ready');
     </script>

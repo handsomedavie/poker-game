@@ -89,6 +89,9 @@ class GameState:
     connected_count: int = 0  # How many have connected
     winner_seat: Optional[int] = None  # Winner's seat number
     winner_hand: Optional[str] = None  # Winner's hand name
+    # Turn timer
+    turn_start_time: Optional[float] = None  # When current turn started (time.time())
+    turn_timeout_seconds: int = 20  # Seconds allowed per turn
     # Tournament configuration
     buy_in_usd: float = 1.0  # Entry fee in USD
     starting_chips: int = 1000  # Chips given for buy-in
@@ -101,6 +104,9 @@ class GameState:
             is_showdown = self.phase in [GamePhase.SHOWDOWN, GamePhase.FINISHED]
             hide = for_seat != seat and not is_showdown
             player_dict = p.to_dict(hide_cards=hide)
+            
+            # Add isCurrentTurn flag for timer display
+            player_dict["isCurrentTurn"] = (seat == self.current_player_seat)
             
             # Add hand name at showdown for each active player
             if is_showdown and not p.is_folded and len(p.cards) >= 2 and len(self.community_cards) >= 3:
@@ -136,10 +142,22 @@ class GameState:
             "connectedCount": self.connected_count,
             "winnerSeat": self.winner_seat,
             "winnerHand": self.winner_hand,
+            # Turn timer info
+            "turnStartTime": self.turn_start_time,
+            "turnTimeoutSeconds": self.turn_timeout_seconds,
+            "turnTimeRemaining": self._get_turn_time_remaining(),
             # Tournament config
             "buyInUsd": self.buy_in_usd,
             "startingChips": self.starting_chips,
         }
+    
+    def _get_turn_time_remaining(self) -> Optional[float]:
+        """Calculate remaining time for current turn"""
+        if self.turn_start_time is None or self.current_player_seat is None:
+            return None
+        elapsed = time.time() - self.turn_start_time
+        remaining = self.turn_timeout_seconds - elapsed
+        return max(0, remaining)
 
 
 # In-memory game storage
@@ -259,6 +277,9 @@ def start_hand(session_id: str) -> Optional[GameState]:
         game.current_player_seat = active_players[2].seat
     else:
         game.current_player_seat = sb_player.seat
+    
+    # Start turn timer
+    game.turn_start_time = time.time()
     
     print(f"🎮 GAME: Hand started, {len(active_players)} players, pot=${game.pot}, first to act: seat {game.current_player_seat}")
     return game
@@ -468,6 +489,7 @@ def _check_round_complete(game: GameState):
     else:
         # Next player's turn
         game.current_player_seat = next_seat
+        game.turn_start_time = time.time()  # Reset turn timer
 
 
 def _advance_phase(game: GameState):
@@ -482,6 +504,7 @@ def _advance_phase(game: GameState):
     active = get_active_players(game)
     if active:
         game.current_player_seat = active[0].seat  # Use seat, not telegram_id!
+        game.turn_start_time = time.time()  # Reset turn timer
     
     if game.phase == GamePhase.PRE_FLOP:
         # Deal flop (3 cards)
@@ -689,6 +712,9 @@ def start_new_hand(session_id: str) -> Optional[GameState]:
             game.current_player_seat = active[2].seat
         else:
             game.current_player_seat = sb_player.seat
+        
+        # Start turn timer
+        game.turn_start_time = time.time()
     
     print(f"🎮 GAME: New hand started!")
     return game
