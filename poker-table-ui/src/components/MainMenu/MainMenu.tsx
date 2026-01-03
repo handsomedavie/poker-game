@@ -59,6 +59,7 @@ interface MainMenuProps {
 export const MainMenu: React.FC<MainMenuProps> = ({ onJoinTable, onCreatePrivate, onGameModes }) => {
   const [activeMode, setActiveMode] = useState<GameMode>('tournament');
   const [tables, setTables] = useState<TableInfo[]>(MOCK_TABLES.tournament);
+  const [balanceSheetOpen, setBalanceSheetOpen] = useState(false);
   const [user, setUser] = useState<UserProfile>({
     id: 0,
     firstName: 'Player',
@@ -195,11 +196,80 @@ export const MainMenu: React.FC<MainMenuProps> = ({ onJoinTable, onCreatePrivate
           )}
         </div>
 
-        {/* Balance Section */}
-        <div className={styles.balanceSection}>
+        {/* Balance Section - Clickable */}
+        <div 
+          className={styles.balanceSection}
+          onClick={() => setBalanceSheetOpen(true)}
+        >
           <div className={styles.balanceLabel}>Balance</div>
-          <div className={styles.balanceAmount}>${user.balance.toLocaleString()}</div>
+          <div className={styles.balanceAmount}>
+            <span className={styles.balanceIcon}>💰</span>
+            ${user.balance.toLocaleString()}
+            <span className={styles.balanceArrow}>▼</span>
+          </div>
         </div>
+
+        {/* Balance Sheet Modal */}
+        {balanceSheetOpen && (
+          <div className={styles.balanceSheetOverlay} onClick={() => setBalanceSheetOpen(false)}>
+            <div className={styles.balanceSheet} onClick={e => e.stopPropagation()}>
+              <div className={styles.sheetHeader}>
+                <span className={styles.sheetTitle}>Баланс</span>
+                <button className={styles.sheetClose} onClick={() => setBalanceSheetOpen(false)}>×</button>
+              </div>
+              
+              <div className={styles.sheetContent}>
+                {/* Main Balance */}
+                <div className={styles.balanceRow}>
+                  <div className={styles.balanceItem}>
+                    <span className={styles.balanceItemLabel}>Счёт • USD</span>
+                    <div className={styles.balanceItemValue}>
+                      <span className={styles.currencyIcon}>💵</span>
+                      {user.balance.toFixed(2)}
+                    </div>
+                  </div>
+                  <div className={styles.balanceItem}>
+                    <span className={styles.balanceItemLabel}>Chips</span>
+                    <div className={styles.balanceItemValue}>
+                      <span className={styles.currencyIcon}>🪙</span>
+                      {(user.balance * 100).toLocaleString()}
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Bonus Balance */}
+                <div className={styles.bonusRow}>
+                  <div className={styles.bonusItem}>
+                    <span className={styles.bonusLabel}>Бонусный счёт</span>
+                    <span className={styles.bonusValue}>0.00$</span>
+                  </div>
+                  <span className={styles.bonusArrow}>›</span>
+                </div>
+                
+                {/* Wallet Button */}
+                <button className={styles.walletButton}>
+                  💳 Кошелёк
+                </button>
+                
+                {/* Quick Actions */}
+                <div className={styles.quickActions}>
+                  <button className={styles.quickAction}>
+                    <span className={styles.quickIcon}>➕</span>
+                    <span>Deposit</span>
+                  </button>
+                  <button className={styles.quickAction}>
+                    <span className={styles.quickIcon}>➖</span>
+                    <span>Withdraw</span>
+                  </button>
+                  <button className={styles.quickAction}>
+                    <span className={styles.quickIcon}>📜</span>
+                    <span>History</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Action Buttons */}
         <div className={styles.sidebarButtons}>

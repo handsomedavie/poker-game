@@ -6875,9 +6875,12 @@
                 initUser(); // Register/load user from backend
                 addDebug('Menu shown');
                 
-                // Initialize audio and start background music in menu
+                // Initialize audio and start background music in menu (only if enabled)
                 initAudio();
-                startBgMusic();
+                // Only start music if user hasn't disabled it in settings
+                if (isMusicEnabled) {
+                    startBgMusic();
+                }
             }, 3000);
         }
 
@@ -8491,8 +8494,10 @@
             }
             currentGameSession = null;
             
-            // Resume background music when leaving game
-            startBgMusic();
+            // Resume background music when leaving game (only if enabled in settings)
+            if (isMusicEnabled) {
+                startBgMusic();
+            }
             
             // Go directly to main menu (not lobby screen)
             showScreen('mainMenu', ['pokerTableScreen', 'lobbyScreen']);
@@ -8702,6 +8707,9 @@
                         neonTheme: true
                     }, parsed);
                 }
+                // IMPORTANT: Sync global flags with loaded settings
+                isMusicEnabled = userSettings.musicEnabled;
+                isSoundEnabled = userSettings.sfxEnabled;
             } catch (e) {
                 addDebug('Error loading settings: ' + e);
             }
@@ -8785,12 +8793,14 @@
 
         function toggleMusic() {
             userSettings.musicEnabled = !userSettings.musicEnabled;
+            // IMPORTANT: Also sync with global isMusicEnabled flag
+            isMusicEnabled = userSettings.musicEnabled;
             saveSettings();
             updateSettingsUI();
             
             if (userSettings.musicEnabled) {
                 // Start background music
-                playBgMusic();
+                startBgMusic();
             } else {
                 // Stop background music
                 stopBgMusic();
@@ -9667,9 +9677,13 @@
             
             // Update community cards - sync with server state
             var communityEl = document.getElementById('communityCards');
-            if (communityEl && gameState.communityCards) {
+            if (communityEl) {
+                // Handle missing or null communityCards
+                var serverCards = gameState.communityCards || [];
                 var currentCardCount = communityEl.children.length;
-                var newCardCount = gameState.communityCards.length;
+                var newCardCount = serverCards.length;
+                
+                addDebug('Community cards update: server=' + newCardCount + ', displayed=' + currentCardCount);
                 
                 // If card counts don't match, rebuild completely (handles reconnection)
                 if (newCardCount !== currentCardCount) {
@@ -9686,13 +9700,13 @@
                             })(i);
                             
                             var cardEl = document.createElement('div');
-                            cardEl.innerHTML = createCardHTML(gameState.communityCards[i]);
+                            cardEl.innerHTML = createCardHTML(serverCards[i]);
                             communityEl.appendChild(cardEl.firstChild);
                         }
                     } else {
                         // Card count decreased (new hand) - rebuild all
                         communityEl.innerHTML = '';
-                        gameState.communityCards.forEach(function(card) {
+                        serverCards.forEach(function(card) {
                             var cardEl = document.createElement('div');
                             cardEl.innerHTML = createCardHTML(card);
                             communityEl.appendChild(cardEl.firstChild);
@@ -9830,8 +9844,13 @@
         
         function formatRank(rank) {
             // Convert numeric rank to display value
-            var rankMap = { 14: 'A', 13: 'K', 12: 'Q', 11: 'J', 10: '10' };
-            return rankMap[rank] || rank;
+            // Handle both numeric (11-14) and string ("A", "K", "Q", "J") formats
+            if (typeof rank === 'number') {
+                var rankMap = { 14: 'A', 13: 'K', 12: 'Q', 11: 'J', 10: '10' };
+                return rankMap[rank] || String(rank);
+            }
+            // Already a string - return as-is
+            return rank;
         }
         
         // Convert server-format cards to evaluateHand format
@@ -9842,7 +9861,13 @@
             var suitSymbols = { hearts: '♥', diamonds: '♦', clubs: '♣', spades: '♠' };
             
             return cards.map(function(card) {
-                var rank = rankMap[card.rank] || card.rank;
+                // Handle both numeric and string rank formats
+                var rank;
+                if (typeof card.rank === 'number') {
+                    rank = rankMap[card.rank] || String(card.rank);
+                } else {
+                    rank = card.rank; // Already a string
+                }
                 var suit = suitSymbols[card.suit] || card.suit;
                 return { rank: rank, suit: suit };
             });
