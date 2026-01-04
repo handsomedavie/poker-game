@@ -1417,20 +1417,9 @@
 
         .join-btn:active { opacity: 0.9; }
 
-        /* Lobby Sidebar - hidden on mobile, shown only on desktop */
+        /* Lobby Sidebar - HIDDEN (deprecated, use main menu instead) */
         .lobby-sidebar {
-            display: none;
-            background: #0b1220;
-            border-top: 1px solid #1e293b;
-            padding: 16px;
-        }
-
-        @media (min-width: 768px) {
-            .lobby-sidebar {
-                display: block;
-                border-top: none;
-                border-left: 1px solid #1e293b;
-            }
+            display: none !important;
         }
 
         .sidebar-profile {
@@ -2575,6 +2564,162 @@
         .tournament-notification.show {
             opacity: 1;
             transform: translateX(-50%) translateY(0);
+        }
+        
+        /* ═══════════════════════════════════════════════════
+           STYLED ALERT MODAL
+           ═══════════════════════════════════════════════════ */
+        .styled-alert-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(8px);
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s, visibility 0.3s;
+        }
+        
+        .styled-alert-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .styled-alert-modal {
+            background: linear-gradient(145deg, rgba(30, 20, 60, 0.98), rgba(20, 15, 40, 0.98));
+            border: 2px solid rgba(139, 92, 246, 0.5);
+            border-radius: 20px;
+            padding: 28px 32px;
+            text-align: center;
+            max-width: 320px;
+            width: 85%;
+            box-shadow: 0 20px 60px rgba(139, 92, 246, 0.3),
+                        0 0 40px rgba(139, 92, 246, 0.2) inset;
+            transform: scale(0.8) translateY(20px);
+            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        
+        .styled-alert-overlay.show .styled-alert-modal {
+            transform: scale(1) translateY(0);
+        }
+        
+        .styled-alert-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+            filter: drop-shadow(0 4px 12px rgba(255, 255, 255, 0.3));
+        }
+        
+        .styled-alert-text {
+            font-size: 16px;
+            font-weight: 600;
+            color: #fff;
+            line-height: 1.5;
+            margin-bottom: 24px;
+        }
+        
+        .styled-alert-btn {
+            background: linear-gradient(135deg, #8b5cf6, #6366f1);
+            border: none;
+            border-radius: 12px;
+            padding: 12px 48px;
+            font-size: 15px;
+            font-weight: 700;
+            color: #fff;
+            cursor: pointer;
+            transition: transform 0.15s, box-shadow 0.15s;
+            box-shadow: 0 4px 20px rgba(139, 92, 246, 0.4);
+        }
+        
+        .styled-alert-btn:active {
+            transform: scale(0.95);
+        }
+        
+        /* ═══════════════════════════════════════════════════
+           RETURN TO GAME MODAL
+           ═══════════════════════════════════════════════════ */
+        .return-game-modal {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            z-index: 9998;
+            transform: translateY(100%);
+            transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        
+        .return-game-modal.show {
+            transform: translateY(0);
+        }
+        
+        .return-game-content {
+            background: linear-gradient(145deg, rgba(30, 20, 60, 0.98), rgba(20, 15, 40, 0.98));
+            border-top: 2px solid rgba(139, 92, 246, 0.5);
+            border-radius: 24px 24px 0 0;
+            padding: 24px 20px 32px;
+            text-align: center;
+            box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.5),
+                        0 0 60px rgba(139, 92, 246, 0.2) inset;
+            backdrop-filter: blur(20px);
+        }
+        
+        .return-game-icon {
+            font-size: 42px;
+            margin-bottom: 12px;
+            filter: drop-shadow(0 4px 12px rgba(255, 255, 255, 0.3));
+        }
+        
+        .return-game-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 8px;
+        }
+        
+        .return-game-text {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 20px;
+            line-height: 1.4;
+        }
+        
+        .return-game-buttons {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+        }
+        
+        .return-game-btn {
+            flex: 1;
+            max-width: 160px;
+            padding: 14px 20px;
+            border-radius: 14px;
+            font-size: 14px;
+            font-weight: 700;
+            border: none;
+            cursor: pointer;
+            transition: transform 0.15s, box-shadow 0.15s;
+        }
+        
+        .return-game-btn.return {
+            background: linear-gradient(135deg, #22c55e, #16a34a);
+            color: #fff;
+            box-shadow: 0 4px 20px rgba(34, 197, 94, 0.4);
+        }
+        
+        .return-game-btn.leave {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            color: #fff;
+            box-shadow: 0 4px 20px rgba(239, 68, 68, 0.4);
+        }
+        
+        .return-game-btn:active {
+            transform: scale(0.95);
         }
 
         .player-name {
@@ -8701,6 +8846,18 @@
 
         function leaveTable() {
             addDebug('Leave table');
+            
+            // If in multiplayer game, show return prompt instead of leaving immediately
+            if (gameWebSocket && gameWebSocket.readyState === WebSocket.OPEN) {
+                showLeaveGamePrompt();
+                return;
+            }
+            
+            // For single player or disconnected games, leave directly
+            doLeaveTable();
+        }
+        
+        function doLeaveTable() {
             clearInterval(gameState.timerInterval);
             gameState.phase = 'waiting';
             
@@ -8725,15 +8882,160 @@
             // Go directly to main menu (not lobby screen)
             showScreen('mainMenu', ['pokerTableScreen', 'lobbyScreen']);
         }
+        
+        var pendingGameSession = null;
+        var pendingGameSeat = null;
+        
+        function showLeaveGamePrompt() {
+            // Store current game info for potential return
+            pendingGameSession = currentGameSession;
+            pendingGameSeat = mySeat;
+            
+            // Go to main menu but keep connection alive temporarily
+            showScreen('mainMenu', ['pokerTableScreen', 'lobbyScreen']);
+            
+            // Show the return prompt
+            showReturnToGameModal();
+        }
+        
+        function showReturnToGameModal() {
+            var modal = document.getElementById('returnToGameModal');
+            if (!modal) {
+                modal = document.createElement('div');
+                modal.id = 'returnToGameModal';
+                modal.className = 'return-game-modal';
+                modal.innerHTML = '<div class="return-game-content">' +
+                    '<div class="return-game-icon">🎮</div>' +
+                    '<div class="return-game-title">Активная игра</div>' +
+                    '<div class="return-game-text">У вас есть незавершённая игра. Вернуться за стол или покинуть игру?</div>' +
+                    '<div class="return-game-buttons">' +
+                    '<button class="return-game-btn return" onclick="returnToActiveGame()">🔙 Вернуться</button>' +
+                    '<button class="return-game-btn leave" onclick="confirmLeaveGame()">🚪 Покинуть</button>' +
+                    '</div>' +
+                    '</div>';
+                document.body.appendChild(modal);
+            }
+            
+            setTimeout(function() {
+                modal.classList.add('show');
+            }, 100);
+        }
+        
+        function hideReturnToGameModal() {
+            var modal = document.getElementById('returnToGameModal');
+            if (modal) {
+                modal.classList.remove('show');
+            }
+        }
+        
+        function returnToActiveGame() {
+            hideReturnToGameModal();
+            
+            if (pendingGameSession && gameWebSocket && gameWebSocket.readyState === WebSocket.OPEN) {
+                // Return to game screen
+                showScreen('pokerTableScreen', ['mainMenu', 'lobbyScreen']);
+                addDebug('Returned to active game');
+            } else {
+                // Connection lost, need to reconnect
+                if (pendingGameSession) {
+                    connectToGameWebSocket(pendingGameSession);
+                    showScreen('pokerTableScreen', ['mainMenu', 'lobbyScreen']);
+                }
+            }
+            
+            pendingGameSession = null;
+            pendingGameSeat = null;
+        }
+        
+        function confirmLeaveGame() {
+            hideReturnToGameModal();
+            
+            // Now actually leave the game
+            clearInterval(gameState.timerInterval);
+            gameState.phase = 'waiting';
+            
+            if (gameWebSocket) {
+                try {
+                    gameWebSocket.close();
+                } catch(e) {}
+                gameWebSocket = null;
+            }
+            currentGameSession = null;
+            mySeat = null;
+            pendingGameSession = null;
+            pendingGameSeat = null;
+            
+            clearSessionCache();
+            
+            if (isMusicEnabled) {
+                startBgMusic();
+            }
+            
+            showAlert('Вы покинули игру. Ваши карты сброшены.');
+        }
 
         // ═══════════════════════════════════════════════════
         // BUTTON HANDLERS
         // ═══════════════════════════════════════════════════
         function showAlert(msg) {
-            if (tg && tg.showAlert) {
-                tg.showAlert(msg);
+            showStyledAlert(msg);
+        }
+        
+        var styledAlertTimeout = null;
+        
+        function showStyledAlert(message) {
+            var overlay = document.getElementById('styledAlertOverlay');
+            if (!overlay) {
+                // Create styled alert elements
+                overlay = document.createElement('div');
+                overlay.id = 'styledAlertOverlay';
+                overlay.className = 'styled-alert-overlay';
+                overlay.innerHTML = '<div class="styled-alert-modal">' +
+                    '<div class="styled-alert-icon">⏱️</div>' +
+                    '<div class="styled-alert-text"></div>' +
+                    '<button class="styled-alert-btn" onclick="hideStyledAlert()">OK</button>' +
+                    '</div>';
+                document.body.appendChild(overlay);
+            }
+            
+            // Update icon based on message type
+            var iconEl = overlay.querySelector('.styled-alert-icon');
+            var textEl = overlay.querySelector('.styled-alert-text');
+            
+            if (message.includes('Время истекло') || message.includes('timeout') || message.includes('⏱️')) {
+                iconEl.textContent = '⏱️';
+            } else if (message.includes('ошибка') || message.includes('error') || message.includes('❌')) {
+                iconEl.textContent = '❌';
+            } else if (message.includes('успех') || message.includes('success') || message.includes('✅')) {
+                iconEl.textContent = '✅';
+            } else if (message.includes('⚠️')) {
+                iconEl.textContent = '⚠️';
             } else {
-                alert(msg);
+                iconEl.textContent = '💬';
+            }
+            
+            // Clean message from emojis at start
+            var cleanMsg = message.replace(/^[⏱️❌✅⚠️💬]\s*/, '');
+            textEl.textContent = cleanMsg;
+            
+            // Show overlay
+            overlay.classList.add('show');
+            
+            // Auto-hide after 5 seconds
+            if (styledAlertTimeout) clearTimeout(styledAlertTimeout);
+            styledAlertTimeout = setTimeout(function() {
+                hideStyledAlert();
+            }, 5000);
+        }
+        
+        function hideStyledAlert() {
+            var overlay = document.getElementById('styledAlertOverlay');
+            if (overlay) {
+                overlay.classList.remove('show');
+            }
+            if (styledAlertTimeout) {
+                clearTimeout(styledAlertTimeout);
+                styledAlertTimeout = null;
             }
         }
 
@@ -10645,8 +10947,9 @@
                     '</div>';
                 }
                 
+                var avatarActiveClass = player.isCurrentTurn ? ' active' : '';
                 html += '<div class="table-player ' + positionClass + foldedClass + isCurrentTurn + '" data-seat="' + player.seat + '">' +
-                    '<div class="player-avatar">' + timerRingHtml + (player.name ? player.name.charAt(0).toUpperCase() : '?') + '</div>' +
+                    '<div class="player-avatar' + avatarActiveClass + '">' + timerRingHtml + (player.name ? player.name.charAt(0).toUpperCase() : '?') + '</div>' +
                     '<div class="player-info">' +
                         '<div class="player-name">' + (player.name || 'Player') + '</div>' +
                         '<div class="player-chips" onclick="toggleStackDisplay()">' + formatChips(player.chips || 0) + '</div>' +
