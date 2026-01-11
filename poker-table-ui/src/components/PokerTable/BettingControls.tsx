@@ -94,11 +94,12 @@ export const BettingControls: React.FC<BettingControlsProps> = ({
       <div className={styles.betControlsRow}>
         {/* Action Buttons - Moved to top */}
         <div className={styles.actionButtons} style={{ position: 'relative' }}>
-          {/* Timer overlay around action buttons */}
+          {/* Timer overlay around action buttons - ТЕСТОВЫЙ РЕЖИМ ВКЛЮЧЕН */}
           <ActionButtonsTimer
             isActive={isActive}
             duration={20}
             onTimeout={onTimeout}
+            testMode={true}
           />
           <button
             className={`${styles.actionButton} ${styles.fold}`}

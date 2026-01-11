@@ -5,17 +5,34 @@ interface ActionButtonsTimerProps {
   isActive: boolean;
   duration?: number; // seconds
   onTimeout?: () => void;
+  testMode?: boolean; // ТЕСТОВЫЙ РЕЖИМ - автостарт без ожидания isActive
 }
 
 export const ActionButtonsTimer: React.FC<ActionButtonsTimerProps> = ({
   isActive,
   duration = 20,
   onTimeout,
+  testMode = true, // По умолчанию включен для тестирования
 }) => {
   const [timeRemaining, setTimeRemaining] = useState(duration);
   const [isRunning, setIsRunning] = useState(false);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const startTimeRef = useRef<number | null>(null);
+
+  // ОТЛАДКА: Логирование при монтировании компонента
+  useEffect(() => {
+    console.log('[ActionButtonsTimer] Component mounted');
+    console.log('[ActionButtonsTimer] Test mode:', testMode);
+    console.log('[ActionButtonsTimer] isActive:', isActive);
+    console.log('[ActionButtonsTimer] Starting 20s countdown');
+  }, []);
+
+  // ОТЛАДКА: Логирование каждую секунду
+  useEffect(() => {
+    if (isRunning) {
+      console.log('[Timer]', timeRemaining, 'seconds left');
+    }
+  }, [timeRemaining, isRunning]);
 
   // Calculate stroke dashoffset for circular progress
   // Approximate perimeter of action buttons container
@@ -31,9 +48,12 @@ export const ActionButtonsTimer: React.FC<ActionButtonsTimerProps> = ({
     return '#00ff88'; // Green
   };
 
-  // Start timer when active
+  // ТЕСТОВЫЙ РЕЖИМ: Автостарт таймера при монтировании
   useEffect(() => {
-    if (isActive && !isRunning) {
+    const shouldStart = testMode || (isActive && !isRunning);
+    
+    if (shouldStart && !isRunning) {
+      console.log('[ActionButtonsTimer] Starting timer...');
       setIsRunning(true);
       setTimeRemaining(duration);
       startTimeRef.current = Date.now();
@@ -45,12 +65,22 @@ export const ActionButtonsTimer: React.FC<ActionButtonsTimerProps> = ({
         setTimeRemaining(remaining);
 
         if (remaining === 0) {
+          console.log('[ActionButtonsTimer] Timer expired!');
           if (intervalRef.current) {
             clearInterval(intervalRef.current);
             intervalRef.current = null;
           }
           setIsRunning(false);
           onTimeout?.();
+          
+          // ТЕСТОВЫЙ РЕЖИМ: Автоматический рестарт
+          if (testMode) {
+            console.log('[ActionButtonsTimer] Auto-restarting in 2 seconds...');
+            setTimeout(() => {
+              setTimeRemaining(duration);
+              setIsRunning(false);
+            }, 2000);
+          }
         }
       }, 100); // Update every 100ms for smooth animation
     }
@@ -61,30 +91,38 @@ export const ActionButtonsTimer: React.FC<ActionButtonsTimerProps> = ({
         intervalRef.current = null;
       }
     };
-  }, [isActive, duration, onTimeout, isRunning]);
+  }, [isActive, duration, onTimeout, isRunning, testMode]);
 
-  // Stop timer when inactive
+  // Stop timer when inactive (только если НЕ тестовый режим)
   useEffect(() => {
-    if (!isActive && isRunning) {
+    if (!testMode && !isActive && isRunning) {
+      console.log('[ActionButtonsTimer] Stopping timer (inactive)');
       if (intervalRef.current) {
         clearInterval(intervalRef.current);
         intervalRef.current = null;
       }
       setIsRunning(false);
     }
-  }, [isActive, isRunning]);
+  }, [isActive, isRunning, testMode]);
 
-  // Don't render if not active
-  if (!isActive && !isRunning) {
+  // ТЕСТОВЫЙ РЕЖИМ: Всегда рендерить
+  // В обычном режиме: рендерить только если активен
+  if (!testMode && !isActive && !isRunning) {
     return null;
   }
+
+  console.log('[ActionButtonsTimer] Rendering timer', { timeRemaining, isActive, isRunning });
 
   const timerColor = getTimerColor();
   const isDanger = timeRemaining <= 5;
 
   return (
     <div 
-      className={`${styles.timerOverlay} ${isActive ? styles.active : styles.fadeOut} ${isDanger ? styles.danger : ''}`}
+      className={`${styles.timerOverlay} ${(testMode || isActive) ? styles.active : styles.fadeOut} ${isDanger ? styles.danger : ''}`}
+      style={{
+        // ОТЛАДКА: Красная рамка для видимости границ
+        border: '2px solid red',
+      }}
     >
       {/* SVG Border Timer */}
       <svg 
@@ -95,41 +133,48 @@ export const ActionButtonsTimer: React.FC<ActionButtonsTimerProps> = ({
       >
         {/* Background rectangle */}
         <rect
-          x="2"
-          y="2"
-          width="616"
-          height="76"
-          rx="12"
-          ry="12"
+          x="3"
+          y="3"
+          width="614"
+          height="74"
+          rx="20"
+          ry="20"
           fill="none"
-          stroke="rgba(255, 255, 255, 0.1)"
-          strokeWidth="1"
+          stroke="rgba(255, 255, 255, 0.2)"
+          strokeWidth="2"
         />
         
-        {/* Progress rectangle */}
+        {/* Progress rectangle - УВЕЛИЧЕННАЯ ТОЛЩИНА И СВЕЧЕНИЕ */}
         <rect
-          x="2"
-          y="2"
-          width="616"
-          height="76"
-          rx="12"
-          ry="12"
+          x="3"
+          y="3"
+          width="614"
+          height="74"
+          rx="20"
+          ry="20"
           fill="none"
           stroke={timerColor}
-          strokeWidth="4"
+          strokeWidth="6"
           strokeDasharray={containerPerimeter}
           strokeDashoffset={strokeDashoffset}
           strokeLinecap="round"
           className={styles.progressStroke}
           style={{
-            filter: isDanger ? `drop-shadow(0 0 8px ${timerColor})` : `drop-shadow(0 0 4px ${timerColor})`,
+            filter: isDanger 
+              ? `drop-shadow(0 0 20px ${timerColor}) drop-shadow(0 0 40px ${timerColor})` 
+              : `drop-shadow(0 0 25px ${timerColor}) drop-shadow(0 0 50px rgba(0, 255, 136, 0.6))`,
           }}
         />
       </svg>
 
+      {/* КРУПНАЯ ЦИФРА В ЦЕНТРЕ */}
+      <div className={styles.timerDisplayCenter}>
+        <span className={styles.timerNumberLarge}>{timeRemaining}</span>
+      </div>
+      
       {/* Timer Display (seconds counter in top-right) */}
       <div className={styles.timerDisplay}>
-        <span className={styles.timerNumber}>{timeRemaining}</span>
+        <span className={styles.timerNumber}>{timeRemaining}s</span>
       </div>
     </div>
   );
