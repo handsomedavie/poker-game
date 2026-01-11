@@ -14,6 +14,7 @@ import WinnerAnimation, { type WinnerData } from '../WinnerAnimation/WinnerAnima
 import ChipAnimation from '../WinnerAnimation/ChipAnimation';
 import TestControls from '../TestControls/TestControls';
 import ShowdownDecision from './ShowdownDecision';
+import PlayerHandTimer from './PlayerHandTimer';
 
 // Test utilities (auto-loads in development)
 import '../../utils/testWinnerAnimation';
@@ -1443,6 +1444,19 @@ export const PokerTable: React.FC<PokerTableProps> = ({ tableId }) => {
       <div className={styles.controlsContainer}>
         <div className={styles.bettingControlsContainer}>
           <div className={styles.gameStageIndicator}>{formatStageLabel(gameStage)}</div>
+          
+          {/* Player Hand Timer - Shows when it's hero's turn */}
+          <PlayerHandTimer
+            isActive={heroSeat?.player?.id === tableState?.activeUserId && !heroIsBusted}
+            duration={20}
+            onTimeout={() => {
+              // Auto-fold on timeout
+              if (isRemoteControlled) {
+                sendAction('fold');
+              }
+            }}
+          />
+          
           <BettingControls
             minBet={minBet}
             maxBet={maxBet}
