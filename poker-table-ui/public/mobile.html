@@ -2417,18 +2417,24 @@
            QUICK CHAT SYSTEM
            ═══════════════════════════════════════════════════ */
         .chat-btn {
-            width: 44px;
-            height: 44px;
+            /* ПЕРЕМЕЩЕНО В ПРАВЫЙ НИЖНИЙ УГОЛ НАД PRE-FLOP */
+            position: fixed !important;
+            bottom: 260px !important; /* НАД game-phase-indicator (bottom: 210px) */
+            right: 16px !important;
+            left: auto !important;
+            width: 48px;
+            height: 48px;
             border-radius: 50%;
             background: linear-gradient(135deg, #6366f1, #4f46e5);
             border: none;
-            font-size: 18px;
+            font-size: 20px;
             display: flex;
             align-items: center;
             justify-content: center;
             box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
             cursor: pointer;
             transition: transform 0.15s, box-shadow 0.15s;
+            z-index: 100 !important; /* Поверх всего */
         }
         
         .chat-btn:active {
@@ -2891,16 +2897,49 @@
             padding: 0;
         }
         
-        /* Timer border pulse animation */
-        @keyframes timerPulse {
+        /* ═══════════════════════════════════════════════════
+           HORIZONTAL TIMER BAR - Between action buttons and slider
+           ═══════════════════════════════════════════════════ */
+        .timer-bar-wrapper {
+            width: 90%;
+            margin: 12px auto;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .timer-bar {
+            height: 100%;
+            background: #00ff88;
+            border-radius: 8px;
+            box-shadow: 0 0 10px currentColor, 0 0 20px currentColor, 0 2px 4px rgba(0,0,0,0.3);
+            transform-origin: left center;
+            transition: background-color 0.5s ease, box-shadow 0.3s ease;
+            will-change: transform;
+        }
+        
+        .timer-bar.warning {
+            background: #ff3333 !important;
+            animation: timerBarPulse 0.6s infinite;
+        }
+        
+        .timer-bar.caution {
+            background: #ffcc00 !important;
+        }
+        
+        @keyframes timerBarPulse {
             0%, 100% { 
-                box-shadow: 0 0 20px rgba(0,255,136,0.8), inset 0 0 20px rgba(0,255,136,0.3);
-                border-color: #00ff88;
+                box-shadow: 0 0 15px rgba(255,51,51,0.8), 0 0 30px rgba(255,51,51,0.5);
             }
             50% { 
-                box-shadow: 0 0 40px rgba(0,255,136,1), inset 0 0 40px rgba(0,255,136,0.6);
-                border-color: #00ffaa;
+                box-shadow: 0 0 25px rgba(255,51,51,1), 0 0 50px rgba(255,51,51,0.8);
             }
+        }
+        
+        .timer-bar-wrapper.hidden {
+            display: none;
         }
 
         .betting-controls.disabled {
@@ -6321,21 +6360,21 @@
                 </div>
             </div>
             
-            <!-- Action Buttons Row with Timer Border -->
-            <div class="action-buttons-row" id="actionButtons" style="
-                position: relative;
-                border: 6px solid #00ff88;
-                border-radius: 20px;
-                padding: 8px;
-                box-shadow: 0 0 30px rgba(0,255,136,1), inset 0 0 30px rgba(0,255,136,0.5);
-                animation: timerPulse 2s infinite;
-            ">
+            <!-- Action Buttons Row (без статической обводки) -->
+            <div class="action-buttons-row" id="actionButtons">
                 <button class="action-btn fold" onclick="playerAction('fold')">Fold</button>
                 <button class="action-btn call" onclick="playerAction('call')" id="callBtn">Check</button>
                 <button class="action-btn raise" onclick="playerAction('raise')" id="raiseBtn">Bet</button>
                 <button class="action-btn allin" onclick="playerAction('allin')">All In</button>
-                <button class="chat-btn" onclick="toggleChatPanel()" id="chatBtn">💬</button>
             </div>
+            
+            <!-- ГОРИЗОНТАЛЬНЫЙ ТАЙМЕР-ПОЛОСКА (между кнопками и слайдером) -->
+            <div class="timer-bar-wrapper" id="timerBarWrapper">
+                <div class="timer-bar" id="timerBar" style="transform: scaleX(1);"></div>
+            </div>
+            
+            <!-- Кнопка чата перемещена в правый нижний угол (fixed position в CSS) -->
+            <button class="chat-btn" onclick="toggleChatPanel()" id="chatBtn">💬</button>
             
             <!-- Quick Chat Panel -->
             <div class="quick-chat-panel hidden" id="quickChatPanel">
@@ -10146,8 +10185,19 @@
             // Use server time if available, otherwise default
             turnTimeRemaining = serverTurnTimeRemaining !== null ? Math.ceil(serverTurnTimeRemaining) : TURN_TIME_LIMIT;
             addDebug('Turn timer started: ' + turnTimeRemaining + 's');
-            console.log('[Timer Border] Rendering wrapper around action buttons');
-            console.log('[Timer Border] Timer active, time remaining:', turnTimeRemaining);
+            console.log('[Timer Bar] Started countdown: ' + turnTimeRemaining + 's');
+            
+            // Show and reset timer bar
+            var timerBarWrapper = document.getElementById('timerBarWrapper');
+            var timerBar = document.getElementById('timerBar');
+            if (timerBarWrapper) {
+                timerBarWrapper.classList.remove('hidden');
+            }
+            if (timerBar) {
+                timerBar.style.transform = 'scaleX(1)';
+                timerBar.classList.remove('warning', 'caution');
+                timerBar.style.background = '#00ff88';
+            }
             
             // Update timer display immediately
             updateTimerProgress(turnTimeRemaining, TURN_TIME_LIMIT);
@@ -10155,8 +10205,9 @@
             // Start countdown
             turnTimerId = setInterval(function() {
                 turnTimeRemaining--;
+                console.log('[Timer Bar] Time remaining:', turnTimeRemaining);
                 
-                // Update SVG timer progress
+                // Update timer bar and SVG timer progress
                 updateTimerProgress(turnTimeRemaining, TURN_TIME_LIMIT);
                 
                 // Add warning class when time is low
@@ -10193,6 +10244,32 @@
                     circle.style.stroke = '#22c55e'; // Green
                 }
             });
+            
+            // === ОБНОВЛЕНИЕ ГОРИЗОНТАЛЬНОГО ТАЙМЕРА-ПОЛОСКИ ===
+            var timerBar = document.getElementById('timerBar');
+            if (timerBar) {
+                // Плавное уменьшение полоски через transform: scaleX()
+                timerBar.style.transform = 'scaleX(' + progress + ')';
+                
+                // Смена цветов в зависимости от времени
+                if (remaining <= 5) {
+                    // Красный + пульсация
+                    timerBar.classList.remove('caution');
+                    timerBar.classList.add('warning');
+                    timerBar.style.background = '#ff3333';
+                    console.log('[Timer Bar] Color changed to: RED (warning)');
+                } else if (remaining <= 10) {
+                    // Жёлтый
+                    timerBar.classList.remove('warning');
+                    timerBar.classList.add('caution');
+                    timerBar.style.background = '#ffcc00';
+                    console.log('[Timer Bar] Color changed to: YELLOW (caution)');
+                } else {
+                    // Зелёный
+                    timerBar.classList.remove('warning', 'caution');
+                    timerBar.style.background = '#00ff88';
+                }
+            }
         }
         
         function stopTurnTimer() {
@@ -10219,6 +10296,19 @@
                 circle.style.strokeDashoffset = 0;
                 circle.style.stroke = '#22c55e';
             });
+            
+            // === СКРЫТЬ ГОРИЗОНТАЛЬНЫЙ ТАЙМЕР-ПОЛОСКУ ===
+            var timerBarWrapper = document.getElementById('timerBarWrapper');
+            var timerBar = document.getElementById('timerBar');
+            if (timerBarWrapper) {
+                timerBarWrapper.classList.add('hidden');
+            }
+            if (timerBar) {
+                timerBar.style.transform = 'scaleX(1)';
+                timerBar.classList.remove('warning', 'caution');
+                timerBar.style.background = '#00ff88';
+            }
+            console.log('[Timer Bar] Timer stopped and hidden');
         }
         
         // ═══════════════════════════════════════════════════
