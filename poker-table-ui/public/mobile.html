@@ -2890,6 +2890,18 @@
             gap: 4px;
             padding: 0;
         }
+        
+        /* Timer border pulse animation */
+        @keyframes timerPulse {
+            0%, 100% { 
+                box-shadow: 0 0 20px rgba(0,255,136,0.8), inset 0 0 20px rgba(0,255,136,0.3);
+                border-color: #00ff88;
+            }
+            50% { 
+                box-shadow: 0 0 40px rgba(0,255,136,1), inset 0 0 40px rgba(0,255,136,0.6);
+                border-color: #00ffaa;
+            }
+        }
 
         .betting-controls.disabled {
             opacity: 0.5;
@@ -6309,8 +6321,15 @@
                 </div>
             </div>
             
-            <!-- Action Buttons Row -->
-            <div class="action-buttons-row" id="actionButtons">
+            <!-- Action Buttons Row with Timer Border -->
+            <div class="action-buttons-row" id="actionButtons" style="
+                position: relative;
+                border: 6px solid #00ff88;
+                border-radius: 20px;
+                padding: 8px;
+                box-shadow: 0 0 30px rgba(0,255,136,1), inset 0 0 30px rgba(0,255,136,0.5);
+                animation: timerPulse 2s infinite;
+            ">
                 <button class="action-btn fold" onclick="playerAction('fold')">Fold</button>
                 <button class="action-btn call" onclick="playerAction('call')" id="callBtn">Check</button>
                 <button class="action-btn raise" onclick="playerAction('raise')" id="raiseBtn">Bet</button>
@@ -10127,6 +10146,8 @@
             // Use server time if available, otherwise default
             turnTimeRemaining = serverTurnTimeRemaining !== null ? Math.ceil(serverTurnTimeRemaining) : TURN_TIME_LIMIT;
             addDebug('Turn timer started: ' + turnTimeRemaining + 's');
+            console.log('[Timer Border] Rendering wrapper around action buttons');
+            console.log('[Timer Border] Timer active, time remaining:', turnTimeRemaining);
             
             // Update timer display immediately
             updateTimerProgress(turnTimeRemaining, TURN_TIME_LIMIT);
