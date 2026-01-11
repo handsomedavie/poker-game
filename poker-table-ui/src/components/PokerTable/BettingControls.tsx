@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import styles from './poker_table.module.css';
+import ActionButtonsTimer from './ActionButtonsTimer';
 
 export interface BettingControlsProps {
   minBet: number;
@@ -16,6 +17,7 @@ export interface BettingControlsProps {
   canRaise: boolean;
   onAllIn?: () => void;
   canAllIn?: boolean;
+  onTimeout?: () => void;
 }
 
 export const BettingControls: React.FC<BettingControlsProps> = ({
@@ -33,6 +35,7 @@ export const BettingControls: React.FC<BettingControlsProps> = ({
   canRaise,
   onAllIn,
   canAllIn,
+  onTimeout,
 }) => {
   const [betAmount, setBetAmount] = useState<number>(minBet);
   const [isAllIn, setIsAllIn] = useState<boolean>(false);
@@ -90,7 +93,13 @@ export const BettingControls: React.FC<BettingControlsProps> = ({
     <div className={`${styles.bettingControls} ${!isActive ? styles.disabled : ''}`}>
       <div className={styles.betControlsRow}>
         {/* Action Buttons - Moved to top */}
-        <div className={styles.actionButtons}>
+        <div className={styles.actionButtons} style={{ position: 'relative' }}>
+          {/* Timer overlay around action buttons */}
+          <ActionButtonsTimer
+            isActive={isActive}
+            duration={20}
+            onTimeout={onTimeout}
+          />
           <button
             className={`${styles.actionButton} ${styles.fold}`}
             onClick={onFold}

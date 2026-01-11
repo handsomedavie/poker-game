@@ -1472,6 +1472,12 @@ export const PokerTable: React.FC<PokerTableProps> = ({ tableId }) => {
             canRaise={canRaise}
             onAllIn={canAllIn ? handleAllIn : undefined}
             canAllIn={canAllIn}
+            onTimeout={() => {
+              // Auto-fold on timeout
+              if (isRemoteControlled) {
+                sendAction('fold');
+              }
+            }}
           />
           {socketError && <div className={styles.connectionError}>{socketError}</div>}
         </div>

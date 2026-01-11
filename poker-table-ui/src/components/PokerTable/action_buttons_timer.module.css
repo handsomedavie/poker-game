@@ -1,0 +1,115 @@
+/* ═══════════════════════════════════════════════════
+   ACTION BUTTONS TIMER - Animated border around action buttons
+   ═══════════════════════════════════════════════════ */
+
+.timerOverlay {
+  position: absolute;
+  top: -6px;
+  left: -6px;
+  right: -6px;
+  bottom: -6px;
+  pointer-events: none;
+  z-index: 5;
+  opacity: 0;
+  transition: opacity 0.3s ease-out;
+  will-change: opacity;
+}
+
+.timerOverlay.active {
+  opacity: 1;
+}
+
+.timerOverlay.fadeOut {
+  opacity: 0;
+  transition: opacity 0.2s ease-in;
+}
+
+.timerOverlay.danger {
+  animation: pulseWarning 0.6s infinite;
+}
+
+@keyframes pulseWarning {
+  0%, 100% {
+    filter: drop-shadow(0 0 15px rgba(255, 51, 51, 0.8));
+  }
+  50% {
+    filter: drop-shadow(0 0 30px rgba(255, 51, 51, 1));
+  }
+}
+
+.timerBorder {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.progressStroke {
+  transition: stroke 0.3s ease, stroke-dashoffset 0.1s linear;
+  will-change: stroke-dashoffset, stroke;
+}
+
+.timerDisplay {
+  position: absolute;
+  top: -24px;
+  right: 8px;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.7);
+  border-radius: 8px;
+  padding: 4px 10px;
+  backdrop-filter: blur(4px);
+}
+
+.timerNumber {
+  font-size: 16px;
+  font-weight: 700;
+  color: #ffffff;
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  user-select: none;
+  line-height: 1;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .timerOverlay {
+    top: -4px;
+    left: -4px;
+    right: -4px;
+    bottom: -4px;
+  }
+  
+  .timerDisplay {
+    top: -20px;
+    right: 4px;
+    padding: 3px 8px;
+  }
+  
+  .timerNumber {
+    font-size: 14px;
+  }
+}
+
+/* Neon theme variant */
+body.neon-theme .timerDisplay {
+  background: rgba(20, 15, 40, 0.9);
+  border: 1px solid rgba(139, 92, 246, 0.4);
+}
+
+body.neon-theme .timerOverlay.danger {
+  animation: pulseWarningNeon 0.6s infinite;
+}
+
+@keyframes pulseWarningNeon {
+  0%, 100% {
+    filter: drop-shadow(0 0 15px rgba(255, 51, 51, 0.8));
+  }
+  50% {
+    filter: drop-shadow(0 0 30px rgba(255, 51, 51, 1));
+  }
+}
